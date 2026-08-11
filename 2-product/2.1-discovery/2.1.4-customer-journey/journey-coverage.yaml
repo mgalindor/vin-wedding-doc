@@ -1,0 +1,215 @@
+---
+project: Wendy Planner — Wedding Management Platform
+client: Vineyards
+date: 2026-08-10
+type: coverage-tracking
+scope: internal
+version: 1.0.0
+updated: 2026-08-10
+work-style: yolo
+---
+
+# Journey Map Coverage — Wendy Planner
+
+domains:
+  - name: User & Role Management
+    status: done
+    processes:
+      - name: Onboard a Wedding Planner
+        status: done
+      - name: Log in to the platform
+        status: done
+      - name: Manage own profile
+        status: done
+      - name: Disable a Wedding Planner
+        status: done
+      - name: Reset a Wedding Planner's password
+        status: done
+  - name: Wedding Management
+    status: done
+    processes:
+      - name: Register a new wedding
+        status: done
+      - name: Edit wedding details
+        status: done
+      - name: List and view own weddings
+        status: done
+      - name: Archive a past wedding
+        status: done
+  - name: Guest List Management
+    status: done
+    processes:
+      - name: Add a guest to a wedding
+        status: done
+      - name: Edit a guest
+        status: done
+      - name: Delete a guest
+        status: done
+      - name: Mark attendance status
+        status: done
+      - name: Generate per-guest invitation links
+        status: done
+      - name: Import / export guest list as CSV
+        status: done
+  - name: Online Invitation
+    status: done
+    processes:
+      - name: Publish an invitation
+        status: done
+      - name: View invitation via per-guest link
+        status: done
+      - name: Submit RSVP via per-guest link
+        status: done
+      - name: Upload photos to guest album
+        status: done
+      - name: Moderate guest-uploaded photos
+        status: done
+  - name: Photo Storage (Official)
+    status: done
+    processes:
+      - name: Configure photo storage on a wedding
+        status: done
+      - name: Upload official photos
+        status: done
+      - name: Download all photos as archive
+        status: done
+      - name: Share couple upload link
+        status: done
+      - name: Couple uploads photos via shared link
+        status: done
+
+depends-on:
+  - process: Onboard a Wedding Planner
+    depends-on: []
+  - process: Log in to the platform
+    depends-on: []
+  - process: Manage own profile
+    depends-on:
+      - domain: User & Role Management
+        process: Log in to the platform
+        reason: A user must be logged in to edit their profile.
+  - process: Disable a Wedding Planner
+    depends-on:
+      - domain: User & Role Management
+        process: Onboard a Wedding Planner
+        reason: A WP must exist before being disabled.
+  - process: Reset a Wedding Planner's password
+    depends-on:
+      - domain: User & Role Management
+        process: Onboard a Wedding Planner
+        reason: A WP must exist before password reset.
+  - process: Register a new wedding
+    depends-on:
+      - domain: User & Role Management
+        process: Log in to the platform
+        reason: A WP must be logged in to register a wedding.
+  - process: Edit wedding details
+    depends-on:
+      - domain: Wedding Management
+        process: Register a new wedding
+        reason: A wedding must exist to be edited.
+  - process: List and view own weddings
+    depends-on:
+      - domain: User & Role Management
+        process: Log in to the platform
+        reason: A WP must be logged in to list weddings.
+  - process: Archive a past wedding
+    depends-on:
+      - domain: Wedding Management
+        process: Register a new wedding
+        reason: A wedding must exist before being archived.
+  - process: Add a guest to a wedding
+    depends-on:
+      - domain: Wedding Management
+        process: Register a new wedding
+        reason: A guest must belong to an existing wedding.
+  - process: Edit a guest
+    depends-on:
+      - domain: Guest List Management
+        process: Add a guest to a wedding
+        reason: A guest must exist to be edited.
+  - process: Delete a guest
+    depends-on:
+      - domain: Guest List Management
+        process: Add a guest to a wedding
+        reason: A guest must exist to be deleted.
+  - process: Mark attendance status
+    depends-on:
+      - domain: Guest List Management
+        process: Add a guest to a wedding
+        reason: A guest must exist before attendance is tracked.
+  - process: Generate per-guest invitation links
+    depends-on:
+      - domain: Guest List Management
+        process: Add a guest to a wedding
+        reason: Links are generated when guests are created.
+  - process: Import / export guest list as CSV
+    depends-on:
+      - domain: Guest List Management
+        process: Add a guest to a wedding
+        reason: A guest list must exist to be exported.
+  - process: Publish an invitation
+    depends-on:
+      - domain: Wedding Management
+        process: Register a new wedding
+        reason: An invitation belongs to a wedding.
+      - domain: Guest List Management
+        process: Generate per-guest invitation links
+        reason: Invitation links must exist before publishing.
+  - process: View invitation via per-guest link
+    depends-on:
+      - domain: Online Invitation
+        process: Publish an invitation
+        reason: An invitation must be published to be viewed.
+  - process: Submit RSVP via per-guest link
+    depends-on:
+      - domain: Online Invitation
+        process: View invitation via per-guest link
+        reason: A guest must access their invitation to RSVP.
+  - process: Upload photos to guest album
+    depends-on:
+      - domain: Online Invitation
+        process: View invitation via per-guest link
+        reason: Guests must view the invitation to reach the album.
+  - process: Moderate guest-uploaded photos
+    depends-on:
+      - domain: Online Invitation
+        process: Upload photos to guest album
+        reason: Photos must exist to be moderated.
+  - process: Configure photo storage on a wedding
+    depends-on:
+      - domain: Wedding Management
+        process: Register a new wedding
+        reason: Photo storage is configured per wedding.
+  - process: Upload official photos
+    depends-on:
+      - domain: Photo Storage (Official)
+        process: Configure photo storage on a wedding
+        reason: Storage must be configured before upload.
+  - process: Download all photos as archive
+    depends-on:
+      - domain: Photo Storage (Official)
+        process: Upload official photos
+        reason: Photos must exist to be downloaded.
+  - process: Share couple upload link
+    depends-on:
+      - domain: Photo Storage (Official)
+        process: Configure photo storage on a wedding
+        reason: Storage must be configured to generate the share link.
+  - process: Couple uploads photos via shared link
+    depends-on:
+      - domain: Photo Storage (Official)
+        process: Share couple upload link
+        reason: Couple needs the link to upload.
+
+mapping-order:
+  - domain: User & Role Management
+    reason: No functional dependencies; foundation for every authenticated flow.
+  - domain: Wedding Management
+    reason: Depends only on User & Role Management; anchor for all wedding-scoped flows.
+  - domain: Guest List Management
+    reason: Depends on Wedding Management; precedes the invitation flow.
+  - domain: Online Invitation
+    reason: Depends on Wedding Management and Guest List Management.
+  - domain: Photo Storage (Official)
+    reason: Depends on Wedding Management; can be developed in parallel with the invitation.

@@ -1,0 +1,159 @@
+name: create-project-plan
+description: End-to-end project planning workflow. Each step is delegated to a specialized sub-agent.
+
+execution-model: |
+  Steps execute sequentially. Each step is assigned to a sub-agent identified by its agent name.
+  Steps with type "hold" pause the workflow until the required external work is completed.
+  The planning.yaml file in the planning folder tracks the state of each step.
+  Steps that reference a skill delegate the full creative process to that skill.
+  Steps without a skill reference follow the inline instructions below.
+
+steps:
+  - id: create-journeys
+    name: Create User Journey Maps
+    order: 1
+    agent: run the product-manager agent 
+    skill: pm-create-journey
+    goal: Discover user domains and create journey maps that document how users interact with the system.
+    instructions: |
+      Check if user journey maps already exist in the workspace.
+      If journey maps exist and cover the relevant domains, mark this step as done and proceed.
+      If no journey maps exist or coverage is incomplete, delegate to the product-manager agent using the pm-create-journey skill.
+      The product-manager will identify domains, create journey maps per domain, and validate coverage.
+      This step is complete when all relevant domains have journey maps.
+
+  - id: create-backlog
+    name: Create Product Backlog
+    order: 2
+    agent: run the  product-manager agent
+    skill: pm-create-backlog
+    goal: Transform user journey actions into a flat list of user stories grouped by domain.
+    instructions: |
+      Delegate to the product-manager agent using the pm-create-backlog skill.
+      The product-manager reads all journey maps, extracts user actions, and transforms them into user stories.
+      Each story follows the format: {Short title} - {user story} [groupBy:: {domain}].
+      This step is complete when the backlog file exists in the planning folder with all journey actions covered.
+  
+  - id: update-glossary
+    name: Update Glossary
+    order: 3
+    agent: run the  product-manager agent
+    goal: Extract domain-specific terms from user journeys and backlog to create a glossary.
+    instructions: |
+      Delegate to the product-manager agent.
+      The product-manager reviews all journey maps and backlog items to identify domain-specific terms and concepts.
+      For each term, create a glossary entry with a clear definition and context.
+      This step is complete when the glossary file exists in the planning folder with relevant terms defined.
+      Include only key terms, words and concepts and document the special meaning for the client, not every single word, not generic meaning. Focus on terms that are important for shared understanding across the team.
+      Keep in mind this glossary is going to be used as ubiquitous language between the product manager, the architect and the development team, so it should be focused on terms that are relevant for the project and that can help to avoid misunderstandings. 
+      It is not necessary to include generic terms or concepts that are widely understood in the industry, but it is important to include any term that has a specific meaning in the context of this project or that can be a source of confusion if not properly defined.
+
+  - id: architecture-review
+    name: Architecture Review
+    order: 4
+    agent: run the  architect agent
+    type: hold
+    goal: The architect produces the system architecture documentation based on the product backlog and project context.
+    instructions: |
+      This is a HOLD step. The planning process pauses here.
+      The architect agent needs to review the product backlog and project context to produce architecture documentation:
+      - System context and boundaries
+      - Component design and bounded contexts
+      - Key architectural decisions (decision records)
+      - Technology stack recommendations
+
+      Inform the user: "The architecture must be completed before continuing the project plan. Delegate to the architect agent to create the architecture documentation. Resume the project plan after the architecture is ready."
+
+      Set this step to hold in planning.yaml.
+      This step moves to done only when the user confirms the architecture documentation exists.
+
+  - id: add-architecture-tasks
+    name: Add Architecture Tasks to Backlog
+    order: 5
+    agent: run the  architect agent
+    goal: Add technical enablement tasks to the backlog that prepare the development team to start coding.
+    instructions: |
+      Delegate to the architect agent.
+      The architect reads the product backlog and the architecture documentation, then adds technical tasks to the existing backlog file.
+
+      Types of tasks to add:
+      - Repository setup and project scaffolding
+      - Shared libraries or common modules initialization
+      - Database schema creation or migration setup
+      - API contract definitions
+      - Authentication and authorization infrastructure
+      - Development environment configuration
+
+      Rules:
+      - Each task is added to the existing product backlog file
+      - Each task uses the tag [groupBy:: arq]
+      - Tasks are typed as technical tasks, not user stories
+      - Tasks should enable developers to start working on user stories — not implement the stories themselves
+
+      This step is complete when architecture tasks are present in the backlog.
+
+  - id: add-devops-tasks
+    name: Add DevOps Tasks to Backlog
+    order: 6
+    agent: run the  devops agent
+    goal: Add delivery enablement tasks to the backlog that establish CI/CD and deployment capabilities.
+    instructions: |
+      Delegate to the devops agent.
+      The devops agent reads the product backlog and the architecture documentation, then adds tasks that enable continuous integration, continuous deployment, and continuous delivery.
+
+      Types of tasks to add:
+      - CI pipeline setup (build, lint, test)
+      - CD pipeline setup (deploy to staging/production)
+      - Environment provisioning (dev, staging, production)
+      - Container or infrastructure configuration
+      - Monitoring and observability setup
+      - Branching strategy and code review workflow
+      - Automated testing infrastructure
+
+      Rules:
+      - Each task is added to the existing product backlog file
+      - Each task uses the tag [groupBy:: devops]
+      - Tasks are typed as technical tasks, not user stories
+      - Focus on what enables the team to ship reliably — not on perfecting the pipeline
+
+      This step is complete when devops tasks are present in the backlog.
+
+  - id: prioritize-backlog
+    name: Prioritize Backlog
+    order: 7
+    agent: run the  product-manager agent
+    goal: Apply MoSCoW prioritization to every backlog item.
+    instructions: |
+      Delegate to the product-manager agent.
+      The product-manager reads the complete backlog (user stories + architecture tasks + devops tasks) and applies MoSCoW prioritization.
+
+      Priority values:
+      - Must have = [priority:: 3] — Without this, the product cannot launch
+      - Should have = [priority:: 2] — Important but not critical for launch
+      - Could have = [priority:: 1] — Nice to have if time allows
+      - Won't have = [priority:: 0] — Explicitly excluded from this release
+
+      Rules:
+      - Add a [priority:: N] tag to each backlog item
+      - In interactive mode: present the prioritized list for review and adjustment
+      - Infrastructure and scaffolding tasks that block other work are typically Must (3)
+      - Be ruthless — if everything is Must, nothing is. Aim for roughly 60% Must, 20% Should, 20% Could
+
+      This step is complete when every backlog item has a priority tag.
+
+  - id: create-release-plan
+    name: Create Release Plan
+    order: 8
+    agent: run the  product-manager agent
+    skill: pm-create-release-plan
+    goal: Group prioritized backlog items into sprints based on dependencies, domain cohesion, and team capacity.
+    instructions: |
+      Delegate to the product-manager agent using the pm-create-release-plan skill.
+      The skill validates two prerequisites before proceeding:
+      - The product backlog with items (ideally prioritized)
+      - The project brief with sprint count and team size
+
+      The product-manager groups items into sprints following sequencing rules:
+      dependency order, domain cohesion, priority order, and balanced load.
+
+      This step is complete when the release plan file exists in the planning folder.

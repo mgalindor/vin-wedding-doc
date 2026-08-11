@@ -1,0 +1,156 @@
+name: create-journey
+description: Step-by-step workflow for generating a User Journey Map. Each step builds one section of the journey document.
+
+execution-model: |
+  Step 1 (discover-domains) runs once globally.
+  Step 2 (map-dependencies) runs once globally — identifies prerequisite relationships between processes across domains.
+  Step 3 (map-domain) repeats for each domain — it contains sub-steps executed in order for every domain. Domains are mapped in dependency order (no-dependency domains first).
+  Step 4 (validate-coverage) runs once globally at the end — includes dependency chain validation.
+
+steps:
+  - id: discover-domains
+    name: Discover Domains and Processes
+    order: 1
+    repeat: once
+    optional: false
+    goal: Identify all domains and their processes before creating any journey file. Store the result in a coverage tracking file.
+    instructions: |
+      Search the workspace for context: PRD, project brief, interview notes, analysis documents, client-shared references.
+      Identify all functional domains in the product. A domain is a cohesive grouping of processes sharing a common actor or objective.
+      Good domain groupers: business domain (Users, Products, Payments), main actor, lifecycle stage, service line, or system capability.
+      For each domain, list the processes it contains — these are the end-to-end flows that will need a journey map.
+      Create a tracking file named journey-coverage.yaml in the journey maps folder with this structure:
+        domains:
+          - name: {Domain name}
+            status: pending
+            processes:
+              - name: {Process name}
+                status: pending
+      In interactive mode: present the domain list to the user and ask for validation before proceeding.
+      In yolo mode: infer domains and processes from workspace context and create the file immediately.
+      This file is the source of truth for coverage tracking throughout the workflow.
+
+  - id: map-dependencies
+    name: Map Cross-Domain Dependencies
+    order: 2
+    repeat: once
+    optional: false
+    goal: Identify prerequisite relationships between processes across domains so journeys can be mapped and delivered in the right order.
+    instructions: |
+      Read journey-coverage.yaml and the workspace context (PRD, project brief, analysis documents).
+      For each process, ask: "What must already exist for this process to happen?"
+      A dependency exists when one process produces data, state, or conditions that another process requires as input.
+      Examples:
+      - "Register donation" depends on "Create collection campaign" — a donation belongs to a campaign.
+      - "Register donation at collection center" depends on "Register collection center" — the center must exist first.
+
+      Build a dependency list per process. Not every process has dependencies — independent processes are listed with no depends-on.
+
+      Update journey-coverage.yaml by adding a depends-on field to each process that has prerequisites:
+        processes:
+          - name: Register donation
+            status: pending
+            depends-on:
+              - domain: Campaigns
+                process: Create collection campaign
+                reason: A donation must belong to an active campaign
+
+      If a dependency points to a process NOT listed in journey-coverage.yaml, flag it as a gap — a missing process that needs to be added to the domain list.
+
+      Use the dependency graph to determine a mapping order: domains with no dependencies first, then domains whose dependencies are already covered. Record this order in journey-coverage.yaml as a top-level field:
+        mapping-order:
+          - domain: Collection Centers
+            reason: No dependencies
+          - domain: Campaigns
+            reason: No dependencies
+          - domain: Donations
+            reason: Depends on Campaigns and Collection Centers
+
+      In interactive mode: present the dependency table and suggested order for user validation.
+      In yolo mode: infer dependencies and update journey-coverage.yaml immediately.
+
+  - id: map-domain
+    name: Map Domain Journey
+    order: 3
+    repeat: per-domain
+    optional: false
+    goal: Produce a complete journey map file for one domain by executing all sub-steps in order.
+    instructions: |
+      Execute the sub-steps below in order for each domain identified in journey-coverage.yaml.
+      Before starting, update journey-coverage.yaml: set the domain status to in-progress.
+      After completing all sub-steps, update journey-coverage.yaml: set the domain status to done.
+    sub-steps:
+      - id: initialize
+        name: Initialize Journey Map Document
+        order: 2.1
+        goal: Create the journey map file with front matter and title.
+        instructions: |
+          Create the journey map file in the journey maps folder using project naming conventions (date prefix, lowercase, hyphens).
+          The file must contain ONLY the YAML front matter (title, date, type: analysis, scope, version: 1.0.0, updated, work-style, progress: []) and the document title as H1.
+          The document title is the domain name.
+          If two processes in this domain share the same actor and goal, they will be additional sections in this file — not separate files.
+          If a process has a meaningfully different actor or goal, it will need its own file.
+
+      - id: identify-actors-and-goals
+        name: Identify Actors and Goals
+        order: 2.2
+        goal: Identify which user roles interact with this domain and what objective each one is trying to achieve.
+        instructions: |
+          Search the workspace for context: interview notes, analysis documents, PRD, project brief.
+          List the actors — each actor is a human role, never a system or service.
+          For each actor, define their goal as a single sentence starting with a verb.
+          If someone mentions "the API" or "the system" as an actor, ask: who triggers it? That person is the actor.
+          Output: a table with columns Actor and Goal.
+
+      - id: map-steps
+        name: Map Process Steps
+        order: 2.3
+        goal: Build the journey table for each actor — listing sequential steps, actions, pain points, and workarounds.
+        instructions: |
+          Search the workspace for existing process descriptions, story maps, or interview notes about this domain.
+          For each actor, build a journey table with columns: #, Action, Pain, Workaround.
+          Writing rules:
+          - The subject is always the user. If you write "validate input data" — stop. That is the system. Ask what the user sees or does.
+          - Include information needs: steps where the user needs to know something (status, confirmation, error). Example: "Ver confirmación de que el proceso inició"
+          - Include decisions: if the user must choose, that is a step.
+          - Order matters: read top to bottom and it should tell the story.
+          - Keep it concrete: "Gestionar batch" is too vague. "Crear un nuevo batch" is a step.
+          - One actor per table. If actors interact, each gets their own table with handoff points referenced.
+          - If the process is greenfield, mark assumed steps with [ASSUMPTION] in the action column.
+          - Focus on the happy path first. Alternative flows below the main table if relevant.
+          After completing, update journey-coverage.yaml: mark each covered process within this domain as done.
+
+      - id: identify-opportunities
+        name: Identify Opportunities
+        order: 2.4
+        goal: Review the journey tables and mark which pain points represent opportunities for the product.
+        instructions: |
+          Review each journey table. For every pain point, evaluate if the product can realistically address it.
+          Build an opportunities table with columns: #, Pain (from journey), Opportunity, Source.
+          Classify each opportunity as "known" (validated through interviews or observation) or "assumption" (inferred, not validated).
+          The opportunity column describes what the product could do — not how (no technical implementation details).
+          Not every pain is worth solving. If the workaround is acceptable, exclude it.
+          This table becomes direct input for the product backlog.
+
+  - id: validate-coverage
+    name: Validate Coverage
+    order: 4
+    repeat: once
+    optional: false
+    goal: Verify that all identified domains and processes have been covered by a journey map, and that all dependency chains are satisfied.
+    instructions: |
+      Read journey-coverage.yaml and check the status of every domain and process.
+      Build a coverage summary table with columns: Domain, Process, Status.
+      Identify any domain or process still in pending or in-progress status.
+      For each gap found, ask the user: is this intentionally skipped or does it need a journey?
+      If gaps are intentional, mark them as skipped in journey-coverage.yaml with a brief reason.
+      If gaps are missing work, loop back to the map-domain step for that domain.
+
+      DEPENDENCY CHAIN VALIDATION:
+      After coverage is confirmed, validate the dependency chain:
+      For each process that has a depends-on entry, verify that every dependency target has status done.
+      If a dependency target was skipped, flag it explicitly:
+        "Process '{name}' depends on '{dependency}' which was skipped. Can '{name}' still work without it?"
+      If a dependency target is still pending or missing, it must be resolved before the workflow is complete.
+      Build a dependency validation table with columns: Process, Depends On, Dependency Status, Valid?
+      The workflow is complete only when all domains and processes are either done or explicitly skipped, AND all dependency chains are satisfied or explicitly acknowledged.

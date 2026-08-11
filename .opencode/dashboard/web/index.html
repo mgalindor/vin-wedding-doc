@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-wasm.js"></script>
+  <script type="module" src="app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    window.mermaid = mermaid;
+  </script>
+</head>
+<body x-data="app" x-init="init()">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo">Gen-e2</h1>
+      <span class="project-name" x-text="t('header_subtitle')"></span>
+    </div>
+    <nav class="nav">
+      <button :class="{ active: view === 'dashboard' }" @click="view = 'dashboard'" x-text="t('nav_dashboard')"></button>
+      <button :class="{ active: view === 'backlog' }" @click="view = 'backlog'" x-text="t('nav_backlog')"></button>
+      <button :class="{ active: view === 'tasks' }" @click="view = 'tasks'" x-text="t('nav_tasks')"></button>
+      <button :class="{ active: view === 'journeys' }" @click="view = 'journeys'" x-text="t('nav_journeys')"></button>
+      <button :class="{ active: view === 'documents' }" @click="view = 'documents'" x-text="t('nav_documents')"></button>
+      <button :class="{ active: view === 'aitools' }" @click="view = 'aitools'" x-text="t('nav_aitools')"></button>
+      <button x-show="stats.hasObservabilityData" :class="{ active: view === 'observability' }" @click="view = 'observability'" x-text="t('nav_observability')"></button>
+    </nav>
+    <div class="lang-switcher">
+      <button @click="locale='es'" :class="{active: locale==='es'}">ES</button>
+      <button @click="locale='en'" :class="{active: locale==='en'}">EN</button>
+      <button @click="locale='pt'" :class="{active: locale==='pt'}">PT</button>
+      <button @click="locale='fr'" :class="{active: locale==='fr'}">FR</button>
+    </div>
+  </header>
+
+  <!-- Loading state -->
+  <div x-show="loading" class="loading">
+    <p x-text="t('loading')"></p>
+  </div>
+
+  <!-- Dashboard view -->
+  <main x-show="!loading && view === 'dashboard'" class="container">
+    <div class="project-hero">
+      <p class="project-client" x-text="project.client"></p>
+      <h2 x-text="project.name"></h2>
+      <p class="project-summary" x-text="project.summary"></p>
+    </div>
+
+    <!-- Progress bars -->
+    <div class="progress-section">
+      <div class="progress-item">
+        <div class="progress-header">
+          <span class="progress-title" x-text="t('progress_backlog')"></span>
+          <span class="progress-badge" x-text="stats.completedTasks + ' / ' + stats.totalTasks + ' ' + t('stories') + ' (' + storiesProgressPct + '%)'" ></span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--stories" :style="'width: ' + storiesProgressPct + '%'"></div>
+        </div>
+      </div>
+
+      <div class="progress-item" x-show="stats.totalBugs > 0">
+        <div class="progress-header">
+          <span class="progress-title" x-text="t('progress_bugs')"></span>
+          <span class="progress-badge" x-text="stats.closedBugs + ' / ' + stats.totalBugs + ' ' + t('bugs_label') + ' (' + bugsProgressPct + '%)'" ></span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill progress-fill--bugs" :style="'width: ' + bugsProgressPct + '%'"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-header">
+          <span class="progress-title" x-text="t('progress_project')"></span>
+          <span class="progress-badge" x-text="timelineProgressPct + '% ' + t('time_elapsed')"></span>
+        </div>
+        <div class="progress-track progress-track--timeline">
+          <div class="progress-fill progress-fill--timeline" :style="'width: ' + timelineProgressPct + '%'"></div>
+          <div class="progress-today" :style="'left: ' + timelineProgressPct + '%'">
+            <span class="progress-today-label" x-text="timelineTodayLabel"></span>
+          </div>
+        </div>
+        <div class="progress-dates">
+          <span x-text="startDateLabel"></span>
+          <span x-text="endDateLabel"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card stat-card--blue">
+        <span class="stat-icon">📋</span>
+        <span class="stat-number" x-text="stats.totalTasks"></span>
+        <span class="stat-label" x-text="t('stat_items')"></span>
+      </div>
+      <div class="stat-card stat-card--green">
+        <span class="stat-icon">✅</span>
+        <span class="stat-number" x-text="stats.completedTasks"></span>
+        <span class="stat-label" x-text="t('stat_completed')"></span>
+      </div>
+      <div class="stat-card stat-card--orange">
+        <span class="stat-icon">⏳</span>
+        <span class="stat-number" x-text="stats.pendingTasks"></span>
+        <span class="stat-label" x-text="t('stat_pending')"></span>
+      </div>
+      <div class="stat-card stat-card--teal">
+        <span class="stat-icon">🗺️</span>
+        <span class="stat-number" x-text="stats.journeys"></span>
+        <span class="stat-label" x-text="t('stat_journeys')"></span>
+      </div>
+      <div class="stat-card stat-card--purple">
+        <span class="stat-icon">📐</span>
+        <span class="stat-number" x-text="stats.specifications"></span>
+        <span class="stat-label" x-text="t('stat_specs')"></span>
+      </div>
+      <div class="stat-card stat-card--red">
+        <span class="stat-icon">⚖️</span>
+        <span class="stat-number" x-text="stats.decisions"></span>
+        <span class="stat-label" x-text="t('stat_decisions')"></span>
+      </div>
+      <div class="stat-card" :class="daysRemaining === null ? 'stat-card--gray' : daysRemaining >= 0 ? 'stat-card--days-ok' : 'stat-card--days-late'">
+        <span class="stat-icon" x-text="daysRemaining !== null && daysRemaining < 0 ? '🚨' : '🗓️'"></span>
+        <span class="stat-number" x-text="daysRemaining !== null ? Math.abs(daysRemaining) : '—'"></span>
+        <span class="stat-label" x-text="daysRemaining !== null && daysRemaining < 0 ? t('stat_days_overdue') : t('stat_days_remaining')"></span>
+      </div>
+      <div class="stat-card stat-card--gray" x-show="stats.hasObservabilityData">
+        <span class="stat-icon">🤖</span>
+        <span class="stat-number" x-text="formatTokens(stats.totalTokensConsumed)"></span>
+        <span class="stat-label" x-text="t('stat_total_tokens')"></span>
+      </div>
+    </div>
+
+    <h3 x-text="t('board_title')"></h3>
+    <div class="board">
+      <template x-for="group in taskGroups" :key="group.name">
+        <div class="board-column">
+          <div class="column-header">
+            <span x-text="group.name"></span>
+            <div class="column-chips">
+              <span class="chip chip--total" x-text="t('chip_total') + ' ' + group.tasks.length"></span>
+              <span class="chip chip--pending" x-text="t('chip_pending') + ' ' + group.pendingTasks.length"></span>
+            </div>
+          </div>
+          <div class="column-body">
+            <!-- Pending tasks -->
+            <template x-for="task in group.pendingTasks" :key="task.description">
+              <div class="card">
+                <span class="card-id" x-show="task.id" x-text="task.id"></span>
+                <span class="card-text" x-text="task.id ? task.shortDesc.replace(task.id, '').trim().replace(/^[-–—\s]+/, '') : task.shortDesc"></span>
+              </div>
+            </template>
+
+            <!-- Epic completed banner when no pending tasks -->
+            <div x-show="group.pendingTasks.length === 0" class="card card--epic-done">
+              <span x-text="t('epic_completed')"></span>
+            </div>
+
+            <!-- Divider between pending and completed (only when there are pending tasks) -->
+            <hr x-show="group.pendingTasks.length > 0 && group.tasks.filter(t => t.checked).length > 0" class="column-divider">
+
+            <!-- First 5 completed tasks -->
+            <template x-for="task in group.tasks.filter(t => t.checked).slice(0, 5)" :key="'done-' + task.description">
+              <div class="card card-done">
+                <span class="card-id" x-show="task.id" x-text="task.id"></span>
+                <span class="card-text" x-text="task.id ? task.shortDesc.replace(task.id, '').trim().replace(/^[-–—\s]+/, '') : task.shortDesc"></span>
+              </div>
+            </template>
+            <p x-show="group.tasks.filter(t => t.checked).length > 5" class="more-items"
+               x-text="'+ ' + (group.tasks.filter(t => t.checked).length - 5) + ' ' + t('more_items')"></p>
+          </div>
+        </div>
+      </template>
+    </div>
+  </main>
+
+  <!-- Backlog view -->
+  <main x-show="!loading && view === 'backlog'" class="container">
+    <h2 x-text="t('view_backlog')"></h2>
+
+    <div class="filters">
+      <label class="filter-search"><span x-text="t('filter_desc')"></span>
+        <input type="text" x-model="filterText" :placeholder="t('filter_placeholder')" class="filter-input">
+      </label>
+      <label><span x-text="t('filter_domain')"></span>
+        <select x-model="filterGroup">
+          <option value="" x-text="t('filter_all')"></option>
+          <template x-for="g in groupNames" :key="g">
+            <option :value="g" x-text="g"></option>
+          </template>
+        </select>
+      </label>
+      <label><span x-text="t('filter_status')"></span>
+        <select x-model="filterStatus">
+          <option value="" x-text="t('filter_all')"></option>
+          <option value="pending" x-text="t('filter_pending')"></option>
+          <option value="done" x-text="t('filter_done')"></option>
+        </select>
+      </label>
+      <label><span x-text="t('filter_owner')"></span>
+        <select x-model="filterOwner">
+          <option value="" x-text="t('filter_all')"></option>
+          <template x-for="o in ownerNames" :key="o">
+            <option :value="o" x-text="o"></option>
+          </template>
+        </select>
+      </label>
+      <label><span x-text="t('filter_sprint')"></span>
+        <select x-model="filterSprint">
+          <option value="" x-text="t('filter_all')"></option>
+          <template x-for="s in sprintNames" :key="s">
+            <option :value="s" x-text="s"></option>
+          </template>
+        </select>
+      </label>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th x-text="t('th_status')"></th>
+          <th x-text="t('th_id')"></th>
+          <th x-text="t('th_description')"></th>
+          <th x-text="t('th_domain')"></th>
+          <th x-text="t('th_owner')"></th>
+          <th x-text="t('th_sprint')"></th>
+          <th x-text="t('th_priority')"></th>
+        </tr>
+      </thead>
+      <template x-for="task in filteredTasks" :key="task.description">
+        <tbody>
+          <tr :class="{ 'row-done': task.checked, 'row-expandable': task.specs.length > 0 }"
+              @click="task.specs.length > 0 && (task.expanded = !task.expanded)">
+            <td><span x-text="task.checked ? '✅' : '⬜'"></span></td>
+            <td x-text="task.id || '—'"></td>
+            <td>
+              <span x-text="task.shortDesc"></span>
+              <span x-show="task.specs.length > 0" class="specs-indicator" x-text="task.expanded ? ' ▲' : ' ▼'"></span>
+            </td>
+            <td><span class="tag" x-text="task.groupBy || '—'"></span></td>
+            <td x-text="task.owner || '—'"></td>
+            <td x-text="task.sprint || '—'"></td>
+            <td x-text="task.priorityEmoji"></td>
+          </tr>
+          <tr x-show="task.expanded && task.specs.length > 0" class="specs-row">
+            <td colspan="7">
+              <div class="specs-panel">
+                <template x-for="spec in task.specs" :key="spec.path">
+                  <a :href="spec.url" target="_blank" class="spec-chip">
+                    <span x-text="spec.icon"></span>
+                    <span x-text="spec.title"></span>
+                  </a>
+                </template>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </template>
+    </table>
+  </main>
+
+  <!-- Tasks view -->
+  <main x-show="!loading && view === 'tasks'" class="container">
+    <h2 x-text="t('view_tasks')"></h2>
+
+    <div class="filters">
+      <label><span x-text="t('filter_file')"></span>
+        <select x-model="filterTaskFile">
+          <option value="" x-text="t('filter_all')"></option>
+          <template x-for="f in taskFileNames" :key="f">
+            <option :value="f" x-text="f"></option>
+          </template>
+        </select>
+      </label>
+      <label><span x-text="t('filter_status')"></span>
+        <select x-model="filterTaskStatus">
+          <option value="" x-text="t('filter_all')"></option>
+          <option value="pending" x-text="t('filter_pending')"></option>
+          <option value="done" x-text="t('filter_done')"></option>
+        </select>
+      </label>
+      <label><span x-text="t('filter_owner')"></span>
+        <select x-model="filterTaskOwner">
+          <option value="" x-text="t('filter_all')"></option>
+          <template x-for="o in taskOwnerNames" :key="o">
+            <option :value="o" x-text="o"></option>
+          </template>
+        </select>
+      </label>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th x-text="t('th_status')"></th>
+          <th x-text="t('th_description')"></th>
+          <th x-text="t('th_owner')"></th>
+          <th x-text="t('th_file')"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="task in filteredAllTasks" :key="task.description + task.file">
+          <tr :class="{ 'row-done': task.checked }">
+            <td><span x-text="task.checked ? '✅' : '⬜'"></span></td>
+            <td x-text="task.shortDesc"></td>
+            <td x-text="task.owner || '—'"></td>
+            <td><a class="tag tag--file" :href="task.fileUrl" target="_blank" x-text="task.fileName"></a></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </main>
+
+  <!-- Journeys view -->
+  <main x-show="!loading && view === 'journeys'" class="container">
+    <h2 x-text="t('view_journeys')"></h2>
+    <div class="card-grid">
+      <template x-for="j in journeys" :key="j.path">
+        <div class="journey-card">
+          <div class="journey-icon">🗺️</div>
+          <h4><a :href="j.url" target="_blank" class="doc-link" x-text="j.title"></a></h4>
+          <p class="journey-date" x-text="j.date ? new Date(j.date).toLocaleDateString(dateLocale) : ''"></p>
+        </div>
+      </template>
+    </div>
+  </main>
+
+  <!-- Documents view -->
+  <main x-show="!loading && view === 'documents'" class="container">
+    <h2 x-text="t('view_documents')"></h2>
+    <div class="doc-groups">
+      <template x-for="(group, idx) in docGroups" :key="group.type">
+        <div class="doc-group">
+          <h3 class="doc-group-header" @click="docGroups[idx].collapsed = !docGroups[idx].collapsed">
+            <span class="doc-group-toggle" :class="{ 'collapsed': group.collapsed }">▼</span>
+            <span class="doc-group-icon" x-text="group.icon"></span>
+            <span x-text="t('doctype_' + group.type)"></span>
+            <span class="badge" x-text="group.files.length"></span>
+          </h3>
+          <ul x-show="!group.collapsed" x-collapse>
+            <template x-for="f in group.files" :key="f.path">
+              <li class="doc-item">
+                <span class="doc-item-icon" x-text="group.icon"></span>
+                <span class="doc-item-body">
+                  <a :href="f.url" target="_blank" class="doc-link doc-item-title" x-text="f.title || f.path"></a>
+                  <span class="doc-item-path" x-text="f.path"></span>
+                </span>
+              </li>
+            </template>
+          </ul>
+        </div>
+      </template>
+    </div>
+  </main>
+  <!-- AI Tools view -->
+  <main x-show="!loading && view === 'aitools'" class="container">
+    <h2 x-text="t('view_aitools')"></h2>
+    <template x-for="(group, idx) in aiToolGroups" :key="group.type">
+      <div class="aitools-group">
+        <h3 class="aitools-group-header" @click="aiToolGroups[idx].collapsed = !aiToolGroups[idx].collapsed">
+          <span class="doc-group-toggle" :class="{ 'collapsed': group.collapsed }">▼</span>
+          <span x-text="group.icon"></span>
+          <span x-text="t('aitool_' + group.type)"></span>
+          <span class="badge" x-text="group.items.length"></span>
+        </h3>
+        <div class="card-grid" x-show="!group.collapsed" x-collapse>
+          <template x-for="item in group.items" :key="item.path">
+            <div class="aitool-card">
+              <div class="aitool-card-header">
+                <span class="aitool-icon" x-text="group.icon"></span>
+                <a :href="'/' + item.path.replace(/\\\\/g, '/')" target="_blank" class="doc-link aitool-name" x-text="item.name"></a>
+              </div>
+              <p class="aitool-desc" x-text="item.description"></p>
+              <p class="journey-path" x-text="item.path"></p>
+            </div>
+          </template>
+        </div>
+      </div>
+    </template>
+  </main>
+
+  <!-- Observability view -->
+  <main x-show="!loading && view === 'observability'" class="container">
+    <h2 x-text="t('view_observability')"></h2>
+
+    <div class="filter-bar">
+      <label x-text="t('filter_desc')"></label>
+      <input type="text" x-model="filterObsText" :placeholder="t('filter_placeholder')" class="filter-input">
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th style="width:2rem"></th>
+          <th x-text="t('obs_session_name')"></th>
+          <th x-text="t('obs_date')"></th>
+          <th x-text="t('obs_user')"></th>
+          <th x-text="t('obs_llm_calls')"></th>
+          <th x-text="t('obs_tokens_total')"></th>
+          <th x-text="t('obs_duration')"></th>
+          <th style="width:2.5rem"></th>
+        </tr>
+      </thead>
+      <template x-for="(session, idx) in filteredObservabilitySessions" :key="session.path">
+        <tbody>
+          <tr class="row-expandable" @click="session.expanded = !session.expanded; if (session.expanded) loadAgentFlow(session)">
+            <td class="obs-toggle" x-text="session.expanded ? '▼' : '▶'"></td>
+            <td>
+              <span class="obs-session-name" x-text="session.sessionName"></span>
+            </td>
+            <td x-text="session.startTime ? session.startTime.toLocaleDateString(dateLocale) : '—'"></td>
+            <td x-text="session.gitUser.name || '—'"></td>
+            <td><span class="obs-badge obs-badge--calls" x-text="session.summaryGlobal.totalLLMCalls || 0"></span></td>
+            <td><span class="obs-badge obs-badge--tokens" x-text="formatTokens(session.summaryGlobal.totalTokenConsumed || 0)"></span></td>
+            <td x-text="formatDuration(session.durationMs)"></td>
+            <td @click.stop>
+              <a :href="session.url" target="_blank" class="obs-open-link" title="Abrir documento">🔗</a>
+            </td>
+          </tr>
+          <tr x-show="session.expanded" class="obs-expand-row">
+            <td colspan="8">
+              <div class="obs-expand-panel">
+
+                <div class="obs-section">
+                  <h4 x-text="t('obs_summary_global')"></h4>
+                  <div class="obs-metrics-grid">
+                    <div class="obs-metric">
+                      <span class="obs-metric-val" x-text="session.summaryGlobal.totalLLMCalls || 0"></span>
+                      <span class="obs-metric-lbl">LLM Calls</span>
+                    </div>
+                    <div class="obs-metric">
+                      <span class="obs-metric-val" x-text="(session.summaryGlobal.totalInputTokens || 0).toLocaleString()"></span>
+                      <span class="obs-metric-lbl">Input</span>
+                    </div>
+                    <div class="obs-metric">
+                      <span class="obs-metric-val" x-text="(session.summaryGlobal.totalOutputTokens || 0).toLocaleString()"></span>
+                      <span class="obs-metric-lbl">Output</span>
+                    </div>
+                    <div class="obs-metric">
+                      <span class="obs-metric-val" x-text="(session.summaryGlobal.totalCachedTokens || 0).toLocaleString()"></span>
+                      <span class="obs-metric-lbl">Cached</span>
+                    </div>
+                    <div class="obs-metric obs-metric--total">
+                      <span class="obs-metric-val" x-text="formatTokens(session.summaryGlobal.totalTokenConsumed || 0)"></span>
+                      <span class="obs-metric-lbl">Total</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="obs-section">
+                  <h4 x-text="t('obs_git_user')"></h4>
+                  <p class="obs-user-name" x-text="session.gitUser.name || '—'"></p>
+                  <p class="obs-user-email" x-text="session.gitUser.email || '—'"></p>
+                  <p class="obs-meta-small" x-text="'Copilot v' + (session.copilotVersion || '—') + ' · VS Code ' + (session.vscodeVersion || '—')"></p>
+                </div>
+
+              </div>
+
+              <div class="obs-models-section" x-show="session.models.length > 0">
+                <h4 x-text="t('obs_models')"></h4>
+                <table class="data-table obs-models-table">
+                  <thead>
+                    <tr>
+                      <th x-text="t('obs_model_name')"></th>
+                      <th x-text="t('obs_calls')"></th>
+                      <th>Input</th>
+                      <th>Output</th>
+                      <th>Cached</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="model in session.models" :key="model.name">
+                      <tr>
+                        <td><span class="tag" x-text="model.name"></span></td>
+                        <td x-text="model.calls"></td>
+                        <td x-text="(model.inputTokens || 0).toLocaleString()"></td>
+                        <td x-text="(model.outputTokens || 0).toLocaleString()"></td>
+                        <td x-text="(model.cachedTokens || 0).toLocaleString()"></td>
+                        <td><strong x-text="formatTokens(model.totalTokenConsumed || 0)"></strong></td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="obs-agent-flow-section" x-show="session.agentFlow !== undefined">
+                <h4 x-text="t('obs_agent_flow')"></h4>
+                <div x-show="session.agentFlow === null" class="obs-agent-flow-empty" x-text="t('obs_agent_flow_none')"></div>
+                <div x-show="session.agentFlow" :id="'mermaid-' + session.path.replace(/[^a-z0-9]/gi,'_')" class="obs-mermaid"></div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </template>
+    </table>
+  </main>
+
+</body>
+</html>

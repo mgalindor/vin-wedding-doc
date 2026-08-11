@@ -1,0 +1,114 @@
+name: create-architecture
+description: Step-by-step workflow for generating a software architecture document. Each step corresponds to a level-2 section of the arc42 template. Very Important just read the details of a single specific step
+
+steps:
+  - id: initialize
+    name: Initialize Architecture Document
+    order: 0
+    optional: false
+    goal: Create the architecture file with front matter and title. Ask for the work style (interactive or yolo).
+    detail: assets/step-00-initialize.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: introduction-and-goals
+    name: Introduction and Goals
+    order: 1
+    optional: false
+    goal: Define business goals, architecture-significant requirements, top quality goals, and key stakeholders.
+    detail: assets/step-01-introduction-and-goals.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: architecture-constraints
+    name: Architecture Constraints
+    order: 2
+    optional: false
+    goal: Document technical, organizational, and convention constraints that limit design freedom.
+    detail: assets/step-02-architecture-constraints.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: context-and-scope
+    name: Context and Scope
+    order: 3
+    optional: false
+    goal: Define the system boundary, external actors, and communication partners in both business and technical terms.
+    detail: assets/step-03-context-and-scope.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: solution-strategy
+    name: Solution Strategy
+    order: 4
+    optional: false
+    goal: Summarize fundamental architectural decisions, technology choices, and how quality goals are addressed.
+    detail: assets/step-04-solution-strategy.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: building-block-view
+    name: Building Block View
+    order: 5
+    optional: false
+    goal: Decompose the system into its top-level containers and describe their responsibilities and interfaces.
+    detail: assets/step-05-building-block-view.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: runtime-view
+    name: Runtime View
+    order: 6
+    optional: false
+    goal: Illustrate key runtime scenarios showing how containers interact during important use cases.
+    detail: assets/step-06-runtime-view.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: deployment-view
+    name: Deployment View
+    order: 7
+    optional: false
+    goal: Map building blocks to infrastructure resources and describe the deployment topology.
+    detail: assets/step-07-deployment-view.md
+    execution: Indicate goal , resources to a devops subagent to execute the action
+
+  - id: crosscutting-concepts
+    name: Cross-cutting Concepts
+    order: 8
+    optional: false
+    goal: Document architectural concepts that span multiple building blocks (security, logging, error handling, etc).
+    detail: assets/step-08-crosscutting-concepts.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: architecture-decisions
+    name: Architecture Decisions
+    order: 9
+    goal: Record significant architectural decisions as ADRs with context, options, rationale, and consequences.
+    detail: assets/step-09-architecture-decisions.md
+    optional: true
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: quality-requirements
+    name: Quality Requirements
+    order: 10
+    optional: false
+    goal: Define the complete quality requirements catalog with measurable acceptance scenarios.
+    detail: assets/step-10-quality-requirements.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: risks-and-technical-debts
+    name: Risks and Technical Debts
+    order: 11
+    optional: true
+    goal: Identify and prioritize technical risks and accumulated technical debts with mitigation strategies.
+    detail: assets/step-11-risks-and-technical-debts.md
+    execution: Indicate goal , resources to a architect subagent to execute the action
+
+  - id: architecture-panel-review
+    name: Architecture Panel Review
+    order: 12
+    optional: false
+    goal: A single architect subagent reviews the complete document from 4 specialist perspectives (Software, Cloud Infrastructure, Frontend/Mobile, DevOps), produces a consolidated multi-perspective critique, and rewrites the affected sections.
+    detail: assets/step-12-architecture-panel-review.md
+    execution: |
+      SINGLE-SUBAGENT MULTI-PERSPECTIVE REVIEW.
+      Total invocations: 1 architect subagent.
+
+      The subagent receives the full architecture document and reviews it sequentially from each
+      of the 4 specialist perspectives, producing a structured critique per perspective, then
+      consolidates all findings and rewrites the affected sections. Replaces architecture.md
+      with the complete improved document including a Panel Review Summary.

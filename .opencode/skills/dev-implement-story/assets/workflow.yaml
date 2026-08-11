@@ -1,0 +1,167 @@
+name: dev.deliver-story
+description: End-to-end story delivery workflow. Steps execute sequentially, each delegated to a specialized sub-agent.
+
+execution-model: |
+  Steps execute sequentially in the order defined here.
+  Each step is assigned to a sub-agent identified by its agent name.
+  Steps with type "hold" pause the workflow until the required human action is completed.
+  The story.yaml file in the story specification folder tracks the state of each step.
+  Steps that reference a skill delegate execution to that skill.
+
+  CRITICAL — Human approval gate:
+  Every document-producing step (create-functional-spec, create-tech-spec, tech-review) MUST be
+  followed by its corresponding HOLD step before the workflow can continue.
+  The agent MUST NOT advance to the next step automatically after producing a document.
+  It MUST stop, present the output to the user, and wait for explicit human confirmation.
+  If the user does not explicitly say "approved", "looks good", "proceed", or equivalent,
+  the workflow stays paused and the step status remains "draft" in story.yaml.
+
+steps:
+  - id: create-functional-spec
+    name: Create Functional Specification
+    order: 1
+    agent: delegate to product-manager subagent
+    goal: Produce a draft functional specification for the story that the team can review, refine, and approve before technical work begins.
+    instructions: |
+      Delegate to the product-manager subagent.
+      The product-manager reads the story from the backlog, gathers context from journey maps, discovery documents, and the project brief, and produces a draft functional specification.
+      The output is a functional specification document in draft status in the story specification folder.
+      After the agent completes the draft, set this step to draft in story.yaml.
+      Present the document to the user and wait for approval.
+      The step moves to approved when the user confirms the functional specification.
+
+  - id: approve-functional-spec
+    name: Approve Functional Specification
+    order: 2
+    type: hold
+    goal: Ensure the functional specification is reviewed by stakeholders and approved before proceeding with technical work.
+    instructions: |
+      This is a HOLD step. The workflow pauses here until the functional specification is approved.
+      Check the status field of the functional specification document.
+      Verify there are no "Pending confirmation" or "Assumption" label in the document. If there are, inform the user that these need to be resolved before approval.
+      Verifuy there are no ⚠️ TODO markers in the document. If there are, inform the user that these need to be resolved before approval.
+      If the status is "approved": mark this step as approved and proceed to the next step.
+      If the status is "draft" or "refined": pause the workflow.
+        Inform the user: "The functional specification is still in draft. Please review it with the team (need owner, QA, UX) and change the status to 'approved' when ready."
+        Set this step to hold in story.yaml.
+      This step moves to approved only when the functional specification status field is confirmed as "approved".
+
+  - id: create-tech-spec
+    name: Create Technical Specification
+    order: 3
+    agent: delegate to architect subagent
+    goal: Produce a high-level technical design document that defines what components, APIs, database changes, and integrations are needed to implement the story.
+    instructions: |
+      Delegate to the architect subagent.
+      The architect reads the functional specification, the architecture documentation, and any relevant decision records.
+      The output is a technical specification document in draft status in the story specification folder.
+      After the subagent completes the draft, set this step to draft in story.yaml.
+      When finish move to next step
+
+  - id: approve-tech-spec
+    name: Approve Technical Specification
+    order: 4
+    type: hold
+    goal: Ensure the technical specification is reviewed and approved by the team before any technical review or task planning begins.
+    instructions: |
+      This is a HOLD step. The workflow pauses here until the technical specification is approved.
+      Check the status field of the technical specification document.
+      If the status is "approved": mark this step as approved in story.yaml and proceed to the next step.
+      If the status is "draft" or "refined": pause the workflow.
+        Inform the user: "La especificación técnica está en borrador. Por favor revísala con el equipo y cámbia el estado a 'approved' cuando esté lista."
+        Set this step to hold in story.yaml.
+      This step moves to approved only when the user explicitly confirms the technical specification.
+
+  - id: create-task-list
+    name: Create Implementation Task List
+    order: 5
+    agent: delegate to architect subagent — one invocation per active tier
+    goal: Produce one detailed, ordered task list per active tier, each derived from the technical specification and the tier's code repository structure.
+    instructions: |
+      Read the technical specification front matter and identify the active tiers from the `layers` field.
+      Only process tiers whose value is `true`. Skip tiers set to `false`.
+
+      For each active tier, delegate to the architect subagent with the following scope:
+        - The subagent acts as a senior expert in the technologies of that tier listed in the tier blueprint.
+        - The subagent reads the technical specification, the functional specification, and the tier blueprint.
+        - The subagent locates and analyzes the target code repository for that tier to understand the existing structure before generating tasks.
+          The repository location is project-specific. Check the project tools documentation or ask the user if it is not evident.
+        - Tasks are ordered to respect implementation dependencies within the tier.
+
+      After each tier's task list is produced, record it in story.yaml under `create-task-list.task-lists`:
+        - tier: the tier name (e.g., `backend`, `web`)
+        - file: the relative path to the produced task list file
+        - status: `draft`
+
+      Once all active tiers have a task list, set the `create-task-list` step to `draft` in story.yaml.
+      STOP. Present all produced task lists to the user and wait for explicit approval.
+      Do NOT proceed to the next step until the user explicitly approves.
+      The step moves to approved only when the user confirms all task lists.
+
+  - id: approve-task-list
+    name: Approve Implementation Task List
+    order: 6
+    type: hold
+    goal: Ensure the task list is reviewed and approved before any implementation begins.
+    instructions: |
+      This is a HOLD step. The workflow pauses here until the task list is approved.
+      Check the status of the create-task-list step in story.yaml.
+      If the status is "approved": proceed to the next step.
+      If the status is "draft": pause the workflow.
+        Inform the user: "La lista de tareas está en borrador. Por favor revísala y confirma para comenzar la implementación."
+        Set this step to hold in story.yaml.
+      This step moves to approved only when the user explicitly confirms the task list.
+
+  - id: implement-tasks
+    name: Implement Tasks
+    order: 7
+    agent: delegate to developer subagent — one invocation per tier
+    goal: Execute each task from the approved task list one at a time, limiting context window scope to maximize implementation quality.
+    instructions: |
+      Read the approved task list from the story specification folder.
+      Execute each task independently by delegating to the developer subagent indicating the tier.
+        The developer subagent uses the tier to locate and load the corresponding tier blueprint,
+        which defines the exact tech stack and coding conventions to follow.
+        Never invoke the developer subagent without indicating the tier. Without this context,
+        the subagent cannot align with the project's established standards.
+
+      PARTIAL IMPLEMENTATION — the user may request to implement only a subset of the task list:
+        - By task: the user lists specific task IDs or descriptions to implement.
+        - By block: the user names a logical group of tasks (e.g., "authentication block", "notification block").
+        - By tier: the user names a tier (e.g., "only backend", "only web frontend", "only mobile").
+        When a partial scope is requested, implement only the matching tasks and skip the rest.
+        After completing the partial scope, inform the user which tasks were implemented and which remain pending.
+        Do NOT mark the implement-tasks step as done until ALL tasks across ALL tiers are completed.
+
+      IMPORTANT: Delegate one task block at a time. Do not pass the entire task list to the developer subagent in a single invocation.
+        For each task, provide: the tier, the task description, the functional specification, the technical specification, and the relevant portion of the code repository.
+        Wait for each task to be completed and reviewed before proceeding to the next.
+      Track task completion using checkboxes in the task list document. Mark each task as completed immediately after it is done.
+      After all tasks are completed, set this step to done in story.yaml.
+      Present the result to the user and wait for confirmation before moving to the next task.
+
+  - id: functional-verification
+    name: Functional Verification
+    order: 8
+    agent: default
+    goal: Verify that the implemented code meets the acceptance criteria defined in the functional specification, from a developer perspective.
+    instructions: |
+      Read the functional specification and its acceptance criteria.
+      Read the task list and confirm all tasks are marked as completed.
+      Perform a developer-level functional verification:
+        - Review the implemented code against each acceptance criterion.
+        - Identify any gap between what was implemented and what was specified.
+        - Do NOT execute formal QA or write test plans. This is a developer review pass.
+      Produce a short verification summary in the story specification folder: criteria reviewed, any gaps found, and recommendation (pass or needs rework).
+      If all criteria are met: set this step to passed in story.yaml.
+      If gaps are found: set this step to failed in story.yaml and inform the user with the specific gaps identified.
+      Present the verification summary to the user before finalizing.
+  - id: mark-as-done-story
+    name: Mark Story as Done
+    order: 9
+    agent: default
+    goal: Mark the story as completed in the backlog and update any relevant project tracking tools.
+    instructions: |
+      After functional verification passes, mark the story as done in the backlog.
+      Update any relevant project tracking tools or documentation to reflect the story's completion.
+      Set this step to done in story.yaml.

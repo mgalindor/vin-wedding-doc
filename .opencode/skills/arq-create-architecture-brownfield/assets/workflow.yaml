@@ -1,0 +1,321 @@
+name: create-architecture-brownfield
+description: >
+  Brownfield archaeology and architecture workflow.
+  All step goals and prompts are defined inline — no separate step files.
+  Steps execute sequentially. The analyze-components step is a loop over all
+  registered components, one at a time.
+
+steps:
+
+  - id: initialize
+    name: Initialize
+    order: 0
+    goal: Create brownfield-progress.yaml, confirm work style, verify workspace state.
+    agent: architect
+    prompt: |
+      You are the orchestrator of a brownfield architecture analysis.
+
+      Tasks:
+      1. Read the project resources document to understand the current workspace state
+         (which src-code components are already registered).
+      2. Find the archaeology folder (search for the folder used to store
+         archaeological and snapshot documents in the workspace).
+      3. Check if brownfield-progress.yaml already exists in that folder:
+         - If it exists: load it, summarize current state, and determine where to resume.
+         - If not: create it with all steps in `not-started` status using the schema below.
+      4. Ask the user for the work style: interactive or yolo.
+         Default to yolo if they prefer to skip the question.
+      5. Write brownfield-progress.yaml with initialize step marked as `done`.
+
+      brownfield-progress.yaml schema:
+      ```yaml
+      workflow: arq-create-architecture-brownfield
+      started: {today}
+      working-style: {yolo|interactive}
+      steps:
+        - step: initialize
+          status: done
+        - step: discover-components
+          status: not-started
+        - step: analyze-components
+          status: not-started
+          components: []
+        - step: architecture-snapshot
+          status: not-started
+          output:
+        - step: functional-snapshot
+          status: not-started
+          output:
+        - step: target-architecture
+          status: not-started
+          output:
+        - step: architecture-review
+          status: not-started
+          output:
+      ```
+
+      Return: confirmation of workspace state, whether this is a fresh start or resume,
+      and the list of already-registered components (if any).
+
+  - id: discover-components
+    name: Discover Code Components
+    order: 1
+    goal: Find all deployable containers in the workspace and register them in the project resources document.
+    agent: run sub agent architect
+    prompt: |
+      You are a software architect discovering deployable code components (C4 containers)
+      in a brownfield workspace.
+
+      A deployable component is a unit that must be running for the system to work.
+      It has its own dependency manifest and can be built and deployed independently.
+
+      Tasks:
+      1. Read the project resources document. If src-code entries with valid local paths already exist,
+         use them. Skip rediscovery for entries that are already registered.
+      2. Search the workspace (and sibling folders referenced in the project resources document) for
+         project descriptor files that indicate a runnable component:
+         - Build/package managers: pom.xml, package.json (ignore node_modules/),
+           build.gradle, Cargo.toml, pyproject.toml, go.mod, *.csproj, *.fsproj
+         - Infrastructure descriptors: Dockerfile, docker-compose.yaml at paths that
+           represent a service (not just CI tooling)
+      3. For each discovered component not yet in the project resources document:
+         - Add a src-code entry: name (folder name), type (infer from tech stack),
+           local (relative path from workspace root), git (leave empty if unknown)
+      4. Update the project resources document with any new entries.
+      5. Update brownfield-progress.yaml:
+         - Mark discover-components as done.
+         - Populate analyze-components.components list with one entry per component
+           (status: not-started, assessment: empty).
+
+      Return: list of all components with their paths and types.
+
+  - id: analyze-components
+    name: Analyze Components
+    order: 2
+    loop: true
+    goal: Perform archaeological analysis of each component one at a time, producing an assessment per component. Very important execute this process by each component
+    agent: run sub agent architect
+    prompt: |
+      You are a software architect performing the archaeological analysis of a single
+      code component in a brownfield project.
+
+      Read brownfield-progress.yaml to confirm the next component to analyze
+      (first entry with status: not-started in the components list).
+
+      For the identified component, produce a complete Component Assessment 
+
+      Rules:
+      - Explore actual source code — read files, search for patterns, examine dependencies.
+        Do not infer from file names alone.
+      - Behave as an expert in the specific technology stack found in the Overview.
+
+      After completing the assessment:
+      - Save it to the archaeology folder as {YYYYMMDD}-{component-name}-assessment.md.
+      - Update brownfield-progress.yaml: component status → done, add assessment path.
+      - Update the project resources document: add `assessment` field to this component's src-code entry.
+
+      Return: the assessment file path and a one-paragraph summary of the component.
+
+  - id: architecture-snapshot
+    name: Architecture Snapshot
+    order: 3
+    goal: Produce an architecture document describing the current state of the system, based strictly on archaeological evidence.
+    agent: run sub agent architect
+    prompt: |
+      You are a software architect producing an architecture snapshot — a document that
+      describes what the system IS today, based strictly on archaeological evidence.
+      This is NOT a future-state design document.
+
+      Input sources (read all):
+      - All component assessments listed in brownfield-progress.yaml
+      - Project brief (README.md) and kickoff documents
+      - Existing decision records if available
+
+      Produce the architecture snapshot using the architecture document template. Set project-type: brownfield-snapshot
+      in the front matter and include only the sections inferrable from archaeological evidence:
+      Context and Scope, Solution Strategy, Building Block View, Runtime View,
+      Cross-cutting Concepts, Architecture Decisions, and Gap Analysis.
+
+      The document covers only the sections that can be inferred from the evidence:
+      - Context and Scope: system boundary and external actors visible in the assessments
+      - Solution Strategy: main technology choices and patterns found in the codebase
+      - Building Block View: the containers found, their responsibilities, and interactions
+      - Runtime View: key interaction scenarios inferred from input/output interfaces
+      - Cross-cutting Concepts: patterns visible across multiple components
+        (auth, logging, error handling, configuration)
+      - Architecture Decisions: notable decisions evident in the codebase
+      - Gap Analysis: risks, weaknesses, and structural problems observed in the current state
+
+      Include a prominent snapshot notice at the top: this document describes the system
+      as of {today's date} and does not represent a design decision.
+
+      Save as {YYYYMMDD}-architecture-snapshot.md in the archaeology folder.
+      Update brownfield-progress.yaml: mark step done, record output path.
+
+      Return: file path and a summary of the most significant architectural findings.
+
+  - id: functional-snapshot
+    name: Functional Snapshot
+    order: 4
+    goal: Produce an executive summary of what the system does and what capabilities it offers.
+    agent: run sub agent architect
+    prompt: |
+      You are a software architect producing a functional snapshot — a document that
+      answers "what does this system do?" for both technical and non-technical stakeholders.
+
+      Input sources (read all):
+      - All component assessments (Component Responsibility and Main Capabilities sections)
+      - Architecture snapshot document (if produced in the previous step)
+      - Project brief (README.md) and kickoff documents
+
+      Produce the functional snapshot using the template at
+      assets/template-functional-snapshot.md.
+
+      The document must include:
+      - Prominent snapshot notice with the date
+      - System Overview: 1-2 paragraphs on what the system does at a high level
+      - System Capabilities: structured list grouped by domain or component
+      - Component Summary: one-line description per component and its primary responsibility
+
+      Save as {YYYYMMDD}-functional-snapshot.md in the discovery analysis folder.
+      Update brownfield-progress.yaml: mark step done, record output path.
+
+      Return: file path and the system overview paragraph.
+
+  - id: target-architecture
+    name: Target Architecture
+    order: 5
+    goal: Produce the target architecture document — what the system should become.
+    agent: run sub agent architect
+    prompt: |
+      You are a software architect producing the target architecture for a brownfield project. 
+      You are responsable to modify, improve or add new features to an existing system. 
+
+      The target architecture describes what the system SHOULD become — the desired future
+      state that achieves the project objectives while respecting real constraints discovered
+      during archaeological analysis.
+
+      The new  goals, modifications , improvements or new features are defined by the project brief and kickoff documents, but you must also consider the constraints and realities uncovered in the component assessments and architecture snapshot. 
+      This is a design document, not an analysis document — it should propose a coherent future architecture that addresses the problems found in the current system.
+
+      Input sources (read all):
+      - All component assessments listed in brownfield-progress.yaml
+      - Architecture snapshot and functional snapshot documents
+      - Project brief (README.md), kickoff documents, SOW, and PRD if available
+      - Existing decision records
+
+      Produce a comprehensive target architecture document covering all relevant sections.
+      Key differences from a purely greenfield architecture:
+      - Solution Strategy must account for constraints found in the assessments
+        (legacy data models, inherited tech stacks, existing integrations)
+      - Building Block View shows the future component structure, noting which existing
+        components are retained, refactored, or replaced
+      - Architecture Decisions should explain how the target design navigates
+        brownfield constraints
+      - Include a Gap Analysis section: the delta between the current architecture
+        snapshot and this target, with prioritized list of changes required
+
+      Save the document in the architecture folder (not the archaeology folder),
+      following the project's naming conventions.
+      Update brownfield-progress.yaml: mark step done, record output path.
+
+      Return: file path and a summary of the main architectural directions chosen.
+
+  - id: architecture-review
+    name: Architecture Review
+    order: 6
+    goal: A single architect subagent reviews the complete target architecture document from 4 specialist perspectives, consolidates findings, and rewrites the affected sections.
+    agent: architect
+    execution: |
+      SINGLE-SUBAGENT MULTI-PERSPECTIVE REVIEW.
+      Total invocations: 1 architect subagent.
+
+      Delegate to a single architect subagent passing the full target architecture document.
+      The subagent reviews the document sequentially from 4 specialist perspectives
+      (Software Architect, Cloud Infrastructure Architect, Frontend/Mobile Architect,
+      DevOps Architect), consolidates findings, rewrites affected sections, and appends
+      a Review Summary. Replaces the target architecture file with the improved document.
+      Updates brownfield-progress.yaml: mark step done.
+    prompt: |
+      You are a senior architect. Your task is to review the FULL target architecture document
+      sequentially from 4 specialist perspectives, then consolidate all findings and produce
+      an improved version of the document.
+
+      Full target architecture document:
+      ---
+      [FULL ARCHITECTURE DOCUMENT]
+      ---
+
+      ## Step 1 — Multi-Perspective Review
+
+      Review the document four times, once per perspective below. For each perspective produce
+      a structured critique organized by section:
+
+      # Review — [Perspective Name]
+
+      ### Overall Assessment
+      - **Document coverage**: Is the document complete? What major areas are missing?
+      - **Cross-section consistency**: Identify elements stated differently or contradictorily across sections
+      - **Brownfield fit**: Are the legacy constraints from the archaeology properly addressed?
+      - **Technical Viability**: [Viable / Partially Viable / Not Viable] — one-sentence assessment
+
+      ### Section-by-Section Findings
+      For each section that has findings:
+
+      #### [Section Name]
+      - **Pros**: What is done well (reference actual content)
+      - **Cons / Concerns**: What is missing, risky, or incomplete (be direct)
+      - **Suggested Changes**: Concrete, actionable additions or rewrites
+
+      (Skip sections where you have no concerns)
+
+      ---
+
+      Perspectives to apply (in order):
+
+      **Perspective 1 — Software Architect**
+      Senior software architect specializing in system design, domain modeling, design patterns
+      (GoF, DDD, Hexagonal, CQRS), SOLID principles, and quality attributes.
+      Focus: building block coherence, runtime view consistency, pattern appropriateness,
+      quality goals coverage, coupling/dependencies, constraint compliance, cross-section consistency.
+
+      **Perspective 2 — Cloud Infrastructure Architect**
+      Cloud infrastructure architect with expertise in cloud-native patterns, managed services
+      trade-offs, multi-region resilience, infrastructure cost optimization.
+      Focus: deployment topology realism, resilience patterns, single points of failure,
+      storage/database alignment, networking and compliance, right-sizing.
+
+      **Perspective 3 — Frontend/Web & Mobile Architect**
+      Frontend and mobile architecture expert specializing in SPAs, PWAs, native/hybrid mobile
+      apps, API design from the consumer perspective, offline-first strategies.
+      Focus: API contracts and payload design, client-side performance, offline behavior,
+      state management, authentication flows, UX journey alignment.
+
+      **Perspective 4 — DevOps Architect**
+      DevOps architect following Continuous Delivery principles, with expertise in CI/CD pipeline
+      design, infrastructure as code, observability stacks, release safety strategies.
+      Focus: observability coverage, deployment safety and reversibility, secrets management,
+      health checks, CI/CD pipeline definition, rollback feasibility, migration strategy.
+
+      ---
+
+      ## Step 2 — Consolidation and Document Rewrite
+
+      After completing all 4 perspective reviews:
+
+      1. Consolidate all concerns, deduplicate overlapping observations
+      2. Classify each concern:
+         - **Consensus concern**: raised by 2 or more perspectives → MUST be addressed
+         - **Specialist concern**: raised by 1 perspective → address if technically sound
+      3. Rewrite sections that have concerns; return unchanged sections as-is
+      4. Append a `## Review Summary` section at the end with table:
+         | Section | Consensus Concerns | Changes Made | Deferred |
+      5. Update brownfield-progress.yaml: mark architecture-review as done
+
+      Rules:
+      - Preserve all content that received no critical feedback
+      - Improvements must ADD specificity; never reduce existing valid content
+      - Pay special attention to brownfield-specific concerns: migration paths,
+        legacy constraint handling, Gap Analysis completeness
+
+      Output: the complete improved architecture document, ready to replace the original file.

@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "type": "hook",
+    "version": "1.0.0",
+    "update": "2026-07-16",
+    "description": "Hook to analyze session logs and generate metrics after the session ends."
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node .gene2/scripts/analyze-session-logs.js --stdin",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ]
+  }
+}

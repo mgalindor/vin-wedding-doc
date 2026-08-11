@@ -1,0 +1,68 @@
+name: create-component-assessment
+description: Step-by-step workflow for analyzing an existing code component and producing a technical assessment document. Each step corresponds to a section of the component assessment. Very Important just read the details of a single specific step.
+
+steps:
+  - id: initialize
+    name: Initialize Assessment Document
+    goal: Create the assessment file with front matter and title. Confirm the component path and ask for the work style (interactive or yolo).
+    detail: assets/step-00-initialize.md
+    execution: Indicate goal, resources to an architect subagent to execute the action
+
+  - id: overview
+    name: Repository Overview
+    goal: Identify the language, runtime, platform, build tool, and key frameworks/libraries of the component.
+    detail: assets/step-01-overview.md
+    execution: Indicate goal, component path, resources to an architect subagent to execute the action
+
+  - id: configuration
+    name: Configuration Style
+    goal: Identify how the component manages its configuration (files, env vars, external systems, code constants, database).
+    detail: assets/step-02-configuration.md
+    execution: Indicate goal, component path, current assessment to an architect subagent to execute the action
+
+  - id: input-interfaces
+    name: Input Interfaces
+    goal: Identify all inbound entry points that trigger actions in the component (API endpoints, UI, message consumers, scheduled tasks, polling, CDC events).
+    detail: assets/step-03-input-interfaces.md
+    execution: Indicate goal, component path, current assessment to an architect subagent to execute the action
+
+  - id: output-interfaces
+    name: Output Interfaces
+    goal: Identify all outbound dependencies the component actively calls or pushes to (APIs, datastores, messaging, email, auth, monitoring).
+    detail: assets/step-04-output-interfaces.md
+    execution: Indicate goal, component path, current assessment to an architect subagent to execute the action
+
+  - id: data-archaeology
+    name: Data Archaeology
+    goal: Document the data model (schemas, tables/collections, key entities and relationships) and detect problematic legacy patterns.
+    detail: assets/step-05-data-archaeology.md
+    execution: Indicate goal, component path, current assessment to an architect subagent to execute the action
+
+  - id: component-responsibility
+    name: Component Responsibility
+    goal: Classify the component's responsibility type and summarize its 1-10 main capabilities based on evidence gathered in previous steps.
+    detail: assets/step-06-component-responsibility.md
+    execution: Indicate goal, component path, current assessment to an architect subagent to execute the action
+
+  - id: cross-cutting-concerns
+    name: Cross-Cutting Concerns
+    goal: Identify any cross-cutting concerns or architectural smells that span multiple sections (e.g. security, performance, maintainability issues).
+    execution: Indicate goal, component path, current assessment to an architect subagent to execute the action
+
+  - id: assessment-review
+    name: Assessment Review
+    goal: A panel of 3 specialists independently reviews the complete assessment, then a synthesis step consolidates feedback and improves the document.
+    detail: assets/step-07-assessment-review.md
+    execution: |
+      PARALLEL FULL-DOCUMENT REVIEW — does NOT follow standard single-subagent delegation.
+      Total invocations: 4 (3 parallel reviewers + 1 synthesis).
+
+      Phase A (parallel): Launch 3 subagents SIMULTANEOUSLY, each reviewing the FULL assessment:
+        - architect (Software Architect persona)
+        - architect (Data & Integration Specialist persona)
+        - architect (Technology Stack Specialist persona)
+      Wait for ALL 3 reviews before proceeding.
+
+      Phase B (sequential): Delegate to a single architect subagent to consolidate all 3 reviews,
+        rewrite affected sections, and append the Assessment Review Summary. Replace the assessment
+        with the complete improved document.
