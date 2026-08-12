@@ -4,8 +4,8 @@ date: 2026-08-10
 type: architecture
 scope: client
 project-type: greenfield
-version: 1.0.0
-updated: 2026-08-10
+version: 1.1.0
+updated: 2026-08-11
 working-style: yolo
 progress:
   - step: initialize
@@ -53,6 +53,10 @@ progress:
 > **Status:** Target architecture (greenfield, MVP).
 > **Audience:** Delivery team (1 BE + 1 FE), Tech Lead, Product Owner, Vineyards stakeholders.
 > **Style:** Pragmatic. Optimized for a 2-person team delivering an MVP in 3 months while leaving the door open for future iterations (multi-tenancy, budget/vendor modules, more languages).
+>
+> **Revision history**
+> - **v1.1.0 (2026-08-11):** Fixes from the architecture audit (`20260811-architecture-audit.md`): removed SSR/Next.js-era residues (ASR-3, §4 cloud row, §5.2 interfaces), corrected the WP onboarding scenario to Admin-assigned passwords with no system notifications (§6.1), and added guest-photo moderation end-to-end (TC-11, ASR-8, §5.1 events, new scenario §6.6, QS-11, §8.6 audit list, §11 risk).
+> - v1.0.0 (2026-08-10): Initial version.
 
 ---
 
@@ -77,11 +81,12 @@ The following functional requirements are the ones that **shape structural or te
 |----|-----|----------------------|
 | ASR-1 | **Wedding data capture** — name of couple, wedding date, and the 14 invitation modules (landing, story, location, schedule, dress code, gifts, RSVP, gallery, contact, etc.) must be stored per wedding and rendered into a public invitation. | Drives the **Wedding** bounded context and the need for flexible per-template data (JSON). |
 | ASR-2 | **Guest list + RSVP** — CRUD for guest groups and guests; each guest has a unique invitation link; RSVP is submitted through that link with three states (Confirmed / Declined / Pending). | Drives **Guest Management** bounded context, token-based public link generation, and the decision to lazy-load the public invitation route in the SPA. |
-| ASR-3 | **Public online invitation** with 6 fixed generic templates selected by the WP. The platform fills the template with the wedding's data. No per-wedding layout customization in MVP. | Drives the choice of **server-side rendering** for invitation pages (SEO + first paint) and the **Template** module inside the Invitation bounded context. |
+| ASR-3 | **Public online invitation** with 6 fixed generic templates selected by the WP. The platform fills the template with the wedding's data. No per-wedding layout customization in MVP. | Drives the **Template** module inside the Invitation bounded context and the **lazy-loaded public route group** in the SPA: pages are `noindex` (no SEO value, per ADR-10), so fast first paint is achieved with CloudFront caching, a small per-route bundle, and an inline skeleton — **no SSR** (see ADR-02 v2). |
 | ASR-4 | **Photo storage** — official photos per wedding (max 200), configurable quality (High/Low), shared upload link for the couple, auto-delete **1 month after the event date**. | Drives the **Photo Storage** bounded context, the use of **object storage with lifecycle policies**, and a scheduled job to enforce deletion. |
 | ASR-5 | **Authentication & roles** — Administrator and Wedding Planner roles, credentials `nombre@wendy`, passwords assigned by the Administrator. No self-service password recovery in MVP. | Drives the **Identity & Access** bounded context, JWT-based stateless auth, and a dedicated seed for the initial `admin@wendy`. |
 | ASR-6 | **Bilingual UI (EN default, ES)** auto-detected from `Accept-Language`, with architecture ready for additional languages. | Drives the **i18n strategy** (no hard-coded strings, locale-aware routing on invitations, message catalogs at the framework level). |
 | ASR-7 | **Multi-tenancy preparation** — `tenant_id` column on all relevant tables from day one. Row-level isolation **not enforced** in MVP. | Drives the **schema design** (every domain entity carries `tenant_id`) but defers policy/RLS to a later iteration. |
+| ASR-8 | **Guest photo album with pre-publication moderation** — guests upload photos through the invitation's album module (max 20 per guest, ≤ 5 MB, JPG/PNG/GIF per TC-10); uploads stay **hidden until the WP approves them** (TC-11). | Drives a `GuestPhoto` moderation state machine (Pending → Approved / Rejected), a WP review queue in the dashboard, and the publish rule that only Approved photos render on the public invitation. |
 
 ### 1.3 Quality Goals
 
@@ -128,6 +133,7 @@ Constraints that limit the architect's freedom of design. Some are negotiable; t
 | TC-8 | **Web target: PC and tablet** | Mobile-first is out of scope for MVP. | Kickoff §Restricciones técnicas |
 | TC-9 | **Credentials format `nombre@wendy`** | Username format is fixed; passwords are assigned by the Administrator. No self-service recovery. | Kickoff §Seguridad y autenticación |
 | TC-10 | **Photo upload: max 5 MB per file, JPG/PNG/GIF** | Limits apply to guest-uploaded photos to the public album. | Glossary (Guest Photo Album) |
+| TC-11 | **Guest photo moderation before publishing** | Photos uploaded by guests to the public album are **not visible on the invitation until the WP approves them**. Rejected photos are deleted from storage. | Glossary (Guest Photo Album); Kickoff §Precondiciones (guest-upload anti-abuse rules) |
 
 ### 2.2 Organizational Constraints
 
@@ -244,7 +250,7 @@ A summary of the fundamental decisions that shape the architecture. Details live
 | Time-to-MVP with 2-person team | **Modular monolith** in **TypeScript** end-to-end (NestJS + Vite/React) | One language across FE/BE reduces context-switching and shared types. Modular monolith avoids the ops and coordination cost of microservices. |
 | Lightweight, simple-to-operate public invitation | **Vite + React SPA** with two route groups: `(dashboard)` authenticated, `(public)` lazy-loaded for `/i/:token`. Static deploy to S3 + CloudFront. No Node.js runtime for the FE. | No SSR/SEO needed (`noindex` per ADR-10); CloudFront caching + lazy route + skeleton give acceptable first paint; no Fargate cost for the FE. |
 | Standardized data layer with future multi-tenancy | **PostgreSQL 15** as the single OLTP store, with `tenant_id` columns and bounded-context schemas | PostgreSQL is well-supported in both stacks, supports JSON for template data, and is the de-facto standard for this kind of workload. |
-| Container-based cloud deployment with low ops overhead | **AWS ECS Fargate** for both the Web App and the API, plus **RDS PostgreSQL**, **S3**, **CloudFront**, **Secrets Manager**, **CloudWatch** | Containers satisfy TC-2; Fargate removes the K8s ops burden that 2 people cannot afford; AWS is the broadest, most documented option for the team. |
+| Container-based cloud deployment with low ops overhead | **AWS ECS Fargate** for the API; the **Web App is static assets on S3 behind CloudFront** (no Node.js runtime for the FE — ADR-02 v2), plus **RDS PostgreSQL**, **S3**, **CloudFront**, **Secrets Manager**, **CloudWatch** | Containers satisfy TC-2 for the deployable runtime (the API); static hosting needs no runtime at all. Fargate removes the K8s ops burden that 2 people cannot afford; AWS is the broadest, most documented option for the team. |
 | Predictable cost and auto-deletion of photos | **S3 Lifecycle Policy** with `Expiration` set to `event_date + 30 days` per object prefix, plus a daily **scheduled job** as a safety net | Native S3 lifecycle is the cheapest, most reliable way to enforce TC-6. A scheduler is a backstop in case a wedding's `event_date` is updated. |
 | Bilingual UI ready for more languages | **`i18next` + `react-i18next`** on the frontend; `Accept-Language` detection on first visit; user can override; framework-agnostic | Mature ecosystem; same mechanism scales to any number of locales; decoupled from the FE framework choice. |
 | Versioned, peer-reviewed schema changes | **Prisma Migrate** as the single source of truth for DB schema + migrations; one-shot ECS task runs `prisma migrate deploy` before the API starts | Same tool as the ORM; SQL files in git; no drift between `schema.prisma` and migrations; ecosystem-native (Liquibase analog). |
@@ -284,6 +290,8 @@ graph LR
         invitationViewed(["Invitation Viewed"])
         rsvpSubmitted(["RSVP Submitted"])
         photoUploadedByGuest(["Photo Uploaded (Guest)"])
+        guestPhotoApproved(["Guest Photo Approved"])
+        guestPhotoRejected(["Guest Photo Rejected"])
     end
 
     subgraph ps["Photo Storage"]
@@ -305,6 +313,8 @@ graph LR
     invitationLinkIssued --> invitationViewed
     invitationViewed --> rsvpSubmitted
     invitationViewed --> photoUploadedByGuest
+    photoUploadedByGuest --> guestPhotoApproved
+    photoUploadedByGuest --> guestPhotoRejected
     photoUploadedOfficial --> photoDownloaded
     photosDeleted --> audited
     rsvpSubmitted --> audited
@@ -326,6 +336,8 @@ graph LR
 | RSVP Submitted | `RSVP` | Invitation |
 | Photo Uploaded (Official) | `Photo` | Photo Storage |
 | Photo Uploaded (Guest) | `GuestPhoto` | Invitation |
+| Guest Photo Approved | `GuestPhoto` | Invitation |
+| Guest Photo Rejected | `GuestPhoto` | Invitation |
 | Photo Downloaded | `DownloadEvent` | Photo Storage |
 | Photos Auto-Deleted | `Wedding` | Photo Storage |
 | Critical Action Logged | `AuditEvent` | Audit |
@@ -373,7 +385,7 @@ graph LR
 **Important Interfaces:**
 
 - **Public API** (v1): REST/JSON over HTTPS. Documented via OpenAPI 3 generated from NestJS decorators (`@nestjs/swagger`).
-- **Web → API**: same-origin via rewrites in production; relative paths in dev. All calls authenticated except `POST /oauth/token` (login), `GET /.well-known/wendy-configuration`, `GET /.well-known/jwks.json`, and the public invitation/photo-album endpoints.
+- **Web → API**: same-origin in production (the CDN forwards `/api/*` to the API origin); relative paths in dev. All calls authenticated except `POST /oauth/token` (login), `GET /.well-known/wendy-configuration`, `GET /.well-known/jwks.json`, and the public invitation/photo-album endpoints.
 - **API → S3**: server-side generates presigned PUT/GET URLs; clients upload/download directly to/from S3 to avoid streaming through the API.
 - **DB driver**: Prisma ORM with strict typing and migrations. No raw SQL outside migrations.
 - **Error contract**: standard JSON error envelope `{ "code": string, "message": string, "details"?: object, "traceId": string }` for all API responses.
@@ -410,14 +422,16 @@ sequenceDiagram
     participant WP as Wedding Planner (offline)
 
     A->>W: open /admin/wedding-planners
-    W->>API: POST /api/v1/wedding-planners { fullName, email, role: "WeddingPlanner" }
+    A->>W: fills fullName, contact email, phone, and types the password she assigns to the WP
+    W->>API: POST /api/v1/wedding-planners { fullName, email, phone, role: "WeddingPlanner", password }
     Note over W,API: body validated by ValidationPipe against CreateWeddingPlannerDto (ADR-14)
-    API->>DB: INSERT INTO users (..., role, tenant_id)
+    API->>API: bcrypt.hash(password, cost 12) — the plain password is never stored nor returned
+    API->>DB: INSERT INTO users (..., role, tenant_id, password_hash)
     API->>DB: INSERT INTO audit_events (action: "user.created")
     DB-->>API: ok
-    API-->>W: 201 { userId, username: "miguel@wendy", initialPassword }
-    W-->>A: shows username + initial password (one-time display in UI)
-    A-->>WP: hands the credentials over an out-of-band channel (chat, call)
+    API-->>W: 201 { userId, username: "miguel@wendy" }
+    W-->>A: confirmation screen (no password is shown back — the Admin already knows it)
+    A-->>WP: shares username + password over an out-of-band channel (chat, call) — the system sends no notifications (email is out of scope per the kickoff)
 ```
 
 After the handoff, the WP logs in with `POST /oauth/token { grant_type: "password", username, password }`. The endpoint returns an access token (15 min) and a refresh token cookie. The same password works on every subsequent login.
@@ -565,7 +579,56 @@ sequenceDiagram
     end
 ```
 
-### 6.6 Scenario 6 — Photos Auto-Deleted 1 Month After Event Date
+### 6.6 Scenario 6 — Wedding Planner Moderates Guest Photos
+
+- **Trigger:** A guest has uploaded photos through the invitation's Guest Photo Album module; the WP reviews the pending queue.
+- **Flow type:** Synchronous review; asynchronous visibility — photos appear on the public invitation only after approval.
+- **Architectural relevance:** Implements TC-11 ("WP moderation is required before publishing" — glossary, and the kickoff's guest-upload anti-abuse precondition). Validates the `GuestPhoto` moderation state machine and the publish rule that the public invitation renders only `Approved` guest photos.
+
+```mermaid
+sequenceDiagram
+    participant G as Guest (Browser)
+    participant W as Web App
+    participant API as API
+    participant DB as PostgreSQL
+    participant S3 as S3
+    participant WP as Wedding Planner
+
+    G->>W: uploads a photo via the invitation's album module
+    W->>API: POST /api/v1/public/guest-photos/{token}/presign { contentType, size }
+    API->>API: validate caps (≤ 20 per guest, ≤ 5 MB, JPG/PNG/GIF — TC-10)
+    API-->>W: { presignedPutUrl, objectKey }
+    W->>S3: PUT to presigned URL
+    W->>API: POST /api/v1/public/guest-photos/{token} { objectKey }
+    API->>DB: INSERT INTO guest_photos (..., status: "Pending", tenant_id)
+    Note over DB: a Pending photo is NOT rendered on the public invitation
+
+    WP->>W: open /weddings/{id}/guest-photos (moderation queue)
+    W->>API: GET /api/v1/weddings/{id}/guest-photos?status=Pending
+    API-->>W: pending photos (short-lived signed GET URLs for review)
+    alt approve
+        WP->>W: approve
+        W->>API: POST /api/v1/guest-photos/{id}/approve
+        API->>DB: UPDATE guest_photos SET status = "Approved"
+        API->>DB: INSERT INTO audit_events (action: "guest_photo.approved")
+        Note over DB: the photo now renders on the public invitation
+    else reject
+        WP->>W: reject
+        W->>API: POST /api/v1/guest-photos/{id}/reject
+        API->>DB: UPDATE guest_photos SET status = "Rejected"
+        API->>S3: DELETE the object (rejected photos are not kept)
+        API->>DB: INSERT INTO audit_events (action: "guest_photo.rejected")
+    end
+```
+
+**Moderation rules:**
+
+- A guest photo is created in `Pending` status and is never included in the public invitation payload until it reaches `Approved`.
+- `Approved` and `Rejected` are terminal states in the MVP (no re-review queue).
+- Rejection deletes the S3 object immediately; the DB row remains for audit.
+- The 20-per-guest cap counts all uploads regardless of status, so a rejected upload still consumes a slot (anti-spam).
+
+### 6.7 Scenario 7 — Photos Auto-Deleted 1 Month After Event Date
 
 - **Trigger:** Scheduled (daily).
 - **Flow type:** Asynchronous, two layers: a primary S3 Lifecycle Policy and a safety-net Lambda scan.
@@ -590,12 +653,13 @@ sequenceDiagram
     end
 ```
 
-### 6.7 Notable Runtime Properties
+### 6.8 Notable Runtime Properties
 
 - **Stateless API**: any container instance can serve any request; horizontal scale-out is trivial.
 - **CSR for both surfaces**: the dashboard is fully client-rendered; the public invitation is also CSR but with a route bundle lazy-loaded so guests do not download dashboard code.
 - **Validation is shared**: every write goes through `class-validator` DTOs from `@wendy/contracts` (ADR-14); the FE forms use the same DTOs.
 - **No background workers in MVP**: the only scheduled task is the daily photo sweeper, which runs as a serverless Lambda.
+- **Guest photo moderation (TC-11)**: photos uploaded by guests are stored with status `Pending` and are never rendered on the public invitation until a WP approves them (see §6.6). Rejection deletes the S3 object.
 - **Audit events** are written synchronously inside the same DB transaction as the action they record for critical operations (RSVP submission, password reset, photo deletion, account disable).
 
 ---
@@ -743,7 +807,7 @@ Patterns that span multiple building blocks.
 
 ### 8.6 Audit Logging
 
-- **What is audited:** user onboarding/disable, password reset, wedding publish/archive, photo upload/download, photo auto-deletion, RSVP submission.
+- **What is audited:** user onboarding/disable, password reset, wedding publish/archive, photo upload/download, photo auto-deletion, guest photo approval/rejection, RSVP submission.
 - **How:** an `AuditEvent` row is written **in the same DB transaction** as the action. Logs are append-only (no UPDATE, no DELETE from the application code path).
 
 ### 8.7 Photo Lifecycle Enforcement (Defense in Depth)
@@ -789,7 +853,7 @@ Significant decisions are captured as standalone ADRs in `3-architecture/3.3-dec
 | AD-02 | Frontend stack: **Vite + React + TypeScript (SPA)** | Accepted (v2.0.0) | 2026-08-10 | [adr-02-frontend-stack-vite-react.md](../3.3-decision-record/adr-02-frontend-stack-vite-react.md) | Lightweight SPA; static deploy on S3 + CloudFront; no Node.js runtime for the FE. |
 | AD-03 | Database: **PostgreSQL 15 on AWS RDS** | Accepted | 2026-08-10 | [adr-03-database-postgresql-rds.md](../3.3-decision-record/adr-03-database-postgresql-rds.md) | Proven, JSON support, easy multi-tenancy prep, broad team familiarity. |
 | AD-04 | Cloud topology: **AWS ECS Fargate + RDS + S3 + CloudFront** | Accepted | 2026-08-10 | [adr-04-cloud-aws-ecs-fargate.md](../3.3-decision-record/adr-04-cloud-aws-ecs-fargate.md) | Containers without K8s ops; managed services; pay-per-use. |
-| AD-05 | Authentication: **JWT (access + refresh) + bcrypt + OIDC-style URLs** | Accepted (v2.0.0) | 2026-08-10 | [adr-05-auth-jwt-bcrypt.md](../3.3-decision-record/adr-05-auth-jwt-bcrypt.md) | Stateless API; standards-aligned URL paths make a future IdP swap a backend-internal change. |
+| AD-05 | Authentication: **JWT (access + refresh) + bcrypt + OIDC-style URLs** | Accepted (v2.0.1) | 2026-08-10 | [adr-05-auth-jwt-bcrypt.md](../3.3-decision-record/adr-05-auth-jwt-bcrypt.md) | Stateless API; standards-aligned URL paths make a future IdP swap a backend-internal change. |
 | AD-06 | Photo storage & lifecycle: **S3 + Lifecycle Policy + Lambda sweeper** | Accepted | 2026-08-10 | [adr-06-photo-storage-s3-lifecycle.md](../3.3-decision-record/adr-06-photo-storage-s3-lifecycle.md) | Cheapest reliable mechanism for TC-6 with a safety net. |
 | AD-07 | Multi-tenancy: **`tenant_id` column from day 1, no RLS** | Accepted | 2026-08-10 | [adr-07-multitenancy-preparation.md](../3.3-decision-record/adr-07-multitenancy-preparation.md) | Schema-only preparation, no MVP overhead. |
 | AD-08 | i18n: **`i18next` + `react-i18next` + `Accept-Language`** | Accepted (v2.0.0) | 2026-08-10 | [adr-08-i18n-i18next.md](../3.3-decision-record/adr-08-i18n-i18next.md) | Framework-agnostic i18n; ready for more locales. |
@@ -843,6 +907,7 @@ Significant decisions are captured as standalone ADRs in `3-architecture/3.3-dec
 | QS-08 | Tenant isolation readiness | TC-4 | Code review / future RLS rollout | All envs | DB | Every relevant table has `tenant_id NOT NULL` | 100% coverage |
 | QS-09 | Build reproducibility | Maintainability | CI runs `pnpm install` | CI | Build artifacts | Same image hash as last green build | 100% reproducible |
 | QS-10 | Bilingual content parity | TC-5 | Comparison of EN vs ES catalogs | Staging | `i18next` catalogs | Zero missing keys in either locale | 0 missing keys |
+| QS-11 | Unmoderated guest photo stays hidden | TC-11 | Guest uploads a photo to the invitation's album | Production | API + Web App | Photo is stored as `Pending` and absent from the public invitation payload until a WP approves it | 100% of Pending/Rejected photos hidden from public rendering |
 
 ---
 
@@ -861,6 +926,7 @@ Risks and known debts with explicit mitigations.
 | Medium | **JWT secret rotation is manual** — rotation needs a coordinated restart. | Low | Medium | (1) Support two active signing keys during rotation; (2) document the rotation runbook. |
 | Medium | **Bilingual content drift** — code text added in EN but not in ES. | Medium | Low | (1) CI step that fails the build if any locale catalog has missing keys. |
 | Medium | **Couple's shared link leaks** — if the WP sends it over an insecure channel, anyone can upload. | Medium | Medium | (1) Tokens are per-wedding, expire after the wedding; (2) WP can rotate the token; (3) max 200 photos and 5 MB per file cap the blast radius. |
+| Medium | **Inappropriate content uploaded by a guest** — without review, abusive or explicit content could be published on a couple's invitation. | Medium | High | (1) Pre-publication moderation queue (TC-11, §6.6) — nothing renders until approved; (2) rejection deletes the S3 object; (3) per-guest caps (20 photos, 5 MB) bound the abuse surface. |
 | Low | **Public invitation first paint depends on JS execution** — guests on slow networks may see a ~1-1.5s blank window before React hydrates. | Low | Medium | (1) Inline a skeleton in `index.html`; (2) lazy-load the route bundle; (3) CloudFront caches the static assets at the edge; (4) escape hatch: NestJS SSR via `react-dom/server` (ADR-02 §Option B) if measurements show >1.5s first paint on real devices. |
 | Low | **No native mobile experience** — guests on phones can use the site but it's not optimized. | High (some guests will be on mobile) | Low | (1) Responsive design is still applied; (2) document that mobile-first is a future iteration. |
 | Low | **No automated reminder emails** — if a guest loses the link, the WP must re-send. | Medium | Low | (1) Documented as out of scope; (2) WP can re-share the link from the dashboard. |

@@ -6,13 +6,14 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 2.0.0
-updated: 2026-08-10
+version: 2.0.1
+updated: 2026-08-11
 ---
 
 # ADR-05 — Authentication: JWT (access + refresh) + bcrypt + OIDC-style URLs
 
 > **Revision history**
+> - **v2.0.1 (2026-08-11):** Fixed internal contradiction — §Token mechanics said HS256 while the Framework section and ADR-15 mandate RS256 with a public JWKS endpoint. The signing algorithm is RS256 (audit `20260811-architecture-audit.md`, finding H-1).
 > - **v2.0.0 (2026-08-10):** Added standards-aligned URL paths (`.well-known/`, `/oauth/...`) to make future migration to a specialized IdP (Cognito, Auth0, Keycloak) a backend-internal change. Clarified that the Admin-assigned password is the WP's **permanent** password — not a one-time code, and the WP is **not required** to change it on first login (clarification based on user review).
 > - v1.0.0 (2026-08-10): Original decision.
 
@@ -35,7 +36,7 @@ Wendy Planner has two roles (Administrator and Wedding Planner) plus public endp
 
 ### Token mechanics
 
-- **Access token:** 15-minute lifetime, signed with HS256 (RS256 is a future option if the IdP requires it), contains `{ sub, role, tenantId, iat, exp, jti }`.
+- **Access token:** 15-minute lifetime, signed with **RS256** (asymmetric key pair: the private key signs and never leaves Secrets Manager; the public key is published at `/.well-known/jwks.json` — see ADR-15 §Why RS256, not HS256), contains `{ sub, role, tenantId, iat, exp, jti }`.
 - **Refresh token:** 7-day lifetime, stored in an `HttpOnly`, `Secure`, `SameSite=Lax` cookie, rotated on every use, persisted server-side with a `jti` and a `revokedAt` timestamp.
 - **Password storage:** bcrypt (cost factor 12). No plain-text logs.
 - **Roles encoded in the token:** `Administrator`, `WeddingPlanner`. Enforced by a NestJS `RolesGuard`.

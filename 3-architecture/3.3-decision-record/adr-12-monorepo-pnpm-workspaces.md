@@ -6,15 +6,19 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 1.0.0
-updated: 2026-08-10
+version: 1.0.1
+updated: 2026-08-11
 ---
 
 # ADR-12 — Repository strategy: monorepo with pnpm workspaces
 
+> **Revision history**
+> - **v1.0.1 (2026-08-11):** Removed stale references to the discarded Next.js frontend and Zod, and corrected the Web App's build/deploy story — static `vite build` → S3 + CloudFront, no container image and no ECR push for the web app (ADR-02 v2). This aligns the ADR with §8.8 of the architecture document (audit `20260811-architecture-audit.md`, finding M-2).
+> - v1.0.0 (2026-08-10): Original decision.
+
 ## Context
 
-Wendy Planner's MVP includes two deployable applications (a NestJS API and a Next.js Web App) plus shared code (Zod schemas, TypeScript types). We need to decide:
+Wendy Planner's MVP includes two deployable applications (a NestJS API and a Vite + React Web App) plus shared code (`class-validator` DTOs and TypeScript types — see ADR-14). We need to decide:
 
 - Should the API and Web App live in the same repository or separate ones?
 - If separate, how do we share the contract types?
@@ -42,7 +46,7 @@ This decision affects developer experience, deployment velocity, onboarding, and
 
 - **Pros**
   - **One repo, three workspaces**: `apps/api`, `apps/web`, `packages/contracts`. (Plus optional `packages/ui` for shared React components.)
-  - **Atomic cross-cutting changes**: a single PR can update the Zod schema, the API consumer, and the FE form in lockstep.
+  - **Atomic cross-cutting changes**: a single PR can update the shared DTO, the API consumer, and the FE form in lockstep.
   - **Shared types via TypeScript path aliases** (`@wendy/contracts`), no npm publish step.
   - **Single CI config** with per-app change detection (the CI matrix is built from the list of changed workspaces).
   - **Single source of truth** for the project's tsconfig, ESLint config, Prettier config, and Renovate config.
@@ -95,8 +99,7 @@ wendy-planner/                              # monorepo root
 │   │   ├── src/
 │   │   │   └── modules/
 │   │   └── package.json
-│   └── web/                                # Vite + React SPA (ADR-02)
-│       ├── Dockerfile (for staging bake only; prod deploy is static S3)
+│   └── web/                                # Vite + React SPA (ADR-02) — static deploy to S3, no container image
 │       ├── vite.config.ts
 │       ├── src/
 │       │   ├── routes/                     # TanStack Router route groups (dashboard, public)
@@ -140,21 +143,20 @@ packages:
 
 - ESLint rule: `apps/api` cannot import from `apps/web` and vice versa.
 - ESLint rule: `apps/*` can import from `packages/*`, but `packages/*` cannot import from `apps/*`.
-- ESLint rule: `packages/contracts` cannot depend on Next.js, NestJS, Prisma client, or any runtime. It contains **DTO classes with class-validator decorators** (see ADR-14) and **branded ID types** (see ADR-13). The DTOs are pure TypeScript at runtime — the decorators are erased — so this rule is easy to enforce.
+- ESLint rule: `packages/contracts` cannot depend on NestJS, Prisma client, or any runtime framework. It contains **DTO classes with class-validator decorators** (see ADR-14) and **branded ID types** (see ADR-13). The DTOs are pure TypeScript at runtime — the decorators are erased — so this rule is easy to enforce.
 
 **CI/CD strategy:**
 
 - The CI pipeline detects which workspaces changed (via `pnpm changed` or a simple diff) and runs the relevant jobs:
   - `apps/api` changed → build API image, run API tests, push to ECR.
-  - `apps/web` changed → build Web image, run Web tests, push to ECR.
-  - `packages/contracts` changed → rebuild both dependents and push both images.
-- The deploy stage promotes the ECR images to ECS via the standard rolling deploy.
+  - `apps/web` changed → run Web tests, `vite build`, deploy the static bundle (S3 sync + CloudFront invalidation).
+  - `packages/contracts` changed → rebuild and redeploy both dependents.
+- The deploy stage promotes the API's ECR image to ECS via the standard rolling deploy; the Web App deploys as static assets (no image, no ECS service — see ADR-02 v2).
 
 **Docker images:**
 
-- Each app has its own `Dockerfile` at `apps/api/Dockerfile` and `apps/web/Dockerfile`.
-- Both Dockerfiles use multi-stage builds with `pnpm fetch` and `pnpm install --offline` for fast, reproducible builds.
-- The production images contain only the built app — not the source code, not the `packages/contracts` source.
+- Only the API has a `Dockerfile` (`apps/api/Dockerfile`) — a multi-stage build with `pnpm fetch` and `pnpm install --offline` for fast, reproducible builds. The production image contains only the built app — not the source code, not the `packages/contracts` source.
+- The Web App has no container image: `vite build` produces static assets deployed to S3 and served via CloudFront (see ADR-02 v2).
 
 ## Consequences
 

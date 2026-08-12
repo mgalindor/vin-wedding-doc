@@ -6,11 +6,15 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 1.0.0
-updated: 2026-08-10
+version: 1.0.1
+updated: 2026-08-11
 ---
 
 # ADR-06 — Photo storage & lifecycle: S3 + Lifecycle Policy + Lambda sweeper
+
+> **Revision history**
+> - **v1.0.1 (2026-08-11):** Noted that guest uploads require WP moderation before public visibility (architecture TC-11), per the glossary and the kickoff's anti-abuse precondition (audit `20260811-architecture-audit.md`, finding M-4).
+> - v1.0.0 (2026-08-10): Original decision.
 
 ## Context
 
@@ -19,7 +23,7 @@ Wendy Planner must:
 - Store up to **200 photos per wedding** (TC-7).
 - Support two quality tiers: **High** (original) and **Low** (compressed).
 - Auto-delete photos **1 month after the event date** (TC-6).
-- Support uploads from the WP (official photos) and from guests via a public link (max 5 MB per file, JPG/PNG/GIF, max 20 per guest).
+- Support uploads from the WP (official photos) and from guests via a public link (max 5 MB per file, JPG/PNG/GIF, max 20 per guest). Guest uploads are subject to **WP moderation before public visibility** (architecture TC-11, scenario §6.6); rejected photos are deleted from the bucket.
 - Serve downloads to the couple after the event.
 - Stay cost-conscious (cost goal in §1.3).
 

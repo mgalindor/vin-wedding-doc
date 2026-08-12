@@ -3,7 +3,7 @@ title: "Architecture Audit — Wendy Planner (architecture.md + ADR-01..17)"
 date: 2026-08-11
 type: analysis
 scope: internal
-version: 1.0.0
+version: 1.0.1
 updated: 2026-08-11
 ---
 
@@ -196,16 +196,16 @@ None of this invalidates the architecture. All findings are fixable in a focused
 
 **Priority 1 — before sprint 1 starts (contradictions):**
 
-- [ ] Fix ADR-05 §Token mechanics: HS256 → RS256 (H-1) [owner:: tech-lead] [priority:: high]
-- [ ] Rewrite ASR-3 architectural impact: remove SSR, reference ADR-02 v2 CSR strategy (H-2) [owner:: tech-lead] [priority:: high]
-- [ ] Align §6.1 with ADR-05: Admin-entered password in the request; no password in the response (H-3) [owner:: tech-lead] [priority:: high]
+- [X] Fix ADR-05 §Token mechanics: HS256 → RS256 (H-1) [owner:: tech-lead] [priority:: high] [completion:: 2026-08-11]
+- [X] Rewrite ASR-3 architectural impact: remove SSR, reference ADR-02 v2 CSR strategy (H-2) [owner:: tech-lead] [priority:: high] [completion:: 2026-08-11]
+- [X] Align §6.1 with ADR-05: Admin-entered password in the request; no password in the response (H-3) [owner:: tech-lead] [priority:: high] [completion:: 2026-08-11]
 - [ ] Decide CDN topology (recommend: one distribution, `/api/*` behavior to the ALB) and align ADR-10 + §5.2 + §7.1 + CORS/cookie notes (M-1) [owner:: tech-lead] [priority:: high]
-- [ ] Sweep stale Next.js/Zod/Fargate-for-web references in §4, ADR-01, ADR-03, ADR-04, ADR-09, ADR-12; bump `architecture.md` to v1.1.0 with a changelog (M-2) [owner:: tech-lead] [priority:: high]
+- [X] Sweep stale Next.js/Zod/Fargate-for-web references in §4, ADR-01, ADR-03, ADR-04, ADR-09, ADR-12; bump `architecture.md` to v1.1.0 with a changelog (M-2) [owner:: tech-lead] [priority:: high] [completion:: 2026-08-11]
 
 **Priority 2 — before the first pilot wedding (traceability gaps):**
 
 - [ ] Document the photo quality-tier enforcement mechanism and reconcile with FEAT-004's "server-side enforced" (M-3) [owner:: backend] [priority:: high]
-- [ ] Add guest-photo moderation (states, WP queue, publish rule) to the architecture and data model (M-4) [owner:: backend] [priority:: high]
+- [X] Add guest-photo moderation (states, WP queue, publish rule) to the architecture and data model (M-4) [owner:: backend] [priority:: high] [completion:: 2026-08-11]
 - [ ] Realign photo delivery with the kickoff: WP bulk-archive download → USB; couple link = view + upload only — or escalate the scope change to the PO and update glossary/FEAT-004 (M-5) [owner:: tech-lead] [priority:: high]
 - [ ] Model Admin-as-WP dual role + WP ownership by Admin; update ADR-05 claims and QS-04 (M-6) [owner:: backend] [priority:: high]
 - [ ] Add a data-protection & retention subsection (LFPDPPP stance, non-photo retention, PII inventory, guest deletion procedure) (M-7) [owner:: tech-lead] [priority:: medium]

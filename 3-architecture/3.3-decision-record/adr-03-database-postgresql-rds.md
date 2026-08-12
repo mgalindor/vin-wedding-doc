@@ -6,11 +6,15 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 1.0.0
-updated: 2026-08-10
+version: 1.0.1
+updated: 2026-08-11
 ---
 
 # ADR-03 — Database: PostgreSQL 15 on AWS RDS
+
+> **Revision history**
+> - **v1.0.1 (2026-08-11):** Removed a stale reference to the discarded Next.js frontend (audit `20260811-architecture-audit.md`, finding M-2).
+> - v1.0.0 (2026-08-10): Original decision.
 
 ## Context
 
@@ -27,7 +31,7 @@ Wendy Planner needs a single OLTP database that:
 ### Option A — PostgreSQL on AWS RDS — **Selected**
 
 - **Pros**
-  - Mature, well-supported in both NestJS (Prisma, TypeORM) and Next.js ecosystems.
+  - Mature, well-supported in the TypeScript/NestJS ecosystem (Prisma, TypeORM) and in every major backend stack.
   - JSONB columns for flexible template data without sacrificing relational integrity.
   - Native `gen_random_uuid()`, partial indexes, and rich query planner.
   - AWS RDS handles backups, patching, and failover (Multi-AZ when needed).

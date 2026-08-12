@@ -6,11 +6,15 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 1.0.0
-updated: 2026-08-10
+version: 1.0.1
+updated: 2026-08-11
 ---
 
 # ADR-01 — Backend stack: NestJS (Node.js + TypeScript)
+
+> **Revision history**
+> - **v1.0.1 (2026-08-11):** Removed stale references to the discarded Next.js frontend and Zod (audit `20260811-architecture-audit.md`, finding M-2). The frontend is Vite + React (ADR-02 v2) and validation is `class-validator` (ADR-14).
+> - v1.0.0 (2026-08-10): Original decision.
 
 ## Context
 
@@ -43,7 +47,7 @@ The kickoff (`1-management/1.1-kickoff/kickoff.md` §Restricciones técnicas) re
 ### Option B — NestJS (Node.js + TypeScript) — **Selected**
 
 - **Pros**
-  - **Single language (TypeScript) end-to-end** with the Next.js frontend. Shared types, shared validation schemas (Zod), shared IDE experience.
+  - **Single language (TypeScript) end-to-end** with the Vite + React frontend (ADR-02). Shared types and shared validation DTOs (`class-validator` — see ADR-14) via `@wendy/contracts`; shared IDE experience.
   - Decorator-based, opinionated structure maps well to bounded contexts (`@Module` per context).
   - Built-in support for guards (RBAC), interceptors (audit logging), pipes (validation), and OpenAPI generation.
   - Fast iteration cycle (`tsc --watch`, hot reload).

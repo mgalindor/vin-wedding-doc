@@ -6,11 +6,15 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 1.0.0
-updated: 2026-08-10
+version: 1.0.1
+updated: 2026-08-11
 ---
 
 # ADR-09 — Modular monolith organization: NestJS modules per bounded context
+
+> **Revision history**
+> - **v1.0.1 (2026-08-11):** Corrected the `packages/contracts` description — it holds `class-validator` DTOs (ADR-14), not Zod schemas (audit `20260811-architecture-audit.md`, finding M-2).
+> - v1.0.0 (2026-08-10): Original decision.
 
 ## Context
 
@@ -84,7 +88,7 @@ apps/
         audit/                  # Audit (event log)
       infra/                    # adapters: prisma, s3, secrets, mail
 packages/
-  contracts/                    # shared Zod schemas + TS types (consumed by Web)
+  contracts/                    # shared class-validator DTOs + TS types (consumed by Web — see ADR-14)
 ```
 
 > The monorepo strategy (one repo vs many) is decided separately in [ADR-12](adr-12-monorepo-pnpm-workspaces.md). This ADR focuses on the **logical** organization of the backend; ADR-12 focuses on the **physical** repository layout.

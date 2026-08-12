@@ -6,11 +6,15 @@ status: accepted
 date: 2026-08-10
 scope: client
 project: wendy-planner
-version: 1.0.0
-updated: 2026-08-10
+version: 1.0.1
+updated: 2026-08-11
 ---
 
 # ADR-04 — Cloud topology: AWS ECS Fargate + RDS + S3 + CloudFront
+
+> **Revision history**
+> - **v1.0.1 (2026-08-11):** Corrected the Decision section — only the API runs on ECS Fargate; the Web App is static assets on S3 + CloudFront per ADR-02 v2 (audit `20260811-architecture-audit.md`, finding M-2). Removed a stale Next.js mention in Option E.
+> - v1.0.0 (2026-08-10): Original decision.
 
 ## Context
 
@@ -65,7 +69,7 @@ The kickoff is cloud-agnostic but requires a "cloud provider" and "container" de
 ### Option E — PaaS (Render, Fly.io, Railway)
 
 - **Pros**
-  - Even simpler than Fargate; some have first-class Next.js support.
+  - Even simpler than Fargate; some have first-class support for popular frameworks.
 - **Cons**
   - We accept the "containers in the cloud" requirement (TC-2), but a PaaS blurs the line between "our container" and "the platform's runtime". A future migration would be a rewrite, not a redeploy.
   - Smaller community for production-grade patterns at our scale.
@@ -83,7 +87,7 @@ The kickoff is cloud-agnostic but requires a "cloud provider" and "container" de
 
 ## Decision
 
-**Adopt AWS as the cloud provider. Deploy both the Web App and the API as ECS Fargate services behind an internal ALB, fronted by CloudFront. Use RDS for the database and S3 for photos.**
+**Adopt AWS as the cloud provider. Deploy the API as an ECS Fargate service behind an ALB, fronted by CloudFront. The Web App is deployed as static assets on S3, served via CloudFront — no Node.js runtime for the frontend (see ADR-02 v2). Use RDS for the database and S3 for photos.**
 
 - **Region:** `us-east-1` (lowest cost and broadest service availability; revisit if latency from Mexico is a concern).
 - **Account structure:** a single AWS account for MVP; environment separation via tags and prefixes. Multi-account is overkill for a 2-person team.
