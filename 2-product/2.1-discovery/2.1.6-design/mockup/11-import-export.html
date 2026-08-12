@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wendy Planner — Import / Export CSV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    .proto-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--inverse-surface); color: var(--inverse-on-surface); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+    body { margin-top: 32px; }
+    .app-shell { display: flex; min-height: calc(100vh - 32px); }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--surface-container-lowest); border-right: 1px solid var(--outline-variant); display: flex; flex-direction: column; position: sticky; top: 32px; height: calc(100vh - 32px); }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid var(--outline-variant); }
+    .brand-mark { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); display: block; }
+    .brand-sub { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-top: 2px; display: block; }
+    .sidebar-wedding-ctx { margin: 12px 12px 0; background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--rounded-md); padding: 12px; }
+    .ctx-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-bottom: 4px; display: block; }
+    .ctx-couple { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: var(--on-surface); display: block; }
+    .ctx-date { font-size: 12px; color: var(--secondary); margin-top: 2px; display: block; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--outline-variant); }
+    .user-chip { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--rounded-md); cursor: pointer; }
+    .user-avatar { width: 32px; height: 32px; border-radius: var(--rounded-full); background: var(--primary-fixed); color: var(--on-primary-fixed-variant); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--on-surface); }
+    .user-role { font-size: 11px; color: var(--secondary); }
+    .main { flex: 1; min-width: 0; background: var(--surface); }
+    .topbar { background: var(--surface-container-lowest); border-bottom: 1px solid var(--outline-variant); padding: 14px 40px; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--secondary); }
+    .breadcrumb a { color: var(--secondary); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--primary); }
+    .breadcrumb-sep { color: var(--outline-variant); }
+    .content { padding: 32px 40px; max-width: 900px; }
+    .section-card { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-xl); box-shadow: var(--shadow-card); margin-bottom: 24px; padding: 28px 32px; }
+    .section-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--secondary); }
+    .upload-zone { border: 2px dashed var(--outline-variant); border-radius: var(--rounded-lg); padding: 40px; text-align: center; cursor: pointer; transition: border-color 150ms, background 150ms; margin-bottom: 20px; }
+    .upload-zone:hover { border-color: var(--primary-container); background: var(--surface-container-low); }
+    .upload-zone-icon { font-size: 32px; margin-bottom: 12px; }
+    .upload-zone-text { font-size: 14px; color: var(--on-surface); margin-bottom: 4px; }
+    .upload-zone-hint { font-size: 12px; color: var(--secondary); }
+    .columns-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+    .column-chip { background: var(--surface-container-high); border-radius: var(--rounded-base); padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--on-surface); display: flex; align-items: center; gap: 6px; }
+    .column-chip.required { background: var(--primary-fixed); color: var(--on-primary-fixed-variant); }
+    .column-chip-badge { font-size: 9px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 1px 5px; border-radius: var(--rounded-full); background: var(--primary-container); color: var(--on-primary-container); }
+    .export-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .export-option { border: 2px solid var(--outline-variant); border-radius: var(--rounded-lg); padding: 20px; cursor: pointer; transition: border-color 150ms, background 150ms; }
+    .export-option:hover { border-color: var(--primary-container); background: var(--surface-container-low); }
+    .export-option.selected { border-color: var(--primary); background: var(--primary-fixed); }
+    .export-option-title { font-size: 14px; font-weight: 600; color: var(--on-surface); margin-bottom: 4px; }
+    .export-option-desc { font-size: 12px; color: var(--secondary); line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span>Prototype · Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="index.html">Index</a>
+      <a href="05-wedding-detail.html">Guest List</a>
+      <a href="11-import-export.html" class="current">Import / Export</a>
+    </nav>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">Wendy</span>
+        <span class="brand-sub">Wedding Planner</span>
+      </div>
+      <div class="sidebar-wedding-ctx">
+        <span class="ctx-label">Current Wedding</span>
+        <span class="ctx-couple">Sofía &amp; Andrés</span>
+        <span class="ctx-date">Sat · Mar 22, 2026</span>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar">MG</div>
+          <div>
+            <div class="user-name">Miguel García</div>
+            <div class="user-role">Wedding Planner</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <nav class="breadcrumb">
+          <a href="05-wedding-detail.html">Guest List</a>
+          <span class="breadcrumb-sep">/</span>
+          <span style="color:var(--on-surface); font-weight:500;">Import / Export CSV</span>
+        </nav>
+      </div>
+
+      <div class="content">
+        <h1 style="font-family:'Playfair Display',serif; font-size:26px; font-weight:700; color:var(--on-surface); margin-bottom:6px;">Import / Export</h1>
+        <p style="font-size:14px; color:var(--secondary); margin-bottom:28px;">Bulk-manage your guest list with CSV files. Download the template to see the required format.</p>
+
+        <!-- Import -->
+        <div class="section-card">
+          <div class="section-title-row">
+            <span class="section-title">Import Guests from CSV</span>
+            <button class="btn-secondary" style="font-size:11px; padding:7px 16px;" onclick="alert('Template CSV downloaded.\n(Prototype)')">⬇ Download Template</button>
+          </div>
+            <div class="upload-zone" onclick="alert('File picker\n(Prototype)')">
+              <div class="upload-zone-icon">📄</div>
+              <p class="upload-zone-text">Drop your CSV here or click to browse</p>
+              <p class="upload-zone-hint">Maximum 500 guests per file · UTF-8 encoding · Comma-separated</p>
+            </div>
+
+            <p style="font-size:12px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--secondary); margin-bottom:10px;">Expected columns</p>
+            <div class="columns-grid">
+              <div class="column-chip required">first_name <span class="column-chip-badge">Required</span></div>
+              <div class="column-chip required">last_name <span class="column-chip-badge">Required</span></div>
+              <div class="column-chip required">side <span class="column-chip-badge">Required</span></div>
+              <div class="column-chip required">group <span class="column-chip-badge">Required</span></div>
+              <div class="column-chip">email</div>
+              <div class="column-chip">phone</div>
+              <div class="column-chip">dietary_notes</div>
+              <div class="column-chip">table_number</div>
+            </div>
+
+            <div style="background:var(--status-pending-bg); border:1px solid var(--primary-fixed-dim); border-radius:var(--rounded-base); padding:12px 16px; margin-top:20px; font-size:13px; color:var(--status-pending-text);">
+              ⚠ Importing creates new guests only. Existing guests will not be modified. Duplicate names in the same group are flagged for review before import.
+            </div>
+        </div>
+
+        <!-- Export -->
+        <div class="section-card">
+          <div class="section-title-row">
+            <span class="section-title">Export Guest List</span>
+          </div>
+            <p style="font-size:14px; color:var(--secondary); margin-bottom:20px;">Choose what data to include in the export.</p>
+            <div class="export-options" style="margin-bottom:20px;">
+              <div class="export-option selected" onclick="selectExport(this)">
+                <div class="export-option-title">Full List</div>
+                <div class="export-option-desc">All guests with RSVP status, dietary notes, invitation links, and group info.</div>
+              </div>
+              <div class="export-option" onclick="selectExport(this)">
+                <div class="export-option-title">RSVP Summary</div>
+                <div class="export-option-desc">Confirmed guests only — names, group, dietary, and table number.</div>
+              </div>
+              <div class="export-option" onclick="selectExport(this)">
+                <div class="export-option-title">Pending Links</div>
+                <div class="export-option-desc">Guests who haven't responded — with their invitation links for follow-up.</div>
+              </div>
+              <div class="export-option" onclick="selectExport(this)">
+                <div class="export-option-title">Attendance Sheet</div>
+                <div class="export-option-desc">Printable list with a checkbox column for day-of attendance marking.</div>
+              </div>
+            </div>
+            <button class="btn-save" style="font-size:12px; padding:11px 24px; border-radius:var(--rounded-base); font-weight:600; letter-spacing:0.05em; text-transform:uppercase; background:var(--primary); color:var(--on-primary); border:none; cursor:pointer;" onclick="alert('Downloading guests-sofia-andres-2026.csv\n(Prototype)')">Export CSV ↓</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function selectExport(el) {
+      document.querySelectorAll('.export-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+  </script>
+</body>
+</html>

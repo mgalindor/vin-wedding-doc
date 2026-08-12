@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sofía &amp; Andrés — Upload Your Photos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    .proto-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--inverse-surface); color: var(--inverse-on-surface); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--surface); color: var(--on-surface); padding-top: 32px; }
+
+    /* ---- Minimal top bar for couple ---- */
+    .couple-topbar {
+      background: var(--surface-container-lowest);
+      border-bottom: 1px solid var(--outline-variant);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .couple-topbar-brand {
+      font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700;
+      color: var(--primary); letter-spacing: 0.01em;
+    }
+    .couple-topbar-wedding {
+      font-size: 13px; color: var(--secondary);
+    }
+
+    /* ---- Hero ---- */
+    .hero {
+      background: var(--surface-container-low);
+      padding: 56px 40px 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--outline-variant);
+    }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 14px;
+    }
+    .hero-names {
+      font-family: 'Playfair Display', serif; font-size: 44px; font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1.1;
+      color: var(--tertiary); margin-bottom: 12px;
+    }
+    .hero-date {
+      font-size: 14px; color: var(--secondary); margin-bottom: 20px;
+    }
+    .hero-desc {
+      font-size: 15px; color: var(--on-surface-variant); max-width: 500px;
+      margin: 0 auto; line-height: 1.7;
+    }
+
+    /* ---- Main content ---- */
+    .page-content { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ---- Quota bar ---- */
+    .quota-card {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-lg);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex; align-items: center; gap: 24px;
+    }
+    .quota-text { flex: 1; min-width: 0; }
+    .quota-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--secondary); margin-bottom: 6px; }
+    .quota-track { height: 6px; background: var(--secondary-container); border-radius: 9999px; overflow: hidden; margin-bottom: 6px; }
+    .quota-fill { height: 100%; background: var(--primary-container); border-radius: 9999px; }
+    .quota-detail { font-size: 12px; color: var(--secondary); }
+    .quota-num { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--primary); line-height: 1; flex-shrink: 0; text-align: center; }
+    .quota-num-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); text-align: center; margin-top: 4px; }
+
+    /* ---- Upload zone ---- */
+    .upload-zone {
+      border: 2px dashed var(--outline-variant);
+      border-radius: var(--rounded-xl);
+      padding: 56px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 150ms, background 150ms;
+      margin-bottom: 32px;
+      background: var(--surface-container-lowest);
+    }
+    .upload-zone:hover { border-color: var(--primary-container); background: var(--surface-container-low); }
+    .upload-icon { font-size: 48px; margin-bottom: 16px; }
+    .upload-title { font-size: 17px; font-weight: 600; color: var(--on-surface); margin-bottom: 8px; }
+    .upload-subtitle { font-size: 13px; color: var(--secondary); margin-bottom: 24px; line-height: 1.6; }
+    .upload-cta { display: inline-flex; align-items: center; gap: 8px; }
+
+    /* ---- Photos grid ---- */
+    .section-heading {
+      font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600;
+      color: var(--on-surface); margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .photos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .photo-thumb {
+      aspect-ratio: 1; border-radius: var(--rounded-lg);
+      background: var(--surface-container-high);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; cursor: pointer; transition: opacity 150ms;
+      position: relative; overflow: hidden;
+    }
+    .photo-thumb:hover { opacity: 0.85; }
+    .photo-delete {
+      position: absolute; top: 8px; right: 8px;
+      width: 24px; height: 24px; border-radius: var(--rounded-full);
+      background: rgba(0,0,0,0.55); color: #fff; border: none; cursor: pointer;
+      font-size: 11px; display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 150ms;
+    }
+    .photo-thumb:hover .photo-delete { opacity: 1; }
+    .photo-add {
+      aspect-ratio: 1; border-radius: var(--rounded-lg);
+      border: 2px dashed var(--outline-variant); background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--outline); font-size: 28px;
+      transition: border-color 150ms, color 100ms;
+    }
+    .photo-add:hover { border-color: var(--primary-container); color: var(--primary); }
+
+    /* ---- Footer note ---- */
+    .upload-note {
+      background: var(--surface-container-low);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-lg);
+      padding: 16px 20px;
+      font-size: 13px; color: var(--secondary); line-height: 1.7;
+    }
+    .upload-note strong { color: var(--on-surface); }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span>Prototype · Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="index.html">Index</a>
+      <a href="05-wedding-detail.html">WP View</a>
+      <a href="15-couple-upload.html" class="current">Couple Upload</a>
+    </nav>
+  </div>
+
+  <!-- Minimal header — no admin panels, no sidebar -->
+  <header class="couple-topbar">
+    <span class="couple-topbar-brand">Wendy</span>
+    <span class="couple-topbar-wedding">Sofía &amp; Andrés · Mar 22, 2026</span>
+  </header>
+
+  <div class="hero">
+    <p class="hero-eyebrow">Official Photos</p>
+    <h1 class="hero-names">Sofía &amp; Andrés</h1>
+    <p class="hero-date">Saturday · March 22, 2026 · Hacienda San Miguel, CDMX</p>
+    <p class="hero-desc">Upload your favorite photos from the wedding. Your planner will review them and add them to the shared collection.</p>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Quota -->
+    <div class="quota-card">
+      <div class="quota-text">
+        <div class="quota-label">Storage used</div>
+        <div class="quota-track"><div class="quota-fill" style="width:23.5%;"></div></div>
+        <div class="quota-detail">47 photos uploaded · 153 slots remaining</div>
+      </div>
+      <div>
+        <div class="quota-num">200</div>
+        <div class="quota-num-label">Max photos</div>
+      </div>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" onclick="triggerUpload()">
+      <div class="upload-icon">📷</div>
+      <p class="upload-title">Drag &amp; drop your photos here</p>
+      <p class="upload-subtitle">JPG or PNG · Max 5 MB per file<br/>Your planner will review uploads before they appear in the collection.</p>
+      <div class="upload-cta">
+        <button class="btn-primary" onclick="event.stopPropagation(); triggerUpload()">Select Photos</button>
+      </div>
+    </div>
+
+    <!-- Uploaded photos -->
+    <div class="section-heading">
+      <span>Your uploads</span>
+      <span style="font-family:'Inter',sans-serif; font-size:13px; font-weight:500; color:var(--secondary);">47 photos</span>
+    </div>
+    <div class="photos-grid">
+      <div class="photo-thumb">🌸<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <div class="photo-thumb">🌺<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <div class="photo-thumb">🎊<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <div class="photo-thumb">🌿<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <div class="photo-thumb">🕯️<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <div class="photo-thumb">💐<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <div class="photo-thumb">🥂<button class="photo-delete" onclick="event.stopPropagation(); this.closest('.photo-thumb').remove()">✕</button></div>
+      <button class="photo-add" onclick="triggerUpload()">+</button>
+    </div>
+
+    <!-- Deletion note -->
+    <div class="upload-note">
+      📅 <strong>Photos are stored until April 21, 2026</strong> (30 days after your wedding). Make sure to download anything you want to keep before that date. Contact your planner if you need an extension.
+    </div>
+
+  </div>
+
+  <script>
+    function triggerUpload() {
+      alert('File picker would open here.\n\n(Prototype — no real upload)');
+    }
+  </script>
+</body>
+</html>

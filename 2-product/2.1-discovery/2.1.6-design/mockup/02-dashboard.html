@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wendy Planner — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    /* ---- Prototype bar ---- */
+    .proto-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: var(--inverse-surface); color: var(--inverse-on-surface);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 6px 16px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+
+    /* ---- Layout ---- */
+    body { margin-top: 32px; } /* offset proto-bar */
+    .app-shell { display: flex; min-height: calc(100vh - 32px); }
+
+    /* ---- Sidebar ---- */
+    .sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--surface-container-lowest);
+      border-right: 1px solid var(--outline-variant);
+      display: flex; flex-direction: column;
+      position: sticky; top: 32px; height: calc(100vh - 32px); overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--outline-variant);
+    }
+    .brand-mark {
+      font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700;
+      color: var(--primary); display: block;
+    }
+    .brand-sub {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--secondary); margin-top: 2px; display: block;
+    }
+    .nav-section { padding: 16px 0 0; }
+    .nav-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--secondary); padding: 4px 20px 4px; display: block;
+    }
+    .nav-list { list-style: none; margin: 4px 0 8px; }
+    .nav-list li a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 20px; font-size: 13px; font-weight: 500;
+      color: var(--on-surface-variant); text-decoration: none;
+      transition: background 100ms, color 100ms;
+    }
+    .nav-list li a:hover { background: var(--surface-container-low); color: var(--on-surface); }
+    .nav-list li a.active {
+      background: var(--surface-container-low);
+      border-left: 2px solid var(--primary); padding-left: 18px;
+      color: var(--primary); font-weight: 600;
+    }
+    .nav-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+    .sidebar-bottom {
+      margin-top: auto; padding: 16px 20px;
+      border-top: 1px solid var(--outline-variant);
+    }
+    .user-chip {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px; border-radius: var(--rounded-md);
+      cursor: pointer; transition: background 100ms;
+    }
+    .user-chip:hover { background: var(--surface-container-low); }
+    .user-avatar {
+      width: 32px; height: 32px; border-radius: var(--rounded-full);
+      background: var(--primary-fixed); color: var(--on-primary-fixed-variant);
+      font-size: 12px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--on-surface); }
+    .user-role { font-size: 11px; color: var(--secondary); }
+    .logout-btn {
+      display: block; width: 100%; margin-top: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--secondary); background: none; border: none; cursor: pointer;
+      padding: 8px; text-align: left; border-radius: var(--rounded-sm);
+      transition: color 100ms, background 100ms;
+    }
+    .logout-btn:hover { color: var(--error); background: var(--error-container); }
+
+    /* ---- Main content ---- */
+    .main { flex: 1; min-width: 0; background: var(--surface); }
+
+    .topbar {
+      background: var(--surface-container-lowest);
+      border-bottom: 1px solid var(--outline-variant);
+      padding: 16px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .topbar-greeting {
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600;
+      color: var(--on-surface);
+    }
+    .topbar-date { font-size: 13px; color: var(--secondary); margin-top: 2px; }
+
+    .content { padding: 32px 40px; }
+
+    /* ---- Stats row ---- */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-card {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-lg); padding: 20px 24px;
+      box-shadow: var(--shadow-card);
+      transition: box-shadow 150ms, border-color 150ms;
+      cursor: default;
+    }
+    .stat-card:hover { box-shadow: var(--shadow-card-hover); border-color: var(--primary-container); }
+    .stat-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--secondary); margin-bottom: 8px; display: block;
+    }
+    .stat-value {
+      font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
+      color: var(--primary); line-height: 1; letter-spacing: -0.02em;
+    }
+    .stat-sub { font-size: 12px; color: var(--secondary); margin-top: 6px; }
+
+    /* ---- Section header ---- */
+    .section-header {
+      margin-bottom: 16px;
+    }
+    .section-header-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .section-heading {
+      font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 600;
+      color: var(--on-surface);
+    }
+    .section-count {
+      font-size: 13px; color: var(--secondary); margin-left: 8px; font-family: 'Inter', sans-serif; font-weight: 400;
+    }
+    .section-controls {
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+
+    /* Status filter chips */
+    .filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .filter-chip {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: var(--rounded-full);
+      border: 1.5px solid var(--outline-variant);
+      background: none; cursor: pointer;
+      color: var(--on-surface-variant);
+      transition: all 100ms;
+    }
+    .filter-chip:hover { border-color: var(--primary); color: var(--primary); }
+    .filter-chip.active { background: var(--on-surface); color: var(--surface); border-color: var(--on-surface); }
+    .filter-chip.chip-active.active { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); border-color: var(--status-confirmed-text); }
+    .filter-chip.chip-draft.active { background: var(--status-pending-bg); color: var(--status-pending-text); border-color: var(--status-pending-text); }
+    .filter-chip.chip-archived.active { background: var(--surface-container-high); color: var(--secondary); border-color: var(--outline); }
+
+    /* Sort segmented toggle + right-aligned group */
+    .controls-right { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; }
+    .sort-toggle {
+      display: inline-flex;
+      border: 1.5px solid var(--outline-variant);
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+    }
+    .sort-seg {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 5px 16px; background: none; border: none; cursor: pointer;
+      color: var(--on-surface-variant); white-space: nowrap;
+      transition: background 100ms, color 100ms;
+    }
+    .sort-seg + .sort-seg { border-left: 1.5px solid var(--outline-variant); }
+    .sort-seg:hover { background: var(--surface-container-low); color: var(--on-surface); }
+    .sort-seg.active { background: var(--on-surface); color: var(--surface); }
+
+    /* ---- Wedding cards ---- */
+    .wedding-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+    }
+    .wedding-card {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: box-shadow 150ms, border-color 150ms;
+      display: flex; flex-direction: column;
+    }
+    .wedding-card:hover { box-shadow: var(--shadow-card-hover); border-color: var(--primary-container); }
+
+    .wedding-hero {
+      height: 80px;
+      display: flex; align-items: center; justify-content: center;
+      border-bottom: 1px solid var(--outline-variant);
+      position: relative;
+    }
+    .wedding-status-dot {
+      position: absolute; top: 12px; right: 12px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: var(--rounded-full);
+    }
+    .status-active { background: var(--status-confirmed-bg); color: var(--status-confirmed-text); }
+    .status-draft { background: var(--status-pending-bg); color: var(--status-pending-text); }
+    .status-archived { background: var(--surface-container-high); color: var(--secondary); }
+
+    .wedding-body { padding: 20px; flex: 1; }
+    .wedding-couple {
+      font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600;
+      color: var(--on-surface); line-height: 1.2; margin-bottom: 4px;
+    }
+    .wedding-date { font-size: 13px; color: var(--secondary); margin-bottom: 14px; }
+
+    .wedding-meta {
+      display: flex; gap: 16px; flex-wrap: wrap;
+    }
+    .meta-item { display: flex; flex-direction: column; }
+    .meta-key {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--secondary);
+    }
+    .meta-val { font-size: 14px; font-weight: 500; color: var(--on-surface); margin-top: 2px; }
+
+    .wedding-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--outline-variant);
+      background: var(--surface-container-low);
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    }
+    .action-btn {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--primary); background: none; border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-base); padding: 6px 12px; cursor: pointer;
+      text-decoration: none; display: inline-block;
+      transition: background 100ms, border-color 100ms, color 100ms;
+    }
+    .action-btn:hover { background: var(--secondary-container); border-color: var(--primary); }
+    .action-btn.primary-action {
+      background: var(--primary); color: var(--on-primary); border-color: var(--primary);
+    }
+    .action-btn.primary-action:hover {
+      background: var(--primary-container); color: var(--on-primary-container); border-color: var(--primary-container);
+    }
+    .action-btn-icon { margin-left: auto; }
+
+    /* ---- Rsvp progress inside card ---- */
+    .rsvp-bar-wrap { margin-top: 14px; }
+    .rsvp-bar-labels { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .rsvp-bar-track { height: 4px; background: var(--secondary-container); border-radius: var(--rounded-full); overflow: hidden; }
+    .rsvp-bar-fill { height: 100%; background: var(--primary-container); border-radius: var(--rounded-full); }
+  </style>
+</head>
+<body>
+
+  <!-- Prototype bar -->
+  <div class="proto-bar">
+    <span>Prototype · Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="../../../../mock/index.html">Hub</a>
+      <a href="01-login.html">01 Login</a>
+      <a href="02-dashboard.html" class="current">02 Dashboard</a>
+      <a href="05-wedding-detail.html">05 Wedding</a>
+      <a href="04-invitation.html">04 Invitation</a>
+    </nav>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- ========== Sidebar ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">Wendy</span>
+        <span class="brand-sub">Wedding Planner</span>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-label">Workspace</span>
+        <ul class="nav-list">
+          <li>
+            <a href="02-dashboard.html" class="active">
+              <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+              Weddings
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="nav-section">
+        <span class="nav-label">Administration</span>
+        <ul class="nav-list">
+          <li>
+            <a href="#">
+              <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="4" r="2.5"/><path d="M3 14c0-3 2-5 5-5s5 2 5 5"/><path d="M12 8l1 1 2-2"/></svg>
+              Wedding Planners
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+              Audit Log
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar">MG</div>
+          <div>
+            <div class="user-name">Miguel García</div>
+            <div class="user-role">Wedding Planner</div>
+          </div>
+        </div>
+        <a href="01-login.html">
+          <button class="logout-btn">← Log out</button>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ========== Main ========== -->
+    <main class="main">
+      <!-- Top bar -->
+      <div class="topbar">
+        <div>
+          <div class="topbar-greeting">Good morning, Miguel</div>
+          <div class="topbar-date">Monday, August 11, 2026</div>
+        </div>
+        <button class="btn-primary" onclick="window.location.href='#'">+ New Wedding</button>
+      </div>
+
+      <div class="content">
+
+        <!-- Stats -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-label">Active Weddings</span>
+            <div class="stat-value">3</div>
+            <div class="stat-sub">2 this season</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Total Guests</span>
+            <div class="stat-value">229</div>
+            <div class="stat-sub">across 3 weddings</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Confirmed RSVPs</span>
+            <div class="stat-value" style="color:var(--status-confirmed-text);">180</div>
+            <div class="stat-sub">79% response rate</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Days to Next</span>
+            <div class="stat-value">35</div>
+            <div class="stat-sub">Emma &amp; James · Sep 15</div>
+          </div>
+        </div>
+
+        <!-- Weddings -->
+        <div class="section-header">
+          <div class="section-header-top">
+            <h2 class="section-heading">My Weddings <span class="section-count" id="wedding-count">3 weddings</span></h2>
+          </div>
+          <div class="section-controls">
+            <div class="filter-chips">
+              <button class="filter-chip active" data-filter="all" onclick="applyFilter(this)">All</button>
+              <button class="filter-chip chip-active" data-filter="active" onclick="applyFilter(this)">Active</button>
+              <button class="filter-chip chip-draft" data-filter="draft" onclick="applyFilter(this)">Draft</button>
+              <button class="filter-chip chip-archived" data-filter="archived" onclick="applyFilter(this)">Archived</button>
+            </div>
+            <div class="controls-right">
+              <div class="sort-toggle">
+                <button class="sort-seg active" id="seg-date" onclick="selectSort('date', this)">Closest Wedding</button>
+                <button class="sort-seg" id="seg-added" onclick="selectSort('added', this)">Recently Captured</button>
+              </div>
+              <input id="search-input" class="input-field" style="width:190px; padding:7px 14px; font-size:13px;" type="text" placeholder="Search by name…" oninput="applyFilter()" />
+            </div>
+          </div>
+        </div>
+
+        <div class="wedding-grid">
+
+          <!-- Card 1: Emma & James — Active, upcoming -->
+          <div class="wedding-card" data-status="active" data-name="emma james" data-date="2026-09-15" data-added="2026-08-08" onclick="window.location.href='05-wedding-detail.html'" style="cursor:pointer;">
+            <div class="wedding-hero" style="background: linear-gradient(135deg, var(--primary-fixed) 0%, var(--tertiary-fixed-dim) 100%);">
+              <span class="wedding-status-dot status-active">Active</span>
+              <span style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--on-primary-fixed-variant); opacity:0.6;">♡</span>
+            </div>
+            <div class="wedding-body">
+              <div class="wedding-couple">Emma &amp; James</div>
+              <div class="wedding-date">Sept 15, 2026 · Gran Salón Montecarlo</div>
+              <div class="wedding-meta">
+                <div class="meta-item">
+                  <span class="meta-key">Guests</span>
+                  <span class="meta-val">142</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Confirmed</span>
+                  <span class="meta-val" style="color:var(--status-confirmed-text);">98</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Pending</span>
+                  <span class="meta-val" style="color:var(--status-pending-text);">34</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Photos</span>
+                  <span class="meta-val">147/200</span>
+                </div>
+              </div>
+              <div class="rsvp-bar-wrap">
+                <div class="rsvp-bar-labels">
+                  <span class="meta-key">RSVP Progress</span>
+                  <span class="meta-key">69%</span>
+                </div>
+                <div class="rsvp-bar-track">
+                  <div class="rsvp-bar-fill" style="width:69%;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="wedding-footer">
+              <a href="05-wedding-detail.html" class="action-btn primary-action">Open Wedding</a>
+              <a href="05-wedding-detail.html#guests" class="action-btn" onclick="event.stopPropagation()">Guests (142)</a>
+              <a href="04-invitation.html" target="_blank" class="action-btn" onclick="event.stopPropagation()">Invitation ↗</a>
+            </div>
+          </div>
+
+          <!-- Card 2: Ana & Pedro — Published, past -->
+          <div class="wedding-card" data-status="archived" data-name="ana pedro" data-date="2026-08-03" data-added="2026-07-15">
+            <div class="wedding-hero" style="background: linear-gradient(135deg, var(--tertiary-fixed) 0%, var(--secondary-fixed-dim) 100%);">
+              <span class="wedding-status-dot status-archived">Archived</span>
+              <span style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--on-tertiary-fixed-variant); opacity:0.5;">♡</span>
+            </div>
+            <div class="wedding-body">
+              <div class="wedding-couple">Ana &amp; Pedro</div>
+              <div class="wedding-date">Aug 3, 2026 · Hacienda La Paz</div>
+              <div class="wedding-meta">
+                <div class="meta-item">
+                  <span class="meta-key">Guests</span>
+                  <span class="meta-val">87</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Confirmed</span>
+                  <span class="meta-val" style="color:var(--status-confirmed-text);">82</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Declined</span>
+                  <span class="meta-val" style="color:var(--on-error-container);">5</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Photos</span>
+                  <span class="meta-val">200/200</span>
+                </div>
+              </div>
+              <div class="rsvp-bar-wrap">
+                <div class="rsvp-bar-labels">
+                  <span class="meta-key">RSVP Progress</span>
+                  <span class="meta-key">100%</span>
+                </div>
+                <div class="rsvp-bar-track">
+                  <div class="rsvp-bar-fill" style="width:100%;"></div>
+                </div>
+              </div>
+            </div>
+            <div class="wedding-footer">
+              <a href="#" class="action-btn">Guest List</a>
+              <a href="#" class="action-btn">Download Photos</a>
+            </div>
+          </div>
+
+          <!-- Card 3: María & Carlos — Draft -->
+          <div class="wedding-card" data-status="draft" data-name="maría carlos maria" data-date="2026-12-05" data-added="2026-08-10">
+            <div class="wedding-hero" style="background: var(--surface-container-low);">
+              <span class="wedding-status-dot status-draft">Draft</span>
+              <span style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--outline-variant);">♡</span>
+            </div>
+            <div class="wedding-body">
+              <div class="wedding-couple">María &amp; Carlos</div>
+              <div class="wedding-date">Dec 5, 2026 · Venue TBD</div>
+              <div class="wedding-meta">
+                <div class="meta-item">
+                  <span class="meta-key">Guests</span>
+                  <span class="meta-val">0</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Modules</span>
+                  <span class="meta-val">4/14</span>
+                </div>
+                <div class="meta-item">
+                  <span class="meta-key">Template</span>
+                  <span class="meta-val">Not selected</span>
+                </div>
+              </div>
+              <div style="margin-top:14px; padding:10px 12px; background:var(--status-pending-bg); border-radius:var(--rounded-base);">
+                <p style="font-size:12px; color:var(--status-pending-text); font-weight:500;">
+                  Complete the invitation modules and select a template before publishing.
+                </p>
+              </div>
+            </div>
+            <div class="wedding-footer">
+              <a href="#" class="action-btn primary-action">Continue Setup</a>
+              <a href="#" class="action-btn">Guest List</a>
+            </div>
+          </div>
+
+        </div><!-- /wedding-grid -->
+
+        <!-- Empty state -->
+        <div id="empty-state" style="display:none; text-align:center; padding:64px 24px; color:var(--secondary);">
+          <div style="font-size:32px; margin-bottom:12px;">♡</div>
+          <p style="font-family:'Playfair Display',serif; font-size:18px; font-weight:600; color:var(--on-surface); margin-bottom:6px;">No weddings found</p>
+          <p style="font-size:13px;">Try a different filter or search term.</p>
+        </div>
+
+      </div><!-- /content -->
+    </main>
+  </div><!-- /app-shell -->
+
+  <script>
+    let currentFilter = 'all';
+    let currentSort = 'date';
+    const today = '2026-08-11';
+
+    function selectSort(mode, el) {
+      currentSort = mode;
+      document.querySelectorAll('.sort-seg').forEach(s => s.classList.remove('active'));
+      el.classList.add('active');
+      renderCards();
+    }
+
+    function applyFilter(chipEl) {
+      if (chipEl) {
+        currentFilter = chipEl.dataset.filter;
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chipEl.classList.add('active');
+      }
+      renderCards();
+    }
+
+    function renderCards() {
+      const query = document.getElementById('search-input').value.trim().toLowerCase();
+      const grid = document.querySelector('.wedding-grid');
+      const cards = Array.from(document.querySelectorAll('.wedding-card'));
+
+      /* filter */
+      const visible = cards.filter(card => {
+        const statusMatch = currentFilter === 'all' || card.dataset.status === currentFilter;
+        const nameMatch = !query || card.dataset.name.includes(query);
+        return statusMatch && nameMatch;
+      });
+      const hidden = cards.filter(c => !visible.includes(c));
+
+      hidden.forEach(c => c.style.display = 'none');
+
+      /* sort visible cards */
+      visible.sort((a, b) => {
+        if (currentSort === 'added') {
+          return b.dataset.added.localeCompare(a.dataset.added);
+        }
+        /* date sort: upcoming first, past last, drafts (no date) at end */
+        const da = a.dataset.date || '';
+        const db = b.dataset.date || '';
+        const aUpcoming = da >= today;
+        const bUpcoming = db >= today;
+        if (aUpcoming && !bUpcoming) return -1;
+        if (!aUpcoming && bUpcoming) return 1;
+        if (!da && db) return 1;
+        if (da && !db) return -1;
+        return aUpcoming ? da.localeCompare(db) : db.localeCompare(da);
+      });
+
+      visible.forEach(c => { c.style.display = ''; grid.appendChild(c); });
+
+      document.getElementById('wedding-count').textContent =
+        visible.length + (visible.length === 1 ? ' wedding' : ' weddings');
+      document.getElementById('empty-state').style.display =
+        visible.length === 0 ? 'block' : 'none';
+    }
+
+    /* initial render */
+    renderCards();
+  </script>
+</body>
+</html>

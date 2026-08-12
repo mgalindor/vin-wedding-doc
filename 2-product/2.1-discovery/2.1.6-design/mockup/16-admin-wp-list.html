@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wendy Admin — Wedding Planners</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    .proto-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--inverse-surface); color: var(--inverse-on-surface); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+    body { margin-top: 32px; }
+    .app-shell { display: flex; min-height: calc(100vh - 32px); }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--surface-container-lowest); border-right: 1px solid var(--outline-variant); display: flex; flex-direction: column; position: sticky; top: 32px; height: calc(100vh - 32px); overflow-y: auto; }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid var(--outline-variant); }
+    .brand-mark { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); display: block; }
+    .brand-sub { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-top: 2px; display: block; }
+    .nav-section { padding: 16px 0 0; }
+    .nav-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); padding: 4px 20px; display: block; }
+    .nav-list { list-style: none; margin: 4px 0 8px; }
+    .nav-list li a { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; color: var(--on-surface-variant); text-decoration: none; transition: background 100ms, color 100ms; }
+    .nav-list li a:hover { background: var(--surface-container-low); color: var(--on-surface); }
+    .nav-list li a.active { background: var(--surface-container-low); border-left: 2px solid var(--primary); padding-left: 18px; color: var(--primary); font-weight: 600; }
+    .nav-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--outline-variant); }
+    .user-chip { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--rounded-md); cursor: pointer; }
+    .user-avatar { width: 32px; height: 32px; border-radius: var(--rounded-full); background: var(--tertiary-fixed); color: var(--on-tertiary-fixed-variant); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--on-surface); }
+    .user-role { font-size: 11px; color: var(--secondary); }
+    .main { flex: 1; min-width: 0; background: var(--surface); }
+    .topbar { background: var(--surface-container-lowest); border-bottom: 1px solid var(--outline-variant); padding: 14px 40px; display: flex; align-items: center; justify-content: space-between; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--secondary); }
+    .breadcrumb a { color: var(--secondary); text-decoration: none; transition: color 100ms; }
+    .breadcrumb a:hover { color: var(--primary); }
+    .breadcrumb-sep { color: var(--outline-variant); }
+    .content { padding: 32px 40px; }
+    .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 28px; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--on-surface); margin-bottom: 4px; }
+    .page-subtitle { font-size: 14px; color: var(--secondary); }
+    .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-lg); padding: 18px 20px; box-shadow: var(--shadow-card); }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-bottom: 6px; display: block; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; color: var(--primary); line-height: 1; }
+    .stat-sub { font-size: 12px; color: var(--secondary); margin-top: 4px; }
+    .controls-row { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-select { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-base); padding: 10px 14px; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--on-surface); cursor: pointer; }
+    .table-wrap { border: 1px solid var(--outline-variant); border-radius: var(--rounded-lg); overflow-x: auto; box-shadow: var(--shadow-card); }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    thead { background: var(--surface-container-low); }
+    thead th { padding: 12px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); text-align: left; border-bottom: 1px solid var(--outline-variant); white-space: nowrap; }
+    tbody tr { background: var(--surface-container-lowest); height: 60px; border-bottom: 1px solid var(--outline-variant); transition: background 150ms; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-container-low); }
+    tbody td { padding: 0 16px; font-size: 13px; color: var(--on-surface); white-space: nowrap; }
+    .wp-cell { display: flex; align-items: center; gap: 12px; height: 60px; }
+    .wp-avatar { width: 36px; height: 36px; border-radius: var(--rounded-full); background: var(--primary-fixed); color: var(--on-primary-fixed-variant); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .wp-name { font-weight: 600; color: var(--on-surface); }
+    .wp-email { font-size: 11px; color: var(--secondary); margin-top: 1px; }
+    .inline-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 150ms; }
+    tbody tr:hover .inline-actions { opacity: 1; }
+    .icon-btn { background: none; border: none; cursor: pointer; color: var(--secondary); font-size: 13px; padding: 5px 9px; border-radius: var(--rounded-sm); transition: background 100ms; text-decoration: none; display: inline-flex; align-items: center; }
+    .icon-btn:hover { background: var(--secondary-container); }
+    .icon-btn.danger:hover { background: var(--error-container); color: var(--on-error-container); }
+    .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--surface-container-low); border-top: 1px solid var(--outline-variant); }
+    .page-info { font-size: 13px; color: var(--secondary); }
+    .page-btns { display: flex; gap: 4px; }
+    .page-btn { width: 32px; height: 32px; border-radius: var(--rounded-base); background: none; border: 1px solid var(--outline-variant); font-size: 13px; font-weight: 500; color: var(--on-surface); cursor: pointer; }
+    .page-btn.active { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span>Prototype · Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="index.html">Index</a>
+      <a href="02-dashboard.html">Dashboard</a>
+      <a href="16-admin-wp-list.html" class="current">WP List</a>
+      <a href="17-admin-wp-form.html">Add WP</a>
+    </nav>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">Wendy</span>
+        <span class="brand-sub">Admin Panel</span>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Workspace</span>
+        <ul class="nav-list">
+          <li><a href="02-dashboard.html">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+            All Weddings
+          </a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Administration</span>
+        <ul class="nav-list">
+          <li><a href="16-admin-wp-list.html" class="active">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="4" r="2.5"/><path d="M3 14c0-3 2-5 5-5s5 2 5 5"/><path d="M12 8l1 1 2-2"/></svg>
+            Wedding Planners
+          </a></li>
+        </ul>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar">AD</div>
+          <div>
+            <div class="user-name">Admin</div>
+            <div class="user-role">System Administrator</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <nav class="breadcrumb">
+          <span style="color:var(--on-surface); font-weight:500;">Wedding Planners</span>
+        </nav>
+        <a href="17-admin-wp-form.html" class="btn-primary" style="text-decoration:none; font-size:12px;">+ Add Wedding Planner</a>
+      </div>
+
+      <div class="content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Wedding Planners</h1>
+            <p class="page-subtitle">Manage planner accounts, roles and access.</p>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-label">Total Planners</span>
+            <div class="stat-value">6</div>
+            <div class="stat-sub">5 active · 1 inactive</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Active Weddings</span>
+            <div class="stat-value">24</div>
+            <div class="stat-sub">across all planners</div>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Avg. Weddings / Planner</span>
+            <div class="stat-value">4.8</div>
+            <div class="stat-sub">active planners only</div>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <input class="input-field" style="flex:1; min-width:200px;" type="text" placeholder="Search planners…" />
+          <select class="filter-select">
+            <option>All Status</option>
+            <option>Active</option>
+            <option>Inactive</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:260px;">Wedding Planner</th>
+                <th>Active Weddings</th>
+                <th>Total Weddings</th>
+                <th>Next Wedding</th>
+                <th>Status</th>
+                <th style="width:80px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="wp-cell"><div class="wp-avatar">MG</div><div><div class="wp-name">Miguel García</div><div class="wp-email">miguel@wendy.app</div></div></div></td>
+                <td>8</td>
+                <td>23</td>
+                <td style="color:var(--status-pending-text); font-weight:500;">Aug 15, 2026</td>
+                <td><span class="badge badge-confirmed">Active</span></td>
+                <td><div class="inline-actions"><a href="17-admin-wp-form.html" class="icon-btn" title="Edit">✎</a><button class="icon-btn danger" onclick="toggleStatus(this)" title="Deactivate">⊘</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="wp-cell"><div class="wp-avatar" style="background:var(--tertiary-fixed); color:var(--on-tertiary-fixed-variant);">SR</div><div><div class="wp-name">Sofía Ramírez</div><div class="wp-email">sofia@wendy.app</div></div></div></td>
+                <td>5</td>
+                <td>14</td>
+                <td style="color:var(--status-pending-text); font-weight:500;">Sep 6, 2026</td>
+                <td><span class="badge badge-confirmed">Active</span></td>
+                <td><div class="inline-actions"><a href="17-admin-wp-form.html" class="icon-btn" title="Edit">✎</a><button class="icon-btn danger" onclick="toggleStatus(this)" title="Deactivate">⊘</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="wp-cell"><div class="wp-avatar" style="background:var(--secondary-fixed-dim); color:var(--on-secondary-fixed-variant);">AL</div><div><div class="wp-name">Andrea López</div><div class="wp-email">andrea@wendy.app</div></div></div></td>
+                <td>4</td>
+                <td>9</td>
+                <td style="color:var(--status-pending-text); font-weight:500;">Sep 20, 2026</td>
+                <td><span class="badge badge-confirmed">Active</span></td>
+                <td><div class="inline-actions"><a href="17-admin-wp-form.html" class="icon-btn" title="Edit">✎</a><button class="icon-btn danger" onclick="toggleStatus(this)" title="Deactivate">⊘</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="wp-cell"><div class="wp-avatar" style="background:var(--primary-fixed-dim); color:var(--on-primary-fixed-variant);">JM</div><div><div class="wp-name">Jorge Mendoza</div><div class="wp-email">jorge@wendy.app</div></div></div></td>
+                <td>4</td>
+                <td>11</td>
+                <td style="color:var(--status-pending-text); font-weight:500;">Oct 3, 2026</td>
+                <td><span class="badge badge-confirmed">Active</span></td>
+                <td><div class="inline-actions"><a href="17-admin-wp-form.html" class="icon-btn" title="Edit">✎</a><button class="icon-btn danger" onclick="toggleStatus(this)" title="Deactivate">⊘</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="wp-cell"><div class="wp-avatar" style="background:var(--tertiary-fixed-dim); color:var(--on-tertiary-fixed-variant);">LH</div><div><div class="wp-name">Lucía Herrera</div><div class="wp-email">lucia@wendy.app</div></div></div></td>
+                <td>3</td>
+                <td>7</td>
+                <td style="color:var(--status-pending-text); font-weight:500;">Nov 14, 2026</td>
+                <td><span class="badge badge-confirmed">Active</span></td>
+                <td><div class="inline-actions"><a href="17-admin-wp-form.html" class="icon-btn" title="Edit">✎</a><button class="icon-btn danger" onclick="toggleStatus(this)" title="Deactivate">⊘</button></div></td>
+              </tr>
+              <tr style="opacity:0.55;">
+                <td><div class="wp-cell"><div class="wp-avatar" style="background:var(--surface-container-high); color:var(--secondary);">RM</div><div><div class="wp-name">Roberto Mora</div><div class="wp-email">roberto@wendy.app</div></div></div></td>
+                <td>0</td>
+                <td>4</td>
+                <td style="color:var(--secondary);">—</td>
+                <td><span class="badge badge-declined">Inactive</span></td>
+                <td><div class="inline-actions"><a href="17-admin-wp-form.html" class="icon-btn" title="Edit">✎</a><button class="icon-btn" onclick="toggleStatus(this)" title="Reactivate" style="color:var(--status-confirmed-text);">↺</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span class="page-info">6 planners</span>
+            <div class="page-btns">
+              <button class="page-btn active">1</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleStatus(btn) {
+      const row = btn.closest('tr');
+      const badge = row.querySelector('.badge');
+      const isActive = badge.classList.contains('badge-confirmed');
+      if (isActive) {
+        if (!confirm('Deactivate this planner? They will lose access immediately.')) return;
+        badge.className = 'badge badge-declined';
+        badge.textContent = 'Inactive';
+        row.style.opacity = '0.55';
+        btn.title = 'Reactivate';
+        btn.textContent = '↺';
+        btn.classList.remove('danger');
+        btn.style.color = 'var(--status-confirmed-text)';
+      } else {
+        badge.className = 'badge badge-confirmed';
+        badge.textContent = 'Active';
+        row.style.opacity = '';
+        btn.title = 'Deactivate';
+        btn.textContent = '⊘';
+        btn.classList.add('danger');
+        btn.style.color = '';
+      }
+    }
+  </script>
+</body>
+</html>

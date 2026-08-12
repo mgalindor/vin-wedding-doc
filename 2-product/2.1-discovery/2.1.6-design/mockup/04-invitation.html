@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emma &amp; James — Wedding Invitation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    /* ---- Prototype bar ---- */
+    .proto-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      background: var(--inverse-surface); color: var(--inverse-on-surface);
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 6px 16px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+
+    /* ---- Base reset for invitation ---- */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--surface);
+      color: var(--on-surface);
+      padding-top: 32px; /* proto-bar offset */
+    }
+
+    /* ---- Invitation nav bar (minimal) ---- */
+    .inv-nav {
+      background: var(--surface-container-lowest);
+      border-bottom: 1px solid var(--outline-variant);
+      padding: 14px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .inv-nav-logo {
+      font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 600;
+      color: var(--secondary); letter-spacing: 0.04em;
+    }
+    .inv-nav-links { display: flex; gap: 24px; }
+    .inv-nav-links a {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--secondary); text-decoration: none; transition: color 100ms;
+    }
+    .inv-nav-links a:hover { color: var(--primary); }
+    .inv-lang-switch {
+      display: flex; gap: 8px;
+    }
+    .lang-btn {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      color: var(--secondary); background: none; border: none; cursor: pointer; padding: 4px 8px;
+      border-radius: var(--rounded-sm); transition: color 100ms;
+    }
+    .lang-btn.active { color: var(--primary); }
+
+    /* ---- Hero ---- */
+    .hero {
+      background: var(--surface-container-low);
+      padding: 100px 40px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-pre {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 20px;
+    }
+    .hero-names {
+      font-family: 'Playfair Display', serif; font-size: 64px; font-weight: 700;
+      letter-spacing: -0.02em; line-height: 1.1;
+      color: var(--tertiary);
+      margin-bottom: 24px;
+    }
+    .hero-divider {
+      width: 80px; height: 2px; margin: 0 auto 24px;
+      background: linear-gradient(90deg, transparent, var(--primary-container), transparent);
+      border-radius: 2px;
+    }
+    .hero-date {
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600;
+      color: var(--on-surface); margin-bottom: 8px;
+    }
+    .hero-venue {
+      font-size: 15px; color: var(--secondary); line-height: 1.5;
+    }
+
+    /* Decorative corner marks */
+    .corner-tl, .corner-br {
+      position: absolute; width: 60px; height: 60px;
+      border-color: var(--outline-variant); border-style: solid; border-width: 0;
+    }
+    .corner-tl { top: 24px; left: 40px; border-top-width: 1px; border-left-width: 1px; }
+    .corner-br { bottom: 24px; right: 40px; border-bottom-width: 1px; border-right-width: 1px; }
+
+    /* ---- Countdown ---- */
+    .countdown-section {
+      background: var(--surface-container-lowest);
+      padding: 48px 40px;
+      text-align: center;
+    }
+    .countdown-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--secondary); margin-bottom: 24px;
+    }
+    .countdown-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
+    .countdown-unit { text-align: center; }
+    .countdown-num {
+      font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700;
+      color: var(--primary); line-height: 1; letter-spacing: -0.02em;
+    }
+    .countdown-unit-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--secondary); margin-top: 8px;
+    }
+    .countdown-sep {
+      font-family: 'Playfair Display', serif; font-size: 40px;
+      color: var(--outline-variant); line-height: 1.3;
+      padding-top: 8px;
+    }
+
+    /* ---- Module container ---- */
+    .module {
+      padding: 80px 40px;
+      max-width: 760px; margin: 0 auto;
+    }
+    .module.full-bleed-wrap { max-width: 100%; padding: 0; }
+    .module-inner { max-width: 760px; margin: 0 auto; padding: 80px 40px; }
+
+    .module-alt { background: var(--surface-container-low); }
+
+    .module-eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 12px;
+    }
+    .module-title {
+      font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
+      color: var(--tertiary); line-height: 1.2; margin-bottom: 24px;
+      letter-spacing: -0.01em;
+    }
+    .module-body {
+      font-size: 17px; color: var(--on-surface-variant); line-height: 1.7; margin-bottom: 20px;
+    }
+
+    /* ---- Story photo strip ---- */
+    .photo-strip {
+      display: flex; gap: 12px; margin-top: 32px; overflow: hidden;
+      border-radius: var(--rounded-lg);
+    }
+    .photo-slot {
+      flex: 1; min-width: 0; aspect-ratio: 4/3;
+      background: var(--surface-container-high);
+      border-radius: var(--rounded-md);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--outline-variant); font-size: 24px;
+    }
+
+    /* ---- Location ---- */
+    .location-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
+    .location-card {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-xl);
+      padding: 28px;
+      box-shadow: var(--shadow-card);
+    }
+    .location-card-title {
+      font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600;
+      color: var(--on-surface); margin-bottom: 4px;
+    }
+    .location-time {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 12px;
+    }
+    .location-address { font-size: 14px; color: var(--secondary); line-height: 1.6; margin-bottom: 16px; }
+    .map-placeholder {
+      height: 120px; background: var(--surface-container-high);
+      border-radius: var(--rounded-lg);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--outline); font-size: 13px;
+    }
+
+    /* ---- Program timeline ---- */
+    .timeline { margin-top: 24px; position: relative; }
+    .timeline::before {
+      content: ''; position: absolute; left: 15px; top: 24px; bottom: 24px;
+      width: 1px; background: var(--outline-variant);
+    }
+    .timeline-item { display: flex; gap: 20px; margin-bottom: 28px; position: relative; }
+    .timeline-dot {
+      width: 30px; height: 30px; border-radius: var(--rounded-full); flex-shrink: 0;
+      background: var(--surface-container-lowest);
+      border: 2px solid var(--primary-container);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--primary); font-size: 13px; margin-top: 2px; z-index: 1;
+    }
+    .timeline-time {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 2px;
+    }
+    .timeline-event { font-size: 16px; font-weight: 500; color: var(--on-surface); }
+    .timeline-detail { font-size: 13px; color: var(--secondary); margin-top: 2px; }
+
+    /* ---- RSVP ---- */
+    .rsvp-card {
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      border-radius: var(--rounded-xl);
+      padding: 40px;
+      box-shadow: var(--shadow-card);
+      max-width: 520px; margin: 0 auto;
+      text-align: center;
+    }
+    .rsvp-guest-name {
+      font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600;
+      color: var(--on-surface); margin-bottom: 4px;
+    }
+    .rsvp-pre { font-size: 13px; color: var(--secondary); margin-bottom: 28px; }
+    .rsvp-options { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
+    .rsvp-option {
+      flex: 1; min-width: 100px;
+      padding: 16px; border: 2px solid var(--outline-variant);
+      border-radius: var(--rounded-lg); cursor: pointer;
+      text-align: center; transition: border-color 150ms, background 150ms;
+      background: var(--surface-container-lowest);
+    }
+    .rsvp-option:hover { border-color: var(--primary-container); background: var(--surface-container-low); }
+    .rsvp-option.selected { border-color: var(--primary); background: var(--primary-fixed); }
+    .rsvp-option-icon { font-size: 24px; margin-bottom: 6px; }
+    .rsvp-option-label {
+      font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--on-surface);
+    }
+    .rsvp-confirmed-msg {
+      display: none;
+      background: var(--status-confirmed-bg);
+      border-radius: var(--rounded-lg);
+      padding: 20px;
+      text-align: center;
+    }
+    .rsvp-confirmed-msg.visible { display: block; }
+
+    /* ---- Guest Album ---- */
+    .upload-zone {
+      border: 2px dashed var(--outline-variant);
+      border-radius: var(--rounded-xl);
+      padding: 48px 32px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 150ms, background 150ms;
+      margin-bottom: 24px;
+    }
+    .upload-zone:hover { border-color: var(--primary-container); background: var(--surface-container-low); }
+    .upload-icon { font-size: 40px; color: var(--outline-variant); margin-bottom: 12px; }
+    .upload-instruction { font-size: 15px; color: var(--on-surface); margin-bottom: 6px; }
+    .upload-limits { font-size: 12px; color: var(--secondary); }
+
+    .uploaded-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 24px;
+    }
+    .uploaded-thumb {
+      aspect-ratio: 1; background: var(--surface-container-high);
+      border-radius: var(--rounded-md);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--secondary); font-size: 12px; font-weight: 500;
+      position: relative;
+    }
+    .uploaded-thumb .pending-badge {
+      position: absolute; top: 6px; right: 6px;
+      background: var(--status-pending-bg); color: var(--status-pending-text);
+      font-size: 9px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+      padding: 2px 7px; border-radius: var(--rounded-full);
+    }
+
+    /* ---- Footer ---- */
+    .inv-footer {
+      background: var(--inverse-surface);
+      color: var(--inverse-on-surface);
+      text-align: center;
+      padding: 40px;
+    }
+    .footer-names {
+      font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .footer-note { font-size: 13px; opacity: 0.5; }
+  </style>
+</head>
+<body>
+
+  <!-- Prototype bar -->
+  <div class="proto-bar">
+    <span>Prototype · Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="../../../../mock/index.html">Hub</a>
+      <a href="01-login.html">01 Login</a>
+      <a href="02-dashboard.html">02 Dashboard</a>
+      <a href="05-wedding-detail.html">03 Guests</a>
+      <a href="04-invitation.html" class="current">04 Invitation</a>
+    </nav>
+  </div>
+
+  <!-- Invitation nav -->
+  <nav class="inv-nav">
+    <span class="inv-nav-logo">Wendy Planner</span>
+    <div class="inv-nav-links">
+      <a href="#story">Our Story</a>
+      <a href="#location">Location</a>
+      <a href="#program">Program</a>
+      <a href="#rsvp">RSVP</a>
+      <a href="#album">Photos</a>
+    </div>
+    <div class="inv-lang-switch">
+      <button class="lang-btn active">EN</button>
+      <span style="color:var(--outline-variant);">|</span>
+      <button class="lang-btn">ES</button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="corner-tl"></div>
+    <div class="corner-br"></div>
+    <p class="hero-pre">You are cordially invited to the wedding of</p>
+    <h1 class="hero-names">Emma &amp; James</h1>
+    <div class="hero-divider"></div>
+    <p class="hero-date">Saturday, September 15, 2026</p>
+    <p class="hero-venue">Gran Salón Montecarlo · Ciudad de México<br />Ceremony at 17:00 hrs · Dinner at 19:00 hrs</p>
+  </section>
+
+  <!-- ===== COUNTDOWN ===== -->
+  <section class="countdown-section">
+    <p class="countdown-label">Time remaining</p>
+    <div class="countdown-row">
+      <div class="countdown-unit">
+        <div class="countdown-num" id="days">35</div>
+        <div class="countdown-unit-label">Days</div>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-unit">
+        <div class="countdown-num" id="hrs">08</div>
+        <div class="countdown-unit-label">Hours</div>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-unit">
+        <div class="countdown-num" id="min">24</div>
+        <div class="countdown-unit-label">Minutes</div>
+      </div>
+      <div class="countdown-sep">·</div>
+      <div class="countdown-unit">
+        <div class="countdown-num" id="sec">00</div>
+        <div class="countdown-unit-label">Seconds</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OUR STORY ===== -->
+  <section id="story" class="module-alt full-bleed-wrap">
+    <div class="module-inner">
+      <p class="module-eyebrow">Our Story</p>
+      <h2 class="module-title">A love that started<br />over a cup of coffee</h2>
+      <p class="module-body">
+        It was a rainy Tuesday in 2019 when Emma walked into James's favorite bookshop-café in Roma Norte. She asked for the last copy of a novel they both wanted; he offered to share it. Five years, two cities, and a golden retriever named Biscuit later, we are ready to say yes — forever.
+      </p>
+      <p class="module-body">
+        We can't wait to celebrate this moment with the people who have walked with us through every chapter. Thank you for being part of our story.
+      </p>
+
+      <!-- Photo strip placeholder -->
+      <div class="photo-strip">
+        <div class="photo-slot">📷</div>
+        <div class="photo-slot">📷</div>
+        <div class="photo-slot">📷</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== LOCATION ===== -->
+  <section id="location" class="module">
+    <p class="module-eyebrow">Where &amp; When</p>
+    <h2 class="module-title">Join us at two beautiful venues</h2>
+
+    <div class="location-grid">
+      <div class="location-card">
+        <div class="location-time">17:00 hrs</div>
+        <div class="location-card-title">Religious Ceremony</div>
+        <p class="location-address">
+          Parroquia de San Francisco<br />
+          Av. Francisco I. Madero 7, Centro Histórico<br />
+          Ciudad de México
+        </p>
+        <div class="map-placeholder">📍 Map</div>
+      </div>
+      <div class="location-card">
+        <div class="location-time">19:00 hrs</div>
+        <div class="location-card-title">Dinner &amp; Reception</div>
+        <p class="location-address">
+          Gran Salón Montecarlo<br />
+          Av. Álvaro Obregón 310, Roma Norte<br />
+          Ciudad de México
+        </p>
+        <div class="map-placeholder">📍 Map</div>
+      </div>
+    </div>
+
+    <p style="font-size:13px; color:var(--secondary); margin-top:20px; line-height:1.6;">
+      Valet parking available at Gran Salón Montecarlo. Nearest metro: Insurgentes (Line 1).
+      Dress code: Formal / Black tie optional.
+    </p>
+  </section>
+
+  <!-- ===== PROGRAM ===== -->
+  <section id="program" class="module-alt full-bleed-wrap">
+    <div class="module-inner">
+      <p class="module-eyebrow">Program</p>
+      <h2 class="module-title">An evening to remember</h2>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot">♡</div>
+          <div>
+            <div class="timeline-time">16:30</div>
+            <div class="timeline-event">Guest Arrival &amp; Welcome Cocktail</div>
+            <div class="timeline-detail">Parroquia de San Francisco atrium</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">★</div>
+          <div>
+            <div class="timeline-time">17:00</div>
+            <div class="timeline-event">Religious Ceremony</div>
+            <div class="timeline-detail">Approximately 45 minutes</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">→</div>
+          <div>
+            <div class="timeline-time">18:30</div>
+            <div class="timeline-event">Transfer to Reception Venue</div>
+            <div class="timeline-detail">Shuttle service provided · 15 min ride</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">♦</div>
+          <div>
+            <div class="timeline-time">19:00</div>
+            <div class="timeline-event">Cocktail Hour</div>
+            <div class="timeline-detail">Gran Salón Montecarlo — Garden Terrace</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">✦</div>
+          <div>
+            <div class="timeline-time">20:00</div>
+            <div class="timeline-event">Dinner &amp; Celebrations</div>
+            <div class="timeline-detail">Grand Hall · Live band from 21:00</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot">◎</div>
+          <div>
+            <div class="timeline-time">23:30</div>
+            <div class="timeline-event">Cake cutting &amp; Farewell</div>
+            <div class="timeline-detail">Event ends at midnight</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DRESS CODE ===== -->
+  <section class="module">
+    <p class="module-eyebrow">Dress Code</p>
+    <h2 class="module-title">Formal · Black tie optional</h2>
+    <p class="module-body">
+      We invite you to celebrate in style. Gentlemen: suit and tie or tuxedo. Ladies: cocktail dress or evening gown.
+      Avoid white and ivory out of respect for the bride.
+    </p>
+    <p style="font-size:13px; color:var(--secondary); line-height:1.6;">
+      <strong style="color:var(--on-surface);">Colour palette suggestion:</strong>
+      Champagne gold, dusty rose, sage, slate blue, or any earth tone pair beautifully with our floral arrangements.
+    </p>
+  </section>
+
+  <!-- ===== RSVP ===== -->
+  <section id="rsvp" class="module-alt full-bleed-wrap">
+    <div class="module-inner">
+      <p class="module-eyebrow" style="text-align:center;">Attendance</p>
+      <h2 class="module-title" style="text-align:center;">Will you join us?</h2>
+      <p style="text-align:center; font-size:15px; color:var(--secondary); margin-bottom:40px;">
+        Please confirm your attendance by <strong style="color:var(--on-surface);">September 1st, 2026</strong>.
+      </p>
+
+      <div class="rsvp-card">
+        <div class="rsvp-guest-name">Emma García López</div>
+        <p class="rsvp-pre">We're looking forward to celebrating with you.</p>
+
+        <!-- RSVP options -->
+        <div class="rsvp-options" id="rsvp-options">
+          <div class="rsvp-option selected" onclick="selectRSVP(this, 'confirm')">
+            <div class="rsvp-option-icon">🥂</div>
+            <div class="rsvp-option-label">Confirm</div>
+          </div>
+          <div class="rsvp-option" onclick="selectRSVP(this, 'decline')">
+            <div class="rsvp-option-icon">🙏</div>
+            <div class="rsvp-option-label">Decline</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label class="input-label" for="rsvp-dietary" style="text-align:left;">Dietary requirement</label>
+          <select id="rsvp-dietary" class="input-field" style="cursor:pointer;">
+            <option value="">None</option>
+            <option>Vegetarian</option>
+            <option>Vegan</option>
+            <option>Gluten-free</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <label class="input-label" for="rsvp-msg" style="text-align:left;">Message for the couple (optional)</label>
+          <textarea id="rsvp-msg" class="input-field" rows="3" placeholder="Wishing you a lifetime of joy…" style="resize:vertical;"></textarea>
+        </div>
+
+        <button class="btn-primary" style="width:100%;" onclick="submitRSVP()">Confirm my attendance</button>
+
+        <!-- Thank you state (hidden) -->
+        <div class="rsvp-confirmed-msg" id="rsvp-thanks">
+          <div style="font-size:28px; margin-bottom:12px;">🥂</div>
+          <p style="font-family:'Playfair Display',serif; font-size:20px; font-weight:600; color:var(--status-confirmed-text); margin-bottom:6px;">
+            See you on September 15th!
+          </p>
+          <p style="font-size:14px; color:var(--on-surface-variant); line-height:1.6;">
+            Thank you for confirming. We can't wait to celebrate with you.<br />
+            You will receive a reminder closer to the date.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== GIFT TABLE ===== -->
+  <section class="module">
+    <p class="module-eyebrow">Gift Registry</p>
+    <h2 class="module-title">Your presence is our greatest gift</h2>
+    <p class="module-body">
+      If you wish to contribute something special, we have set up a registry and a honeymoon fund. Your generosity means the world to us.
+    </p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;">
+      <a href="#" class="btn-primary">Liverpool Registry ↗</a>
+      <a href="#" class="btn-secondary">Honeymoon Fund ↗</a>
+    </div>
+    <div style="margin-top:24px; background:var(--surface-container-low); border-radius:var(--rounded-lg); padding:20px 24px;">
+      <p style="font-size:12px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--secondary); margin-bottom:8px;">Bank Transfer</p>
+      <p style="font-size:14px; color:var(--on-surface); font-variant-numeric:tabular-nums; line-height:2;">
+        Bank: BBVA México<br />
+        Account holder: Emma García López<br />
+        CLABE: 0123 4567 8901 2345 67<br />
+        Reference: EJ2026
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== GUEST PHOTO ALBUM ===== -->
+  <section id="album" class="module-alt full-bleed-wrap">
+    <div class="module-inner">
+      <p class="module-eyebrow">Guest Album</p>
+      <h2 class="module-title">Share your photos with us</h2>
+      <p style="font-size:15px; color:var(--secondary); line-height:1.7; margin-bottom:32px;">
+        Capture the moments we might miss. Upload your photos here and we'll add them to our shared gallery.
+        Each guest may upload up to <strong style="color:var(--on-surface);">20 photos</strong> (max 5 MB each · JPG, PNG, GIF).
+        Your photos are reviewed before appearing in the gallery.
+      </p>
+
+      <div class="upload-zone" onclick="triggerUpload()">
+        <div class="upload-icon">📸</div>
+        <p class="upload-instruction">Drag &amp; drop your photos here, or click to browse</p>
+        <p class="upload-limits">JPG, PNG or GIF · Max 5 MB per file · Up to 20 photos</p>
+      </div>
+
+      <div style="display:flex; gap:8px; justify-content:center; margin-bottom:32px;">
+        <button class="btn-primary" onclick="triggerUpload()">Upload Photos</button>
+      </div>
+
+      <!-- Pending uploads sample -->
+      <p style="font-size:12px; font-weight:600; letter-spacing:0.05em; text-transform:uppercase; color:var(--secondary); margin-bottom:12px;">
+        Your uploads (3 / 20) — awaiting review
+      </p>
+      <div class="uploaded-grid">
+        <div class="uploaded-thumb">
+          📷 Photo 1
+          <span class="pending-badge">Pending</span>
+        </div>
+        <div class="uploaded-thumb">
+          📷 Photo 2
+          <span class="pending-badge">Pending</span>
+        </div>
+        <div class="uploaded-thumb">
+          📷 Photo 3
+          <span class="pending-badge">Pending</span>
+        </div>
+        <div class="uploaded-thumb" onclick="triggerUpload()" style="border:2px dashed var(--outline-variant); cursor:pointer; color:var(--outline-variant);">
+          + Add more
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ACCOMMODATION ===== -->
+  <section class="module">
+    <p class="module-eyebrow">Accommodation</p>
+    <h2 class="module-title">Places to stay</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px;">
+      <div style="background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--rounded-lg); padding:20px;">
+        <p style="font-size:15px; font-weight:600; color:var(--on-surface); margin-bottom:4px;">Hotel Condesa DF</p>
+        <p style="font-size:13px; color:var(--secondary); margin-bottom:12px;">5 min from venue · Avg. $180 USD/night</p>
+        <a href="#" style="font-size:12px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--primary); text-decoration:none;">Reserve ↗</a>
+      </div>
+      <div style="background:var(--surface-container-low); border:1px solid var(--outline-variant); border-radius:var(--rounded-lg); padding:20px;">
+        <p style="font-size:15px; font-weight:600; color:var(--on-surface); margin-bottom:4px;">Airbnb — Roma Norte</p>
+        <p style="font-size:13px; color:var(--secondary); margin-bottom:12px;">Walking distance · From $80 USD/night</p>
+        <a href="#" style="font-size:12px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--primary); text-decoration:none;">Browse ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTACT ===== -->
+  <section class="module-alt full-bleed-wrap" style="border-top:1px solid var(--outline-variant);">
+    <div class="module-inner" style="text-align:center; padding:60px 40px;">
+      <p class="module-eyebrow">Contact</p>
+      <h2 class="module-title">Need help?</h2>
+      <p style="font-size:15px; color:var(--secondary); line-height:1.7;">
+        For any questions about the event, please reach out to our Wedding Planner:<br />
+        <strong style="color:var(--on-surface);">Miguel García</strong> · miguel@wendy<br />
+        WhatsApp: <a href="#" style="color:var(--primary); text-decoration:none;">+52 55 1234 5678</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="inv-footer">
+    <div class="footer-names">Emma &amp; James</div>
+    <p class="footer-note">September 15, 2026 · Ciudad de México</p>
+    <p class="footer-note" style="margin-top:16px; font-size:11px;">Powered by Wendy Planner · Vineyards</p>
+  </footer>
+
+  <script>
+    /* ---- Live countdown ---- */
+    function updateCountdown() {
+      const target = new Date('2026-09-15T17:00:00-06:00');
+      const now = new Date();
+      const diff = Math.max(0, target - now);
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor((diff % 86400000) / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('days').textContent = String(d).padStart(2, '0');
+      document.getElementById('hrs').textContent = String(h).padStart(2, '0');
+      document.getElementById('min').textContent = String(m).padStart(2, '0');
+      document.getElementById('sec').textContent = String(s).padStart(2, '0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    /* ---- RSVP ---- */
+    function selectRSVP(el, val) {
+      document.querySelectorAll('.rsvp-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      const btn = document.querySelector('.rsvp-card .btn-primary');
+      btn.textContent = val === 'confirm' ? 'Confirm my attendance' : 'Send my regrets';
+    }
+
+    function submitRSVP() {
+      document.getElementById('rsvp-options').style.display = 'none';
+      document.querySelectorAll('.rsvp-card .input-label, .rsvp-card select, .rsvp-card textarea, .rsvp-card .btn-primary').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.rsvp-card .rsvp-pre').forEach(el => el.style.display = 'none');
+      document.getElementById('rsvp-thanks').classList.add('visible');
+    }
+
+    function triggerUpload() {
+      alert('File picker would open here.\n\n(Prototype — no real upload)');
+    }
+  </script>
+</body>
+</html>

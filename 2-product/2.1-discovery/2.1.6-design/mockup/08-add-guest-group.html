@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wendy Planner &mdash; Add Guest Group</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    .proto-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--inverse-surface); color: var(--inverse-on-surface); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+    body { margin-top: 32px; }
+    .app-shell { display: flex; min-height: calc(100vh - 32px); }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--surface-container-lowest); border-right: 1px solid var(--outline-variant); display: flex; flex-direction: column; position: sticky; top: 32px; height: calc(100vh - 32px); overflow-y: auto; }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid var(--outline-variant); }
+    .brand-mark { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); display: block; }
+    .brand-sub { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-top: 2px; display: block; }
+    .sidebar-wedding-ctx { margin: 12px 12px 0; background: var(--surface-container-low); border: 1px solid var(--outline-variant); border-radius: var(--rounded-md); padding: 12px; }
+    .ctx-label { font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-bottom: 4px; display: block; }
+    .ctx-couple { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 600; color: var(--on-surface); display: block; }
+    .ctx-date { font-size: 12px; color: var(--secondary); margin-top: 2px; display: block; }
+    .nav-section { padding: 16px 0 0; }
+    .nav-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); padding: 4px 20px; display: block; }
+    .nav-list { list-style: none; margin: 4px 0 8px; }
+    .nav-list li a { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; color: var(--on-surface-variant); text-decoration: none; transition: background 100ms, color 100ms; }
+    .nav-list li a:hover { background: var(--surface-container-low); color: var(--on-surface); }
+    .nav-list li a.active { background: var(--surface-container-low); border-left: 2px solid var(--primary); padding-left: 18px; color: var(--primary); font-weight: 600; }
+    .nav-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--outline-variant); }
+    .user-chip { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--rounded-md); cursor: pointer; }
+    .user-chip:hover { background: var(--surface-container-low); }
+    .user-avatar { width: 32px; height: 32px; border-radius: var(--rounded-full); background: var(--primary-fixed); color: var(--on-primary-fixed-variant); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--on-surface); }
+    .user-role { font-size: 11px; color: var(--secondary); }
+    .main { flex: 1; min-width: 0; background: var(--surface); }
+    .topbar { background: var(--surface-container-lowest); border-bottom: 1px solid var(--outline-variant); padding: 14px 40px; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--secondary); }
+    .breadcrumb a { color: var(--secondary); text-decoration: none; transition: color 100ms; }
+    .breadcrumb a:hover { color: var(--primary); }
+    .breadcrumb-sep { color: var(--outline-variant); }
+    .content { padding: 32px 40px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--on-surface); margin-bottom: 4px; }
+    .page-subtitle { font-size: 15px; color: var(--secondary); margin-bottom: 28px; }
+
+    /* two-panel layout matching add-guest */
+    .add-group-layout { display: grid; grid-template-columns: 1fr 1.1fr; gap: 24px; align-items: start; }
+
+    /* Left: identity form panel */
+    .form-panel { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-xl); box-shadow: var(--shadow-card); overflow: hidden; }
+    .form-panel .form-section { padding: 24px; }
+    .section-label-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); }
+    .fields-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .hint { font-size: 12px; color: var(--secondary); margin-top: 4px; }
+    .form-actions { padding: 20px 0 0; display: flex; gap: 12px; justify-content: flex-end; border-top: 1px solid var(--outline-variant); margin: 0 24px 24px; }
+    .btn-cancel { padding: 11px 24px; border-radius: var(--rounded-base); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; background: none; border: 1.5px solid var(--outline-variant); color: var(--on-surface); cursor: pointer; transition: all 100ms; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-cancel:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-save { padding: 11px 24px; border-radius: var(--rounded-base); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; background: var(--primary); color: var(--on-primary); border: none; cursor: pointer; transition: background 100ms; }
+    .btn-save:hover { background: var(--on-primary-fixed-variant); }
+
+    /* Tooltip */
+    .tooltip-wrap { position: relative; display: inline-flex; align-items: center; }
+    .tooltip-icon { width: 16px; height: 16px; border-radius: var(--rounded-full); background: var(--secondary-container); color: var(--secondary); font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; cursor: help; flex-shrink: 0; }
+    .tooltip-box { display: none; position: absolute; left: 0; top: calc(100% + 8px); z-index: 50; background: var(--inverse-surface); color: var(--inverse-on-surface); border-radius: var(--rounded-md); padding: 12px 14px; font-size: 12px; font-weight: 400; letter-spacing: 0; text-transform: none; line-height: 1.6; width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); pointer-events: none; }
+    .tooltip-box em { color: var(--primary-fixed); font-style: normal; font-weight: 600; }
+    .tooltip-wrap:hover .tooltip-box { display: block; }
+
+    /* Right: members panel */
+    .members-panel { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-xl); box-shadow: var(--shadow-card); display: flex; flex-direction: column; overflow: hidden; }
+    .members-header { padding: 16px 20px; background: var(--surface-container-low); border-bottom: 1px solid var(--outline-variant); display: flex; align-items: center; justify-content: space-between; }
+    .members-title { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); }
+    .members-count { font-size: 12px; font-weight: 600; color: var(--primary); background: var(--primary-fixed); padding: 2px 10px; border-radius: var(--rounded-full); }
+    .members-table-wrap { flex: 1; overflow-x: auto; border-radius: 0 0 var(--rounded-xl) var(--rounded-xl); }
+    .members-table { width: 100%; border-collapse: collapse; }
+    .members-table thead { background: var(--surface-container-low); }
+    .members-table thead th { padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); text-align: left; border-bottom: 1px solid var(--outline-variant); white-space: nowrap; }
+    /* center radio column header */
+    .members-table thead th.col-primary { text-align: center; }
+    .members-table tbody tr { border-bottom: 1px solid var(--outline-variant); transition: background 100ms; }
+    .members-table tbody tr:last-child { border-bottom: none; }
+    .members-table tbody tr:hover { background: var(--surface-container-low); }
+    .members-table tbody td { padding: 8px 10px; vertical-align: top; }
+    .members-table .cell-input { width: 100%; background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-base); padding: 8px 12px; font-family: 'Inter', sans-serif; font-size: 13px; color: var(--on-surface); outline: none; transition: border 150ms; }
+    .members-table .cell-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(115,92,0,0.10); }
+    .members-table .cell-input::placeholder { color: var(--secondary); }
+    .remove-btn { background: none; border: none; cursor: pointer; color: var(--secondary); font-size: 14px; padding: 6px 8px; border-radius: var(--rounded-sm); transition: all 100ms; margin-top: 2px; }
+    .remove-btn:hover { background: var(--error-container); color: var(--on-error-container); }
+    .members-footer { padding: 14px 20px; background: var(--surface-container-low); border-top: 1px solid var(--outline-variant); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .members-hint { font-size: 12px; color: var(--secondary); line-height: 1.5; }
+    .add-row-btn { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--primary); background: var(--primary-fixed); border: none; border-radius: var(--rounded-base); padding: 8px 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 100ms; }
+    .add-row-btn:hover { background: var(--primary-fixed-dim); }
+    .members-hint { font-size: 12px; color: var(--secondary); line-height: 1.5; }
+    .members-hint code { font-size: 11px; background: var(--surface-container-high); padding: 1px 5px; border-radius: 3px; color: var(--on-surface-variant); }
+    /* full-width action bar below both panels */
+    .page-actions { display: flex; gap: 12px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid var(--outline-variant); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span>Prototype &middot; Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="index.html">Index</a>
+      <a href="05-wedding-detail.html">Guest List</a>
+      <a href="07-add-guest.html">Add Guest</a>
+      <a href="08-add-guest-group.html" class="current">Add Group</a>
+    </nav>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">Wendy</span>
+        <span class="brand-sub">Wedding Planner</span>
+      </div>
+      <div class="sidebar-wedding-ctx">
+        <span class="ctx-label">Current Wedding</span>
+        <span class="ctx-couple">Sof&iacute;a &amp; Andr&eacute;s</span>
+        <span class="ctx-date">Sat &middot; Mar 22, 2026 &middot; 18:00</span>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">This Wedding</span>
+        <ul class="nav-list">
+          <li><a href="05-wedding-detail.html">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+            Overview
+          </a></li>
+          <li><a href="05-wedding-detail.html" class="active">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="5" r="3"/><path d="M1 14c0-3 2-5 5-5s5 2 5 5"/><path d="M12 7c1.7 0 3 1.3 3 3v4"/></svg>
+            Guests
+          </a></li>
+        </ul>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar">MG</div>
+          <div>
+            <div class="user-name">Miguel Garc&iacute;a</div>
+            <div class="user-role">Wedding Planner</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <nav class="breadcrumb">
+          <a href="05-wedding-detail.html">Guests</a>
+          <span class="breadcrumb-sep">/</span>
+          <span style="color:var(--on-surface); font-weight:500;">Add Guest Group</span>
+        </nav>
+      </div>
+
+      <div class="content">
+        <h1 class="page-title">Add Guest Group</h1>
+        <p class="page-subtitle">Group guests that share the same social circle. Each member gets their own invitation link and RSVP.</p>
+
+        <div class="add-group-layout">
+
+          <!-- ===== LEFT: Group identity ===== -->
+          <div class="form-panel">
+
+            <div class="form-section">
+              <span class="section-label">Group Identity</span>
+              <div class="field-group" style="margin-bottom:16px;">
+                <label class="input-label" for="grp-name">Group Name *</label>
+                <input id="grp-name" class="input-field" type="text" placeholder="e.g. Familia Morales, Frank &amp; Laura, Los amigos de Oaxaca" />
+                <span class="hint">Used as the header row in the guest list. Not visible to guests.</span>
+              </div>
+              <div class="fields-row">
+                <div class="field-group">
+                  <label class="input-label" for="grp-side">Side *</label>
+                  <select id="grp-side" class="input-field" style="cursor:pointer;">
+                    <option value="">Choose&hellip;</option>
+                    <option>Bride</option>
+                    <option>Groom</option>
+                    <option>Both</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="input-label" for="grp-rel">Relationship</label>
+                  <select id="grp-rel" class="input-field" style="cursor:pointer;">
+                    <option value="">Choose&hellip;</option>
+                    <option>Family</option>
+                    <option>Friends</option>
+                    <option>Colleagues</option>
+                    <option>Vendors / Team</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <span class="section-label" style="margin-bottom:16px; display:block;">Contact <span style="font-weight:400; text-transform:none; letter-spacing:0; color:var(--secondary); font-size:11px;">(Optional &mdash; shared for the group)</span></span>
+              <div class="fields-row">
+                <div class="field-group">
+                  <label class="input-label" for="grp-email">Email</label>
+                  <input id="grp-email" class="input-field" type="email" placeholder="shared@example.com" />
+                </div>
+                <div class="field-group">
+                  <label class="input-label" for="grp-phone">Phone</label>
+                  <input id="grp-phone" class="input-field" type="tel" placeholder="+52 55 &hellip;" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===== RIGHT: Members table ===== -->
+          <div class="members-panel">
+            <div class="members-header">
+              <span class="members-title">Group Members</span>
+              <span class="members-count" id="member-count">2 members</span>
+            </div>
+
+            <div class="members-table-wrap">
+              <table class="members-table">
+                <thead>
+                  <tr>
+                    <th class="col-primary" title="Who receives the invitation link">Primary</th>
+                    <th style="width:30px;">#</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th style="width:36px;"></th>
+                  </tr>
+                </thead>
+                <tbody id="members-body">
+                  <tr>
+                    <td style="text-align:center;"><input type="radio" name="primary-member" checked title="Send invitation link to this member" /></td>
+                    <td style="color:var(--secondary); font-size:12px; padding-top:14px;">1</td>
+                    <td><input class="cell-input" type="text" placeholder="e.g. Frank" oninput="updateCount()" /></td>
+                    <td><input class="cell-input" type="text" placeholder="e.g. Torres" oninput="updateCount()" /></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)" title="Remove">&#x2715;</button></td>
+                  </tr>
+                  <tr>
+                    <td style="text-align:center;"><input type="radio" name="primary-member" title="Send invitation link to this member" /></td>
+                    <td style="color:var(--secondary); font-size:12px; padding-top:14px;">2</td>
+                    <td><input class="cell-input" type="text" placeholder="e.g. Laura" oninput="updateCount()" /></td>
+                    <td><input class="cell-input" type="text" placeholder="e.g. Ruiz" oninput="updateCount()" /></td>
+                    <td><button class="remove-btn" onclick="removeRow(this)" title="Remove">&#x2715;</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="members-footer">
+              <span class="members-hint">The <strong>primary member</strong> receives the invitation link. All members are tracked for attendance.</span>
+              <button class="add-row-btn" onclick="addRow()">+ Add Member</button>
+            </div>
+          </div>
+
+        </div><!-- /add-group-layout -->
+
+        <!-- Action bar saves both panels -->
+        <div class="page-actions">
+          <a href="05-wedding-detail.html" class="btn-cancel" style="text-decoration:none;">Cancel</a>
+          <button class="btn-save" onclick="saveGroup()">Save Group</button>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function updateCount() {
+      const rows = document.querySelectorAll('#members-body tr').length;
+      document.getElementById('member-count').textContent = rows + (rows === 1 ? ' member' : ' members');
+    }
+
+    function addRow() {
+      const tbody = document.getElementById('members-body');
+      const num = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="text-align:center;"><input type="radio" name="primary-member" title="Send invitation link to this member" /></td>
+        <td style="color:var(--secondary); font-size:12px; padding-top:14px;">${num}</td>
+        <td><input class="cell-input" type="text" placeholder="First name" oninput="updateCount()" /></td>
+        <td><input class="cell-input" type="text" placeholder="Last name" oninput="updateCount()" /></td>
+        <td><button class="remove-btn" onclick="removeRow(this)" title="Remove">&#x2715;</button></td>`;
+      tbody.appendChild(tr);
+      tr.querySelector('input[type=text]').focus();
+      updateCount();
+    }
+
+    function removeRow(btn) {
+      const tbody = document.getElementById('members-body');
+      if (tbody.querySelectorAll('tr').length > 1) {
+        btn.closest('tr').remove();
+        /* renumber */
+        tbody.querySelectorAll('tr').forEach((r, i) => {
+          r.querySelector('td').textContent = i + 1;
+        });
+        updateCount();
+      }
+    }
+
+    function triggerCsvImport() {
+      alert('CSV Import\n\nExpected columns: first_name, last_name\n\nDrop a file or browse to import members into this group.\n(Prototype)');
+    }
+
+    function saveGroup() {
+      const name = document.getElementById('grp-name').value.trim();
+      if (!name) { alert('Group name is required.'); return; }
+      const members = document.querySelectorAll('#members-body tr').length;
+      alert(`Group "${name}" saved with ${members} member(s).\nInvitation links generated.\n(Prototype)`);
+      window.location.href = '05-wedding-detail.html';
+    }
+  </script>
+</body>
+</html>

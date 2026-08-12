@@ -62,7 +62,7 @@ colors:
   error: '#ba1a1a'
   on-error: '#ffffff'
   error-container: '#ffdad6'
-  on-error-container: '#93000a'
+  on-error-container: '#5a3535'
   # --- Background ---
   background: '#f9f8f7'
   on-background: '#1c1b1a'
@@ -220,7 +220,7 @@ The palette is anchored by **Antique Gold** as the sole emotional accent, set ag
 - **Secondary — Warm Ash (`#605e5c`):** The system's neutral workhorse. Used for secondary labels, de-emphasised metadata, disabled states, and divider lines. Keeps the dashboard calm without introducing visual noise.
 - **Tertiary — Deep Slate Blue (`#4e6073`):** The editorial anchor. Preferred for large headline text in invitation modules, section titles in the planner sidebar, and primary navigation labels. It reads as sophisticated and intentional rather than cold.
 - **Surface family (Warm Parchment `#f9f8f7` → White `#ffffff`):** A tonal gradient from the overall page background down to the smallest content card. The barely-there warm gray wash prevents the harshness of a pure white interface while maintaining a refined, paper-like warmth.
-- **Status colours (RSVP badges):** Muted sage green for Confirmed, warm amber for Pending, and muted rose for Declined. These are intentionally desaturated so they harmonise with the gold-and-teal palette rather than clashing with it.
+- **Status colours (RSVP badges):** Warm desaturated sage (`#dff0e7` / `#1f4a30`) for Confirmed, warm parchment-amber (`#f5edd8` / `#6b4400`) for Pending, and muted warm rose (`#eddfdd` / `#5a3535`) for Declined. All three are pulled from the same warm parchment family so they harmonise with the gold palette rather than reading as clinical traffic-light colours.
 
 ## Typography
 

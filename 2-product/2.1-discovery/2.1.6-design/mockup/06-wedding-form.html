@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wendy Planner — New Wedding</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../design-preview.css" />
+  <style>
+    .proto-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 200; background: var(--inverse-surface); color: var(--inverse-on-surface); font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 6px 16px; display: flex; align-items: center; justify-content: space-between; }
+    .proto-nav { display: flex; gap: 16px; }
+    .proto-nav a { color: var(--inverse-on-surface); text-decoration: none; opacity: 0.6; transition: opacity 100ms; }
+    .proto-nav a:hover { opacity: 1; }
+    .proto-nav a.current { opacity: 1; color: var(--primary-fixed); }
+    body { margin-top: 32px; }
+    .app-shell { display: flex; min-height: calc(100vh - 32px); }
+    .sidebar { width: 240px; flex-shrink: 0; background: var(--surface-container-lowest); border-right: 1px solid var(--outline-variant); display: flex; flex-direction: column; position: sticky; top: 32px; height: calc(100vh - 32px); overflow-y: auto; }
+    .sidebar-brand { padding: 24px 20px 20px; border-bottom: 1px solid var(--outline-variant); }
+    .brand-mark { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--primary); display: block; }
+    .brand-sub { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); margin-top: 2px; display: block; }
+    .nav-section { padding: 16px 0 0; }
+    .nav-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--secondary); padding: 4px 20px; display: block; }
+    .nav-list { list-style: none; margin: 4px 0 8px; }
+    .nav-list li a { display: flex; align-items: center; gap: 10px; padding: 9px 20px; font-size: 13px; font-weight: 500; color: var(--on-surface-variant); text-decoration: none; transition: background 100ms, color 100ms; }
+    .nav-list li a:hover { background: var(--surface-container-low); color: var(--on-surface); }
+    .nav-list li a.active { background: var(--surface-container-low); border-left: 2px solid var(--primary); padding-left: 18px; color: var(--primary); font-weight: 600; }
+    .nav-icon { width: 16px; height: 16px; opacity: 0.6; flex-shrink: 0; }
+    .sidebar-bottom { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--outline-variant); }
+    .user-chip { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--rounded-md); cursor: pointer; }
+    .user-chip:hover { background: var(--surface-container-low); }
+    .user-avatar { width: 32px; height: 32px; border-radius: var(--rounded-full); background: var(--primary-fixed); color: var(--on-primary-fixed-variant); font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .user-name { font-size: 13px; font-weight: 500; color: var(--on-surface); }
+    .user-role { font-size: 11px; color: var(--secondary); }
+    .main { flex: 1; min-width: 0; background: var(--surface); }
+    .topbar { background: var(--surface-container-lowest); border-bottom: 1px solid var(--outline-variant); padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; }
+    .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--secondary); }
+    .breadcrumb a { color: var(--secondary); text-decoration: none; transition: color 100ms; }
+    .breadcrumb a:hover { color: var(--primary); }
+    .breadcrumb-sep { color: var(--outline-variant); }
+    .content { padding: 32px 40px; max-width: 900px; }
+    .page-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--tertiary); margin-bottom: 6px; }
+    .page-subtitle { font-size: 15px; color: var(--secondary); margin-bottom: 32px; }
+    .form-section { background: var(--surface-container-lowest); border: 1px solid var(--outline-variant); border-radius: var(--rounded-xl); box-shadow: var(--shadow-card); margin-bottom: 24px; padding: 28px 32px; }
+    .form-section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--secondary); margin-bottom: 20px; display: block; }
+    .form-section-body { }
+    .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .field-full { grid-column: 1 / -1; }
+    .form-footer { display: flex; gap: 12px; justify-content: flex-end; padding: 24px 0 0; border-top: 1px solid var(--outline-variant); margin-top: 8px; }
+    .btn-cancel { padding: 11px 24px; border-radius: var(--rounded-base); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; background: none; border: 1.5px solid var(--outline-variant); color: var(--on-surface); cursor: pointer; transition: all 100ms; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-cancel:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-save { padding: 11px 24px; border-radius: var(--rounded-base); font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; background: var(--primary); color: var(--on-primary); border: none; cursor: pointer; transition: background 100ms; }
+    .btn-save:hover { background: var(--on-primary-fixed-variant); }
+    /* Template selector */
+    .template-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .template-option { border: 2px solid var(--outline-variant); border-radius: var(--rounded-lg); cursor: pointer; overflow: hidden; transition: border-color 150ms; }
+    .template-option:hover { border-color: var(--primary-container); }
+    .template-option.selected { border-color: var(--primary); }
+    .template-thumb { height: 72px; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 700; border-bottom: 1px solid var(--outline-variant); }
+    .template-label { padding: 8px 12px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--on-surface); background: var(--surface-container-low); display: flex; align-items: center; justify-content: space-between; }
+    .template-check { width: 14px; height: 14px; border-radius: var(--rounded-full); border: 2px solid var(--outline-variant); display: inline-block; flex-shrink: 0; }
+    .template-option.selected .template-check { background: var(--primary); border-color: var(--primary); }
+    .hint { font-size: 12px; color: var(--secondary); margin-top: 4px; line-height: 1.5; }
+  </style>
+</head>
+<body>
+  <div class="proto-bar">
+    <span>Prototype · Wendy Planner MVP</span>
+    <nav class="proto-nav">
+      <a href="index.html">Index</a>
+      <a href="02-dashboard.html">Dashboard</a>
+      <a href="06-wedding-form.html" class="current">New Wedding</a>
+      <a href="05-wedding-detail.html">Wedding Detail</a>
+    </nav>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-mark">Wendy</span>
+        <span class="brand-sub">Wedding Planner</span>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Workspace</span>
+        <ul class="nav-list">
+          <li><a href="02-dashboard.html">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+            All Weddings
+          </a></li>
+          <li><a href="06-wedding-form.html" class="active">
+            <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="7"/><path d="M8 5v6M5 8h6"/></svg>
+            New Wedding
+          </a></li>
+        </ul>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="user-chip">
+          <div class="user-avatar">MG</div>
+          <div>
+            <div class="user-name">Miguel García</div>
+            <div class="user-role">Wedding Planner</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <nav class="breadcrumb">
+          <a href="02-dashboard.html">Dashboard</a>
+          <span class="breadcrumb-sep">/</span>
+          <span style="color:var(--on-surface); font-weight:500;">New Wedding</span>
+        </nav>
+      </div>
+
+      <div class="content">
+        <h1 class="page-title">New Wedding</h1>
+        <p class="page-subtitle">Create a new wedding record. You can complete the invitation modules and guest list after saving.</p>
+
+        <!-- Couple -->
+        <div class="form-section">
+          <span class="form-section-label">Couple Information</span>
+            <div class="fields-grid">
+              <div>
+                <label class="input-label" for="bride-name">Bride / Partner 1 *</label>
+                <input id="bride-name" class="input-field" type="text" placeholder="e.g. Sofía Ramírez" />
+              </div>
+              <div>
+                <label class="input-label" for="groom-name">Groom / Partner 2 *</label>
+                <input id="groom-name" class="input-field" type="text" placeholder="e.g. Andrés López" />
+              </div>
+            </div>
+        </div>
+
+        <!-- Date & Venue -->
+        <div class="form-section" style="background:var(--surface-container-low);">
+          <span class="form-section-label">Event Date &amp; Main Venue</span>
+            <div class="fields-grid">
+              <div>
+                <label class="input-label" for="event-date">Wedding Date *</label>
+                <input id="event-date" class="input-field" type="date" />
+              </div>
+              <div>
+                <label class="input-label" for="event-time">Ceremony Start Time</label>
+                <input id="event-time" class="input-field" type="time" value="18:00" />
+              </div>
+              <div>
+                <label class="input-label" for="venue-name">Venue Name *</label>
+                <input id="venue-name" class="input-field" type="text" placeholder="e.g. Nuestra Boda Sofía y Andrés" />
+              </div>
+              <div>
+                <label class="input-label" for="venue-city">City *</label>
+                <input id="venue-city" class="input-field" type="text" placeholder="e.g. CDMX" />
+              </div>
+            </div>
+        </div>
+
+        <!-- Invitation Template (optional) -->
+        <div class="form-section" style="background:var(--surface-container-low);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+            <span class="form-section-label" style="margin-bottom:0;">Online Invitation</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:12px; color:var(--secondary);">Include invitation?</span>
+              <button id="inv-toggle" onclick="toggleInvitation()" style="display:inline-flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer; padding:0;">
+                <div id="inv-track" style="width:36px; height:20px; border-radius:9999px; background:var(--secondary-container); position:relative; transition:background 150ms;">
+                  <div id="inv-knob" style="width:16px; height:16px; border-radius:9999px; background:#fff; position:absolute; top:2px; left:2px; transition:left 150ms; box-shadow:0 1px 3px rgba(0,0,0,0.2);"></div>
+                </div>
+                <span id="inv-label" style="font-size:12px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--secondary);">No</span>
+              </button>
+            </div>
+          </div>
+          <p class="hint" style="margin-bottom:0;">If enabled, select a template. You can customise all invitation modules after saving.</p>
+
+          <div id="inv-panel" style="display:none; margin-top:20px;">
+            <div class="template-grid">
+              <div class="template-option selected" onclick="selectTemplate(this)">
+                <div class="template-thumb" style="background:linear-gradient(135deg,var(--primary-fixed),var(--surface-container-lowest)); color:var(--primary);">Romantico</div>
+                <div class="template-label">Romántico <span class="template-check"></span></div>
+              </div>
+              <div class="template-option" onclick="selectTemplate(this)">
+                <div class="template-thumb" style="background:linear-gradient(135deg,var(--tertiary-fixed),var(--surface-container-lowest)); color:var(--tertiary);">Moderno</div>
+                <div class="template-label">Moderno <span class="template-check"></span></div>
+              </div>
+              <div class="template-option" onclick="selectTemplate(this)">
+                <div class="template-thumb" style="background:linear-gradient(135deg,var(--secondary-fixed),var(--surface-container-lowest)); color:var(--on-surface);">Clasico</div>
+                <div class="template-label">Clásico <span class="template-check"></span></div>
+              </div>
+              <div class="template-option" onclick="selectTemplate(this)">
+                <div class="template-thumb" style="background:linear-gradient(135deg,var(--surface-container-highest),var(--surface-container-lowest)); color:var(--on-surface-variant);">Botanico</div>
+                <div class="template-label">Botánico <span class="template-check"></span></div>
+              </div>
+              <div class="template-option" onclick="selectTemplate(this)">
+                <div class="template-thumb" style="background:linear-gradient(135deg,var(--primary-fixed-dim),var(--surface-container-lowest)); color:var(--on-primary-fixed-variant);">Elegante</div>
+                <div class="template-label">Elegante <span class="template-check"></span></div>
+              </div>
+              <div class="template-option" onclick="selectTemplate(this)">
+                <div class="template-thumb" style="background:linear-gradient(135deg,var(--tertiary-fixed-dim),var(--surface-container-lowest)); color:var(--on-tertiary-fixed-variant);">Rustico</div>
+                <div class="template-label">Rústico <span class="template-check"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <a href="02-dashboard.html" class="btn-cancel">Cancel</a>
+          <button class="btn-save" onclick="window.location.href='05-wedding-detail.html'">Save &amp; Continue →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function selectTemplate(el) {
+      document.querySelectorAll('.template-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    function toggleInvitation() {
+      const on = document.getElementById('inv-track').style.background === 'var(--primary)';
+      const track = document.getElementById('inv-track');
+      const knob  = document.getElementById('inv-knob');
+      const label = document.getElementById('inv-label');
+      const panel = document.getElementById('inv-panel');
+      if (on) {
+        track.style.background = 'var(--secondary-container)';
+        knob.style.left = '2px';
+        label.textContent = 'No';
+        label.style.color = 'var(--secondary)';
+        panel.style.display = 'none';
+      } else {
+        track.style.background = 'var(--primary)';
+        knob.style.left = '18px';
+        label.textContent = 'Yes';
+        label.style.color = 'var(--primary)';
+        panel.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

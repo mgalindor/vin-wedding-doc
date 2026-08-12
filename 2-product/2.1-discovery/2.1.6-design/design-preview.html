@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wendy Planner — Design System Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-preview.css" />
+</head>
+<body>
+<div class="preview-app">
+
+  <!-- ========== Sidebar ========== -->
+  <nav class="sidebar" aria-label="Design system navigation">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-mark">Wendy Planner</span>
+      <span class="sidebar-logo-sub">Design System</span>
+    </div>
+
+    <p class="sidebar-section-label">Foundations</p>
+    <ul class="sidebar-nav">
+      <li><a href="#colors" class="active">Colors</a></li>
+      <li><a href="#typography">Typography</a></li>
+      <li><a href="#spacing">Spacing &amp; Rounding</a></li>
+      <li><a href="#shape-grammar">Pills &amp; Rectangles</a></li>
+      <li><a href="#elevation">Elevation &amp; Depth</a></li>
+    </ul>
+
+    <p class="sidebar-section-label">Components</p>
+    <ul class="sidebar-nav">
+      <li><a href="#buttons">Buttons</a></li>
+      <li><a href="#inputs">Input Fields</a></li>
+      <li><a href="#badges">RSVP Badges</a></li>
+      <li><a href="#table">Guest List Table</a></li>
+      <li><a href="#cards">Dashboard Cards</a></li>
+      <li><a href="#invitation">Invitation Module</a></li>
+      <li><a href="#progress">Progress / Countdown</a></li>
+      <li><a href="#toggle">Toggle Switch</a></li>
+      <li><a href="#status-pip">Status Pips</a></li>
+      <li><a href="#tabs">Tab Bar</a></li>
+      <li><a href="#form-sections">Form Sections</a></li>
+      <li><a href="#nav-patterns">Breadcrumb &amp; Pagination</a></li>
+    </ul>
+
+    <p class="sidebar-section-label">Guidelines</p>
+    <ul class="sidebar-nav">
+      <li><a href="#dosdont">Do's &amp; Don'ts</a></li>
+    </ul>
+  </nav>
+
+  <!-- ========== Main ========== -->
+  <main class="main-content">
+
+    <!-- Page header -->
+    <header class="page-header">
+      <h1 class="page-title">Design System — Wendy Planner</h1>
+      <p class="page-subtitle">A dual-surface design system for a premium wedding management platform. The B2B planner dashboard prioritizes clarity and efficiency; the B2C guest invitation surfaces prioritize romance and editorial elegance.
+</p>
+      <div class="page-meta">
+        <span class="meta-chip">v1.0.0</span>
+        <span class="meta-chip">Sun Aug 09 2026 18:00:00 GMT-0600 (hora estándar central)</span>
+        <span class="meta-chip">internal</span>
+      </div>
+    </header>
+
+    <!-- ===== COLORS ===== -->
+    <section class="section" id="colors">
+      <h2 class="section-title">Colors</h2>
+      <p class="section-desc">
+        Palette anchored by Antique Gold against a Warm Parchment background family — evoking a handwritten invitation on fine cream paper with a gold-foil wax seal.
+      </p>
+
+      
+      <p class="color-group-title">Primary — Antique Gold</p>
+      <div class="color-grid">
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#735c00;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">primary</span>
+            <span class="swatch-hex">#735c00</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ffffff;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-primary</span>
+            <span class="swatch-hex">#ffffff</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#d4af37;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">primary-container</span>
+            <span class="swatch-hex">#d4af37</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#554300;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-primary-container</span>
+            <span class="swatch-hex">#554300</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#e9c349;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">inverse-primary</span>
+            <span class="swatch-hex">#e9c349</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ffe088;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">primary-fixed</span>
+            <span class="swatch-hex">#ffe088</span>
+          </div>
+        </div>
+        
+      </div>
+      
+      <p class="color-group-title">Secondary — Warm Ash</p>
+      <div class="color-grid">
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#605e5c;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">secondary</span>
+            <span class="swatch-hex">#605e5c</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ffffff;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-secondary</span>
+            <span class="swatch-hex">#ffffff</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#e5e2df;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">secondary-container</span>
+            <span class="swatch-hex">#e5e2df</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#c9c6c3;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">secondary-fixed-dim</span>
+            <span class="swatch-hex">#c9c6c3</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#484745;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-secondary-fixed-variant</span>
+            <span class="swatch-hex">#484745</span>
+          </div>
+        </div>
+        
+      </div>
+      
+      <p class="color-group-title">Tertiary — Deep Slate Blue</p>
+      <div class="color-grid">
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#4e6073;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">tertiary</span>
+            <span class="swatch-hex">#4e6073</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ffffff;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-tertiary</span>
+            <span class="swatch-hex">#ffffff</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#a2b5cb;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">tertiary-container</span>
+            <span class="swatch-hex">#a2b5cb</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#354759;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-tertiary-container</span>
+            <span class="swatch-hex">#354759</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#d1e4fb;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">tertiary-fixed</span>
+            <span class="swatch-hex">#d1e4fb</span>
+          </div>
+        </div>
+        
+      </div>
+      
+      <p class="color-group-title">Surfaces — Warm Parchment Family</p>
+      <div class="color-grid">
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#f9f8f7;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">surface</span>
+            <span class="swatch-hex">#f9f8f7</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ffffff;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">surface-container-lowest</span>
+            <span class="swatch-hex">#ffffff</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#f3f2f0;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">surface-container-low</span>
+            <span class="swatch-hex">#f3f2f0</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#eeeceb;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">surface-container</span>
+            <span class="swatch-hex">#eeeceb</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#e8e7e5;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">surface-container-high</span>
+            <span class="swatch-hex">#e8e7e5</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#e3e1e0;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">surface-container-highest</span>
+            <span class="swatch-hex">#e3e1e0</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#2e2c2b;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">inverse-surface</span>
+            <span class="swatch-hex">#2e2c2b</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#1c1b1a;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-surface</span>
+            <span class="swatch-hex">#1c1b1a</span>
+          </div>
+        </div>
+        
+      </div>
+      
+      <p class="color-group-title">Outlines & Accents</p>
+      <div class="color-grid">
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#7f7663;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">outline</span>
+            <span class="swatch-hex">#7f7663</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#d0c5af;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">outline-variant</span>
+            <span class="swatch-hex">#d0c5af</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#4d4635;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">on-surface-variant</span>
+            <span class="swatch-hex">#4d4635</span>
+          </div>
+        </div>
+        
+      </div>
+      
+      <p class="color-group-title">Status — RSVP</p>
+      <div class="color-grid">
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#dcf5e8;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">status-confirmed-bg</span>
+            <span class="swatch-hex">#dcf5e8</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#1a5c35;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">status-confirmed-text</span>
+            <span class="swatch-hex">#1a5c35</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#fff4e0;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">status-pending-bg</span>
+            <span class="swatch-hex">#fff4e0</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#7c4f00;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">status-pending-text</span>
+            <span class="swatch-hex">#7c4f00</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ffdad6;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">error-container</span>
+            <span class="swatch-hex">#ffdad6</span>
+          </div>
+        </div>
+        
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:#ba1a1a;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">error</span>
+            <span class="swatch-hex">#ba1a1a</span>
+          </div>
+        </div>
+        
+      </div>
+      
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TYPOGRAPHY ===== -->
+    <section class="section" id="typography">
+      <h2 class="section-title">Typography</h2>
+      <p class="section-desc">
+        <strong>Playfair Display</strong> for storytelling (display, headlines) · <strong>Inter</strong> for information density (body, UI, data). Full Latin Extended coverage for ES/EN bilingual support.
+      </p>
+
+      <div class="type-specimen">
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">display-lg</span>
+            <span class="type-spec">Playfair Display 700<br/>48px / 60px<br/>-0.02em</span>
+          </div>
+          <div class="type-sample t-display-lg">Aa</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">display-lg-mobile</span>
+            <span class="type-spec">Playfair Display 700<br/>32px / 40px</span>
+          </div>
+          <div class="type-sample t-display-lg-mobile">Aa</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">headline-md</span>
+            <span class="type-spec">Playfair Display 600<br/>32px / 40px</span>
+          </div>
+          <div class="type-sample t-headline-md">The Wedding of Emma &amp; James</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">headline-sm</span>
+            <span class="type-spec">Playfair Display 600<br/>24px / 32px</span>
+          </div>
+          <div class="type-sample t-headline-sm">Guest Overview</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">body-lg</span>
+            <span class="type-spec">Inter 400<br/>18px / 28px</span>
+          </div>
+          <div class="type-sample t-body-lg">We joyfully invite you to celebrate with us.</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">body-md</span>
+            <span class="type-spec">Inter 400<br/>16px / 24px</span>
+          </div>
+          <div class="type-sample t-body-md">Please confirm your attendance before September 1st.</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">body-sm</span>
+            <span class="type-spec">Inter 400<br/>14px / 20px</span>
+          </div>
+          <div class="type-sample t-body-sm">Venue: Gran Salón Montecarlo, CDMX · 19:00 hrs</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">label-caps</span>
+            <span class="type-spec">Inter 600<br/>12px / 16px<br/>0.05em</span>
+          </div>
+          <div class="type-sample t-label-caps">Guest List · Add Guest · RSVP Status</div>
+        </div>
+        
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">data-tabular</span>
+            <span class="type-spec">Inter 500<br/>14px / 20px</span>
+          </div>
+          <div class="type-sample t-data-tabular">142 guests · 98 confirmed · 2026-09-15</div>
+        </div>
+        
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== SPACING & ROUNDING ===== -->
+    <section class="section" id="spacing">
+      <h2 class="section-title">Spacing &amp; Rounding</h2>
+      <p class="section-desc">
+        8px base unit drives all layout rhythm. Shape language is <em>Softly Rounded</em> — professional restraint that remains warm.
+      </p>
+
+      <p class="subsection-title">Border Radius Scale</p>
+      <div class="token-grid">
+        
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:0.25rem;"></div>
+          <span class="token-label">rounded-sm</span>
+          <span class="token-value">4px — checkboxes, chips</span>
+        </div>
+        
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:0.5rem;"></div>
+          <span class="token-label">rounded-base</span>
+          <span class="token-value">8px — buttons, inputs</span>
+        </div>
+        
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:0.75rem;"></div>
+          <span class="token-label">rounded-md</span>
+          <span class="token-value">12px — secondary cards</span>
+        </div>
+        
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:1rem;"></div>
+          <span class="token-label">rounded-lg</span>
+          <span class="token-value">16px — dashboard cards</span>
+        </div>
+        
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:1.5rem;"></div>
+          <span class="token-label">rounded-xl</span>
+          <span class="token-value">24px — invitation modules</span>
+        </div>
+        
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:9999px;"></div>
+          <span class="token-label">rounded-full</span>
+          <span class="token-value">9999px — badges, avatars</span>
+        </div>
+        
+      </div>
+
+      <p class="subsection-title">Spacing Scale (8px base unit)</p>
+      <div class="spacing-grid">
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:8px;"></div>
+          <div class="spacing-info"><span class="token-label">1× unit</span><span class="token-value">8px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:16px;"></div>
+          <div class="spacing-info"><span class="token-label">2× — mobile margin</span><span class="token-value">16px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:24px;"></div>
+          <div class="spacing-info"><span class="token-label">3× — gutter</span><span class="token-value">24px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:40px;"></div>
+          <div class="spacing-info"><span class="token-label">5× — desktop margin</span><span class="token-value">40px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:56px;"></div>
+          <div class="spacing-info"><span class="token-label">7× — table row height</span><span class="token-value">56px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:80px;"></div>
+          <div class="spacing-info"><span class="token-label">10× — invitation module gap</span><span class="token-value">80px</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== PILLS & RECTANGLES ===== -->
+    <section class="section" id="shape-grammar">
+      <h2 class="section-title">Pills &amp; Rectangles</h2>
+      <p class="section-desc">
+        Shape is meaning. <strong>Pills</strong> (<code>rounded-full</code>) signal identity and state — what something <em>is</em>.
+        <strong>Softly-rounded rectangles</strong> (<code>rounded-base → rounded-xl</code>) signal content and action — what something <em>does</em> or <em>contains</em>.
+      </p>
+
+      <div class="shape-grammar-intro">
+        <div class="shape-grammar-col">
+          <div class="shape-grammar-header">
+            <div class="shape-grammar-icon pill"></div>
+            <span class="shape-grammar-title">Pills — rounded-full (9999px)</span>
+          </div>
+          <div class="shape-grammar-body vertical">
+            <div>
+              <p class="subsection-title" style="margin-top:0;">RSVP Status</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="pill-demo status-confirmed">Confirmed</span>
+                <span class="pill-demo status-pending">Pending</span>
+                <span class="pill-demo status-declined">Declined</span>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Guest Categories</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="pill-demo category-family">Family</span>
+                <span class="pill-demo category-friend">Friend</span>
+                <span class="pill-demo category-colleague">Colleague</span>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Dietary Tags</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="pill-demo dietary">Vegetarian</span>
+                <span class="pill-demo dietary">Gluten-free</span>
+                <span class="pill-demo dietary">Vegan</span>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Avatar Chip</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <div class="avatar-chip"><div class="avatar-bubble">EG</div><span class="avatar-name">Emma García</span></div>
+                <div class="avatar-chip"><div class="avatar-bubble" style="background:var(--tertiary-fixed-dim); color:var(--on-tertiary-fixed-variant);">CR</div><span class="avatar-name">Carlos R.</span></div>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Progress Pill Track</p>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <div class="progress-pill"><div class="progress-pill-fill" style="width:69%;"></div></div>
+                <div class="progress-pill"><div class="progress-pill-fill" style="width:40%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="shape-grammar-col">
+          <div class="shape-grammar-header">
+            <div class="shape-grammar-icon rect"></div>
+            <span class="shape-grammar-title">Rectangles — rounded-sm → rounded-xl</span>
+          </div>
+          <div class="shape-grammar-body vertical">
+            <div class="rect-row">
+              
+              <div class="rect-info">
+                <div class="rect-demo" style="width:44px; height:34px; border-radius:0.25rem; font-size:9px;">sm</div>
+                <span class="rect-label">4px<br/>checkboxes, chips</span>
+              </div>
+              
+              <div class="rect-info">
+                <div class="rect-demo" style="width:68px; height:48px; border-radius:0.5rem; font-size:9px;">base</div>
+                <span class="rect-label">8px<br/>buttons, inputs</span>
+              </div>
+              
+              <div class="rect-info">
+                <div class="rect-demo" style="width:92px; height:62px; border-radius:0.75rem; font-size:9px;">md</div>
+                <span class="rect-label">12px<br/>secondary cards</span>
+              </div>
+              
+              <div class="rect-info">
+                <div class="rect-demo" style="width:116px; height:76px; border-radius:1rem; font-size:9px;">lg</div>
+                <span class="rect-label">16px<br/>dashboard cards</span>
+              </div>
+              
+              <div class="rect-info">
+                <div class="rect-demo" style="width:140px; height:90px; border-radius:1.5rem; font-size:9px;">xl</div>
+                <span class="rect-label">24px<br/>invitation modules</span>
+              </div>
+              
+            </div>
+            <div style="margin-top:8px;">
+              <p class="subsection-title" style="margin-top:0;">Buttons (rounded-base)</p>
+              <div style="display:flex; gap:10px;">
+                <button class="btn-primary">Confirm RSVP</button>
+                <button class="btn-secondary">Cancel</button>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Input (rounded-base)</p>
+              <div class="input-wrap" style="width:100%;"><input class="input-field" type="text" placeholder="Guest name…" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grammar-context">
+        <span class="grammar-context-label">Shape grammar in context — Guest List Row</span>
+        <div class="mini-guest-row">
+          <div class="avatar-chip"><div class="avatar-bubble">EG</div><span class="avatar-name">Emma García López</span></div>
+          <div class="mini-pills">
+            <span class="pill-demo status-confirmed" style="font-size:11px; padding:3px 10px;">Confirmed</span>
+            <span class="pill-demo category-family" style="font-size:11px; padding:3px 10px;">Family</span>
+            <span class="pill-demo dietary" style="font-size:11px; padding:3px 10px;">Vegetarian</span>
+          </div>
+          <span class="t-data-tabular" style="margin-left:auto; color:var(--secondary);">Table 01</span>
+        </div>
+        <div class="mini-guest-row">
+          <div class="avatar-chip"><div class="avatar-bubble" style="background:var(--tertiary-fixed-dim); color:var(--on-tertiary-fixed-variant);">MF</div><span class="avatar-name">María Fernández</span></div>
+          <div class="mini-pills">
+            <span class="pill-demo status-pending" style="font-size:11px; padding:3px 10px;">Pending</span>
+            <span class="pill-demo category-friend" style="font-size:11px; padding:3px 10px;">Friend</span>
+            <span class="pill-demo dietary" style="font-size:11px; padding:3px 10px;">Gluten-free</span>
+          </div>
+          <span class="t-data-tabular" style="margin-left:auto; color:var(--secondary);">Table 03</span>
+        </div>
+        <div class="mini-guest-row">
+          <div class="avatar-chip"><div class="avatar-bubble" style="background:var(--error-container); color:var(--on-error-container);">AM</div><span class="avatar-name">Andrés Morales</span></div>
+          <div class="mini-pills">
+            <span class="pill-demo status-declined" style="font-size:11px; padding:3px 10px;">Declined</span>
+            <span class="pill-demo category-colleague" style="font-size:11px; padding:3px 10px;">Colleague</span>
+          </div>
+          <span class="t-data-tabular" style="margin-left:auto; color:var(--secondary);">—</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== ELEVATION ===== -->
+    <section class="section" id="elevation">
+      <h2 class="section-title">Elevation &amp; Depth</h2>
+      <p class="section-desc">Depth via tonal surface shifts — no heavy shadows. A single ambient shadow token is reserved for floating surfaces only.</p>
+
+      <div class="elevation-grid">
+        <div class="elevation-card" style="background:#f9f8f7;">
+          <span class="token-label">Layer 0</span>
+          <span class="elevation-label">surface</span>
+          <span class="elevation-desc">#f9f8f7 · Page background</span>
+        </div>
+        <div class="elevation-card" style="background:#ffffff; box-shadow:0px 2px 12px rgba(18,30,31,0.06);">
+          <span class="token-label">Layer 1</span>
+          <span class="elevation-label">surface-container-lowest</span>
+          <span class="elevation-desc">#ffffff · Content cards<br/>shadow: 0 2 12 / 6%</span>
+        </div>
+        <div class="elevation-card" style="background:#f3f2f0;">
+          <span class="token-label">Layer 2</span>
+          <span class="elevation-label">surface-container-low</span>
+          <span class="elevation-desc">#f3f2f0 · Sidebar, alternating panels</span>
+        </div>
+        <div class="elevation-card" style="background:#ffffff; box-shadow:0px 4px 20px rgba(18,30,31,0.10); border-color:#d4af37;">
+          <span class="token-label">Hover lift</span>
+          <span class="elevation-label">card hover state</span>
+          <span class="elevation-desc">shadow: 0 4 20 / 10%<br/>border → primary-container 150ms</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== BUTTONS ===== -->
+    <section class="section" id="buttons">
+      <h2 class="section-title">Buttons</h2>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Primary Button</span><span class="meta-chip">Hover me</span></div>
+        <div class="component-body">
+          <button class="btn-primary">Confirm RSVP</button>
+          <button class="btn-primary">Save Changes</button>
+          <button class="btn-primary">Add Guest</button>
+        </div>
+      </div>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Secondary Button</span><span class="meta-chip">Hover me</span></div>
+        <div class="component-body">
+          <button class="btn-secondary">Cancel</button>
+          <button class="btn-secondary">Export List</button>
+          <button class="btn-primary">Save Changes</button>
+        </div>
+      </div>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Neutral / Cancel Button (btn-outline)</span><span class="meta-chip">Hover me</span></div>
+        <div class="component-body">
+          <button class="btn-outline">Cancel</button>
+          <button class="btn-outline">Back</button>
+          <button class="btn-primary">Save &amp; Continue →</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== INPUTS ===== -->
+    <section class="section" id="inputs">
+      <h2 class="section-title">Input Fields</h2>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Text Input — States</span></div>
+        <div class="component-body">
+          <div class="input-wrap">
+            <label class="input-label" for="inp-default">Guest Name</label>
+            <input id="inp-default" class="input-field" type="text" placeholder="e.g. Emma García" />
+            <span class="input-helper">Enter the full name as it will appear on the invitation.</span>
+          </div>
+          <div class="input-wrap">
+            <label class="input-label" for="inp-focus">Email Address</label>
+            <input id="inp-focus" class="input-field" type="email" placeholder="guest@example.com" style="border-color:var(--primary); box-shadow:0 0 0 3px rgba(115,92,0,0.12);" />
+            <span class="input-helper">Focus state — gold ring active.</span>
+          </div>
+          <div class="input-wrap">
+            <label class="input-label" for="inp-error">Phone Number</label>
+            <input id="inp-error" class="input-field error" type="text" value="abc-not-a-phone" />
+            <span class="input-helper error">Invalid phone number format.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== BADGES ===== -->
+    <section class="section" id="badges">
+      <h2 class="section-title">RSVP Status Badges</h2>
+      <p class="section-desc">Pill-shaped with three status variants. Always paired with the guest name.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Status Variants</span></div>
+        <div class="component-body">
+          <span class="badge badge-confirmed">Confirmed</span>
+          <span class="badge badge-pending">Pending</span>
+          <span class="badge badge-declined">Declined</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TABLE ===== -->
+    <section class="section" id="table">
+      <h2 class="section-title">Guest List Table</h2>
+      <p class="section-desc">56px row height · <code>data-tabular</code> typography · action icons appear on row hover only.</p>
+
+      <div class="table-wrap">
+        <table class="table-demo">
+          <thead>
+            <tr>
+              <th>Guest Name</th><th>Table</th><th>Dietary</th><th>Status</th><th>RSVP Date</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td>Emma García López</td><td>01</td><td>Vegetarian</td>
+              <td><span class="badge badge-confirmed">Confirmed</span></td><td>2026-07-14</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>Carlos Rodríguez</td><td>02</td><td>None</td>
+              <td><span class="badge badge-confirmed">Confirmed</span></td><td>2026-07-20</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>María Fernández</td><td>03</td><td>Gluten-free</td>
+              <td><span class="badge badge-pending">Pending</span></td><td>—</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>Andrés Morales</td><td>05</td><td>None</td>
+              <td><span class="badge badge-declined">Declined</span></td><td>2026-07-29</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>Sofía Herrera Blanco</td><td>02</td><td>Vegan</td>
+              <td><span class="badge badge-pending">Pending</span></td><td>—</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== DASHBOARD CARDS ===== -->
+    <section class="section" id="cards">
+      <h2 class="section-title">Dashboard Cards</h2>
+      <p class="section-desc">Single clear title + one primary data point. Hover to reveal gold border lift.</p>
+
+      <div class="card-grid">
+        <div class="dashboard-card">
+          <span class="dashboard-card-label">Total Guests</span>
+          <div class="dashboard-card-value">142</div>
+          <span class="t-body-sm" style="color:var(--secondary);">Across 12 tables</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="dashboard-card-label">Confirmed</span>
+          <div class="dashboard-card-value" style="color:var(--status-confirmed-text);">98</div>
+          <span class="t-body-sm" style="color:var(--secondary);">69% response rate</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="dashboard-card-label">Days Until Wedding</span>
+          <div class="dashboard-card-value">35</div>
+          <span class="t-body-sm" style="color:var(--secondary);">September 15, 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== INVITATION MODULE ===== -->
+    <section class="section" id="invitation">
+      <h2 class="section-title">Invitation Module</h2>
+      <p class="section-desc">B2C surface — emotional &amp; ceremonial register. <code>rounded-xl</code> container, Playfair Display, gold divider accent.</p>
+
+      <div class="invitation-card">
+        <p class="invitation-date-label">You are cordially invited</p>
+        <h2 class="invitation-names">Emma &amp; James</h2>
+        <div class="invitation-divider"></div>
+        <p class="invitation-body">Together with their families, they joyfully invite you<br />to share in the celebration of their marriage.</p>
+        <p class="invitation-date">Saturday, 15 September 2026</p>
+        <div class="tag-pair" style="justify-content:center; margin-bottom:24px;">
+          <span class="t-label-caps" style="color:var(--secondary);">Gran Salón Montecarlo</span>
+          <span class="t-body-sm" style="color:var(--secondary);">·</span>
+          <span class="t-label-caps" style="color:var(--secondary);">19:00 hrs</span>
+        </div>
+        <div class="tag-pair" style="justify-content:center;">
+          <button class="btn-primary">Confirm Attendance · Confirmar</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== PROGRESS / COUNTDOWN ===== -->
+    <section class="section" id="progress">
+      <h2 class="section-title">Progress &amp; Countdown</h2>
+      <p class="section-desc">4px gold bar on secondary track. Pairs with <code>headline-sm</code> numeric readout.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Task Completion (Dashboard)</span></div>
+        <div class="component-body vertical">
+          <div class="progress-wrap">
+            <div class="progress-label"><span class="t-label-caps">Guest Confirmations</span><span class="t-label-caps" style="color:var(--primary);">69%</span></div>
+            <div class="progress-track"><div class="progress-bar" style="width:69%;"></div></div>
+          </div>
+          <div class="progress-wrap" style="margin-top:16px;">
+            <div class="progress-label"><span class="t-label-caps">Seating Plan</span><span class="t-label-caps" style="color:var(--primary);">40%</span></div>
+            <div class="progress-track"><div class="progress-bar" style="width:40%;"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">Wedding Countdown (Invitation)</span></div>
+        <div class="component-body">
+          <div style="text-align:center; padding:0 16px;"><div class="countdown-num">35</div><div class="countdown-unit">Days</div></div>
+          <div style="text-align:center; padding:0 16px;"><div class="countdown-num">08</div><div class="countdown-unit">Hours</div></div>
+          <div style="text-align:center; padding:0 16px;"><div class="countdown-num">24</div><div class="countdown-unit">Minutes</div></div>
+          <div style="text-align:center; padding:0 16px;"><div class="countdown-num">51</div><div class="countdown-unit">Seconds</div></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TOGGLE SWITCH ===== -->
+    <section class="section" id="toggle">
+      <h2 class="section-title">Toggle Switch</h2>
+      <p class="section-desc">Binary on/off control for optional features. Never triggers an immediate side-effect; always paired with a Save action.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">States — click to toggle</span></div>
+        <div class="component-body">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')">
+                <div class="toggle-track"><div class="toggle-knob"></div></div>
+              </div>
+              <span class="t-body-sm" style="color:var(--secondary);">Off — feature disabled</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')">
+                <div class="toggle-track on"><div class="toggle-knob"></div></div>
+              </div>
+              <span class="t-body-sm">On — feature active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">In Context — Feature Row</span></div>
+        <div class="component-body" style="padding:0; flex-direction:column; align-items:stretch;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+            <div>
+              <div style="font-size:14px; font-weight:600; color:var(--on-surface);">Online Invitation</div>
+              <div style="font-size:12px; color:var(--secondary); margin-top:2px;">Include a public invitation page for this wedding</div>
+            </div>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; background:var(--surface-container-lowest);">
+            <div>
+              <div style="font-size:14px; font-weight:600; color:var(--on-surface);">Photo Storage</div>
+              <div style="font-size:12px; color:var(--secondary); margin-top:2px;">Enable S3-backed photo storage for this wedding</div>
+            </div>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track"><div class="toggle-knob"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== STATUS PIPS ===== -->
+    <section class="section" id="status-pip">
+      <h2 class="section-title">Status Pips</h2>
+      <p class="section-desc">Compact inline indicators. Four states cover the full lifecycle: <em>complete</em>, <em>in-progress</em>, <em>off</em>, and <em>auto</em>.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">All States</span></div>
+        <div class="component-body">
+          <span class="status-pip pip-complete">✓ Complete</span>
+          <span class="status-pip pip-progress">In Progress</span>
+          <span class="status-pip pip-empty">Off</span>
+          <span class="status-pip pip-auto">✓ Auto</span>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">In Context — Invitation Module Card</span></div>
+        <div class="component-body" style="padding:0; flex-direction:column; align-items:stretch;">
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+            <span style="font-size:20px;">📖</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--on-surface);">Our Story</div><div style="font-size:11px; color:var(--secondary); margin-top:1px;">Narrative text + photo carousel</div></div>
+            <span class="status-pip pip-progress">In Progress</span>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+            <span style="font-size:20px;">✉️</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--on-surface);">RSVP &amp; Guest Access</div><div style="font-size:11px; color:var(--secondary); margin-top:1px;">Attendance confirmation · per-guest links</div></div>
+            <span class="status-pip pip-complete">✓ Complete</span>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--outline-variant); background:var(--surface-container-lowest);">
+            <span style="font-size:20px;">⏱️</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--on-surface);">Countdown</div><div style="font-size:11px; color:var(--secondary); margin-top:1px;">Live countdown — auto from wedding date</div></div>
+            <span class="status-pip pip-auto">✓ Auto</span>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; background:var(--surface-container-lowest); opacity:0.55;">
+            <span style="font-size:20px;">👨‍👩‍👧</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--on-surface);">Parents</div><div style="font-size:11px; color:var(--secondary); margin-top:1px;">Names of both families</div></div>
+            <span class="status-pip pip-empty">Off</span>
+            <div class="toggle-wrap"><div class="toggle-track"><div class="toggle-knob"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TAB BAR ===== -->
+    <section class="section" id="tabs">
+      <h2 class="section-title">Tab Bar</h2>
+      <p class="section-desc">Page-level navigation for complex entities. Numeric badges show item counts; the <em>pending</em> badge uses the amber tone for items requiring attention.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Wedding Detail Tabs — click to switch</span></div>
+        <div class="component-body" style="padding:0; flex-direction:column; align-items:stretch;">
+          <div class="tab-bar" id="ds-tabbar" style="padding:0 24px;">
+            <button class="tab-btn active" onclick="dsTabSwitch(this)">Overview</button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Wedding Data</button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Guests <span class="tab-badge">112</span></button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Photos <span class="tab-badge pending">8</span></button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Invitation</button>
+          </div>
+          <div style="padding:20px 24px; background:var(--surface-container-lowest); font-size:13px; color:var(--secondary);">
+            Active tab panel content renders here.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== FORM SECTIONS ===== -->
+    <section class="section" id="form-sections">
+      <h2 class="section-title">Form Sections</h2>
+      <p class="section-desc">
+        <code>rounded-xl</code> card grouping related fields. A status pip sits flush right — green "Complete" when saved; blue "Save" when the section has unsaved edits.
+      </p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Interactive — edit any field to see the Save pip</span></div>
+        <div class="component-body" style="flex-direction:column; align-items:stretch; gap:16px;">
+          <div class="form-section" data-form-section>
+            <div class="form-section-header">
+              <span class="form-section-label">Couple Information</span>
+              <span class="status-pip pip-complete form-section-pip">&#10003; Complete</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+              <div>
+                <label class="input-label" for="fs-bride">Bride / Partner 1 *</label>
+                <input id="fs-bride" class="input-field" type="text" placeholder="e.g. Sofía Ramírez" oninput="fsSectionDirty(this)" />
+              </div>
+              <div>
+                <label class="input-label" for="fs-groom">Groom / Partner 2 *</label>
+                <input id="fs-groom" class="input-field" type="text" placeholder="e.g. Andrés López" oninput="fsSectionDirty(this)" />
+              </div>
+            </div>
+          </div>
+          <div class="form-section form-section-tinted" data-form-section>
+            <div class="form-section-header">
+              <span class="form-section-label">Event Date &amp; Main Venue</span>
+              <span class="status-pip pip-complete form-section-pip">&#10003; Complete</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+              <div>
+                <label class="input-label" for="fs-date">Wedding Date *</label>
+                <input id="fs-date" class="input-field" type="date" oninput="fsSectionDirty(this)" />
+              </div>
+              <div>
+                <label class="input-label" for="fs-venue">Venue Name *</label>
+                <input id="fs-venue" class="input-field" type="text" placeholder="e.g. Gran Salón Montecarlo" oninput="fsSectionDirty(this)" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== BREADCRUMB & PAGINATION ===== -->
+    <section class="section" id="nav-patterns">
+      <h2 class="section-title">Breadcrumb &amp; Pagination</h2>
+      <p class="section-desc">Navigation affordances shared across all authenticated views.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Breadcrumb</span></div>
+        <div class="component-body">
+          <nav class="breadcrumb">
+            <a href="#">My Weddings</a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="#">Emma &amp; James</a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">Guest List</span>
+          </nav>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">Table Pagination</span></div>
+        <div class="component-body" style="padding:0;">
+          <div class="pagination" style="width:100%;">
+            <span class="page-info">Showing 20 of 142 guests</span>
+            <div class="page-btns">
+              <button class="page-btn">‹</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">…</button>
+              <button class="page-btn">18</button>
+              <button class="page-btn">›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== DO'S & DON'TS ===== -->
+    <section class="section" id="dosdont">
+      <h2 class="section-title">Do's &amp; Don'ts</h2>
+      <p class="section-desc">Core guardrails for maintaining the design system's intent and quality.</p>
+
+      <div class="dos-grid">
+        <div class="dos-col do">
+          <div class="dos-header do">✓ Do</div>
+          <ul class="dos-list">
+            <li>Use <code>display-lg</code> / <code>headline-md</code> (Playfair Display) for the couple's names and wedding date on all guest-facing surfaces.</li>
+            <li>Use <code>primary</code> Gold exclusively for interactive elements in the dashboard.</li>
+            <li>Provide 80px+ vertical breathing room between invitation modules on desktop.</li>
+            <li>Reserve <code>rounded-full</code> exclusively for status badges and avatar chips.</li>
+            <li>Write all UI labels in <code>label-caps</code> — Inter 12px / 600 / tracked / uppercase.</li>
+            <li>Use the <code>data-tabular</code> token in all table cells with numeric or date content.</li>
+            <li>Support both English and Spanish in every UI string from day one.</li>
+          </ul>
+        </div>
+        <div class="dos-col dont">
+          <div class="dos-header dont">✗ Don't</div>
+          <ul class="dos-list">
+            <li>Use <code>primary</code> Gold on decorative shapes, dividers, or illustration fills.</li>
+            <li>Render Playfair Display below 20px — switch to Inter at small sizes.</li>
+            <li>Use full-bleed images on the planner dashboard — they belong to invitation surfaces only.</li>
+            <li>Apply the ambient card shadow to inline table rows, form fields, or nav items.</li>
+            <li>Use more than two type sizes on a single card or panel.</li>
+            <li>Ship a UI string without its Spanish equivalent — untranslated strings are bugs.</li>
+            <li>Use red (<code>error</code>) for any RSVP status other than Declined / error states.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Sidebar active-link on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.sidebar-nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar-nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  function dsTabSwitch(btn) {
+    document.querySelectorAll('#ds-tabbar .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function fsSectionDirty(input) {
+    const section = input.closest('[data-form-section]');
+    const pip = section.querySelector('.form-section-pip');
+    if (pip.classList.contains('pip-save')) return;
+    pip.className = 'status-pip pip-save form-section-pip';
+    pip.textContent = '\u2191 Save';
+    pip.onclick = () => fsSectionSave(section);
+  }
+
+  function fsSectionSave(section) {
+    const pip = section.querySelector('.form-section-pip');
+    pip.className = 'status-pip pip-complete form-section-pip';
+    pip.textContent = '\u2713 Complete';
+    pip.onclick = null;
+  }
+</script>
+</body>
+</html>
