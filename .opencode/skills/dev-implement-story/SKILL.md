@@ -36,8 +36,9 @@ The `story.yaml` structure:
 ```yaml
 story: "{story-id}"
 title: "{story short title}"
-started: YYYY-MM-DD
-updated: YYYY-MM-DD
+started: YYYY-MM-DDTHH:MM:SS
+updated: YYYY-MM-DDTHH:MM:SS
+finished: YYYY-MM-DDTHH:MM:SS
 mode: interactives
 state: "last implemented step"
 steps:

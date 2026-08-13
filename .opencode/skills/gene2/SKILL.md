@@ -71,7 +71,7 @@ Over time, the model evolved: a single prompt can trigger a pipeline of speciali
 - **Spec Driven Development** where specifications are living documents that evolve through the development process, not static documents created upfront
 - **Document-centric collaboration** where documents are the primary medium of communication and coordination between human and AI agents, not just code or chat messages
 
-> **VERY IMPORTANT** gene2 is not a list of prompts or agents or skills. This workspace includes a folder called `./gene2` which contains a toolkit (this toolkit is not gene2 is just a tool) which helps people implement the methodology.  Eg. methodology include the practice Spec driven development and is implemented with the prompt `mk.implement-story.prompt.md` which orchestrates the full story delivery cycle: functional spec → technical design → task list. The prompt is the entry point to the skill, and the skill is the implementation of the practice. The skill can be called directly, but it is better to start with the prompt because it sets the right context and triggers the right agent and model. 
+> **VERY IMPORTANT** gene2 is not a list of prompts or agents or skills. This workspace includes a folder called `./gene2` which contains a toolkit (this toolkit is not gene2 is just a tool) which helps people implement the methodology.  Eg. methodology include the practice Spec driven development and is implemented with the prompt `mk.implement-story.prompt.md` which orchestrates the full story delivery cycle: functional spec → technical design . The prompt is the entry point to the skill, and the skill is the implementation of the practice. The skill can be called directly, but it is better to start with the prompt because it sets the right context and triggers the right agent and model. 
 
 ---
 
@@ -151,7 +151,6 @@ Iterative cycle per story: `Functional Spec → Implementation Plan → Acceptan
 | **User story** | A single sentence expressing a user need: who, what, and why. Does not include rules or acceptance criteria. |
 | **Functional specification** | The detailed elaboration of a user story: rules, scenarios, acceptance criteria, implementation notes. Written just before development. |
 | **Implementation plan** | This is a technical specification. High-level design for a story: APIs needed, data formats, persistence decisions, service boundaries. |
-| **Task list** | Granular, ordered list of coding activities derived from the implementation plan. |
 | **Technical Blueprint** | Code-level architecture guide for a single tier: folder structure, key components, technologies, interaction patterns. |
 | **Release plan** | Groups of backlog items organized into iterations/sprints, based on priority and dependencies. |
 

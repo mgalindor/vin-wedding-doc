@@ -10,7 +10,7 @@ metadata:
 
 # What is a Technical Specification
 
-A technical specification is the **structural design document** that defines what to build and how the parts connect — not how to implement them line by line. It bridges the approved functional specification and the implementation task list.
+A technical specification is the **structural design document** that defines what to build and how the parts connect — not how to implement them line by line. It bridges the approved functional specification and the implementation
 
 It exists to answer: *What components need to change? What are their contracts? How do they connect?*
 

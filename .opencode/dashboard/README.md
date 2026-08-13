@@ -112,7 +112,7 @@ These tags are parsed from the task text and power the table columns and filters
 
 #### Spec Linking
 
-Spec documents (functional specs, tech specs, task lists) are automatically linked to a story row when the spec file's front matter contains a matching `story-id`:
+Spec documents (functional specs, tech specs) are automatically linked to a story row when the spec file's front matter contains a matching `story-id`:
 
 ```yaml
 ---

@@ -23,7 +23,7 @@ Locate the story specification folder using the provided ID. Verify the followin
 
 If any required documents are missing, stop and inform the user before implementation can begin.
 
-Derive the ordered list of implementation tasks from the technical specification. Do not expect a separate task list file.
+Derive the ordered list of implementation tasks from the technical specification. 
 
 Very important: Before starting, find and read **all** blueprints associated with the specified tier to become an expert on the technology listed there.
 

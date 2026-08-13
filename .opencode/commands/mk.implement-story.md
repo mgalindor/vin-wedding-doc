@@ -17,5 +17,5 @@ Locate the story specification folder. Check if story.yaml exists — if it does
 Search skills related to delivering user stories and software development. Use them as needed to complete the steps of the delivery process, updating story.yaml accordingly at each step.
 
 Skip human approval after tech spec has been generated.
-Stop before to review the task lists
+Stop to let human review specs 
 Do not use subagents
