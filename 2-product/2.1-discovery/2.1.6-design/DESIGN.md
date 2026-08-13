@@ -3,7 +3,7 @@ title: Wendy Planner — Design System
 date: 2026-08-10
 type: discovery
 scope: internal
-
+version: 1.0.0
 name: Wendy Planner
 description: >
   A dual-surface design system for a premium wedding management platform.
