@@ -3,9 +3,10 @@ title: "Release Plan — Wendy Planner"
 date: 2026-08-11
 type: management
 scope: internal
-version: 1.3.0
+version: 1.4.0
 updated: 2026-08-13
 revision-history:
+  - v1.4.0 (2026-08-13): marked OPS-023 as completed in Sprint 1. Sprint 1 now has 7 of 11 architecture/DevOps items done (Postgres 17 docker-compose, dev scripts, two-layer .env / .env.local split).
   - v1.3.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed in Sprint 1. Sprint 1 now has 6 of 11 architecture items done.
   - v1.2.0 (2026-08-13): applied evolutionary design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); distributed Prisma migrations to each bounded-context task; added iterative design principle callout.
   - v1.1.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed in Sprint 1. Added Sprint 1 progress section.
@@ -44,11 +45,14 @@ revision-history:
 | ARC-004 Bootstrap Vite + React Web skeleton | ✅ Done | 2026-08-13 | Two lazy route groups, i18n `en`/`es` wired with cookie detection, shadcn `Button`, static build emits `dist/` (chunk split verified). |
 | ARC-005 Bootstrap `@wendy/contracts` package | ✅ Done | 2026-08-13 | 11 branded NanoId types + `nanoid` re-export + decorator-capable tsconfig + decorator-pipeline sanity test (3 tests pass). `fe-adapter` deferred to Sprint 3 per spec. |
 | ARC-008 Initialize Prisma `users` migration | ✅ Done | 2026-08-13 | `schema.prisma` with single `users` model + `UserRole` enum; initial migration `identity_users_initial` generated (forward-only per ADR-11); `PrismaService` (`@Global()`) + `DatabaseConfig` wired into `AppModule`. |
+| OPS-023 Author `docker-compose.yml` for local dev | ✅ Done | 2026-08-13 | Postgres 17 only (no MinIO/MailHog/Redis — those land with their owning stories); `pnpm docker:up/down/logs` scripts at the workspace root; two-layer env: committed `.env` (non-sensitive defaults, externalizes config out of code) + gitignored `.env.local` for sensitive overrides; ConfigModule resolves env files from the monorepo root first. Verified objectively by an independent `@architect` subagent against 12 explicit constraints (all ✅). |
 
-**Story artifacts (2026-08-12):** `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/` (functional-spec, tech-spec, task-list, verification, story.yaml).
+**Story artifacts (2026-08-12):** `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/` (functional-spec, tech-spec, verification, story.yaml).
 **Story artifacts (2026-08-13):** `4-specs/20260813-arc-004-005-008-web-contracts-prisma-users/` (functional-spec, tech-spec, story.yaml).
+**Story artifacts (2026-08-13):** `4-specs/20260813-arc-013-015-036-auth-jwt-rbac-health/` (functional-spec, tech-spec, story.yaml — **approved but not yet implemented**; ARC-013/015/036 trio will be picked up again when the implementation restarts).
+**Story artifacts (2026-08-13):** `4-specs/20260814-ops-023-docker-compose/` (verification only — no functional-spec per user instruction "no requiere spec").
 
-**Sprint 1 remaining**: ARC-013 (JWT), ARC-015 (passport-jwt + RBAC), ARC-036 (Terminus), OPS-023 (docker-compose), OPS-019 (CI workflow), plus the 5 user stories.
+**Sprint 1 remaining**: ARC-013 (JWT), ARC-015 (passport-jwt + RBAC), ARC-036 (Terminus), OPS-019 (CI workflow), plus the 5 user stories.
 
 ### Architecture & DevOps
 
@@ -61,7 +65,7 @@ revision-history:
 - [ ] ARC-015 Implement passport-jwt strategy with RBAC guards [groupBy:: arq] [priority:: 3]
 - [ ] ARC-036 Implement health checks (Terminus) [groupBy:: arq] [priority:: 3]
 - [X] ARC-002 Enforce ESLint boundary rules [groupBy:: arq] [priority:: 2] [completion:: 2026-08-12]
-- [ ] OPS-023 Author `docker-compose.yml` for local dev [groupBy:: devops] [priority:: 3]
+- [X] OPS-023 Author `docker-compose.yml` for local dev (Postgres 17; two-layer .env/.env.local split) [groupBy:: devops] [priority:: 3] [completion:: 2026-08-13]
 - [ ] OPS-019 Author CI workflow (`ci.yml`) [groupBy:: devops] [priority:: 3]
 
 ### User Stories
@@ -257,13 +261,13 @@ The last week of Sprint 6 (2026-10-26 → 2026-11-01) is reserved as buffer for:
 
 | Sprint | Must | Should | Could | Total | Sprint Goal Theme |
 |---|---|---|---|---|---|
-| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (6 of 11 architecture items done) |
+| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (7 of 12 items done: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 on 2026-08-13) |
 | Sprint 2 (Aug 24–Sep 6) | 14 | 4 | 0 | 18 | Weddings & Guests |
 | Sprint 3 (Sep 7–20) | 9 | 3 | 0 | 12 | Invitation Publish & Bilingual UI |
 | Sprint 4 (Sep 21–Oct 4) | 16 | 4 | 0 | 20 | RSVP, Guest Photos & Photo Storage |
 | Sprint 5 (Oct 5–18) | 6 | 14 | 0 | 20 | Hardening, Staging & AWS Foundation |
 | Sprint 6 (Oct 19–Nov 1) | 0 | 0 | 9 | 9 | Pilot Rehearsal, Could-Haves & Buffer |
-| **Total** | **56** | **26** | **9** | **91** | (6 ARC items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 on 2026-08-13) |
+| **Total** | **56** | **26** | **9** | **91** | (7 items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 on 2026-08-13) |
 
 > Note: 113 backlog items − 91 sprint items = 22 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint.
 

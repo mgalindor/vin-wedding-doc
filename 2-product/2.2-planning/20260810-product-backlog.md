@@ -3,9 +3,10 @@ title: "Product Backlog"
 date: 2026-08-10
 type: management
 scope: internal
-version: 1.6.0
+version: 1.7.0
 updated: 2026-08-13
 revision-history:
+  - v1.7.0 (2026-08-13): marked OPS-023 as completed (Postgres 17 docker-compose + dev scripts + two-layer .env/.env.local). ARC-013/015/036 remain `[ ]` — their specs are approved but the implementation was reverted to keep the OPS-023 scope small; the auth/terminus trio will be picked up again when ARC-013/015/036 restart.
   - v1.6.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed (Sprint 1 foundations trio).
   - v1.5.0 (2026-08-13): applied iterative design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); each bounded-context task (ARC-019, ARC-022, ARC-025, ARC-030, ARC-037) now owns its Prisma migration; clarified ARC-035 scope.
   - v1.4.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed. Refined ARC-003 description to reflect the corrected blueprint folder structure (shared/ instead of common/, no infra/).
@@ -204,7 +205,7 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 ### Local Development
 
-- [ ] OPS-023 Author `docker-compose.yml` for local dev - Postgres 15, MinIO (S3 emulation), MailHog (future), Redis (future). One command (`pnpm dev`) brings up the full stack. Per architecture §7.2. [groupBy:: devops] [priority:: 3]
+- [X] OPS-023 Author `docker-compose.yml` for local dev - Postgres 17 (single service, no MinIO/MailHog/Redis — those land with their owning stories). `pnpm docker:up/down/logs` scripts at the workspace root. Two-layer env: committed `.env` with non-sensitive defaults (externalizes config out of code) + gitignored `.env.local` for sensitive overrides. ConfigModule resolves env files from the monorepo root first. Per architecture §7.2. [groupBy:: devops] [priority:: 3] [completion:: 2026-08-13]
 - [ ] OPS-024 Document the local dev setup - One section in the README: clone, `pnpm install`, `docker compose up -d`, `pnpm db:migrate`, `pnpm dev`. Verify a new dev is productive in < 30 min. Per ADR-12 follow-up. [groupBy:: devops] [priority:: 2]
 - [ ] OPS-025 Provide a seed script for local dev - Generates a test `admin@wendy`, a couple of WPs, a couple of weddings with guests and RSVPs, and a few photos. Lets the FE dev render real screens without backend data entry. [groupBy:: devops] [priority:: 2]
 
