@@ -3,8 +3,11 @@ title: "Product Backlog"
 date: 2026-08-10
 type: management
 scope: internal
-version: 1.3.0
-updated: 2026-08-11
+version: 1.4.0
+updated: 2026-08-12
+revision-history:
+  - v1.4.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed. Refined ARC-003 description to reflect the corrected blueprint folder structure (shared/ instead of common/, no infra/).
+  - v1.3.0 (2026-08-11): prior version
 ---
 
 # Product Backlog
@@ -81,9 +84,9 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 > Technical tasks derived from the architecture document and ADRs. Not user stories — these enable the development team to start coding.
 
-- [ ] ARC-001 Bootstrap monorepo with pnpm workspaces - Initialize the `wendy-planner` monorepo with `apps/api`, `apps/web`, and `packages/contracts` workspaces, shared `tsconfig.base.json`, ESLint, and Prettier configs. Per ADR-12. [groupBy:: arq] [priority:: 3]
-- [ ] ARC-002 Enforce ESLint boundary rules - Configure ESLint to prevent cross-app imports (`apps/api` ⇄ `apps/web`) and ensure `packages/*` never imports from `apps/*`. CI fails on violation. Per ADR-12. [groupBy:: arq] [priority:: 2]
-- [ ] ARC-003 Bootstrap NestJS API skeleton with module layout - Generate `apps/api` with the bounded-context folder structure (identity, weddings, guests, invitation, photos, audit, infra, common) per ADR-09. Include `app.module.ts`, `main.ts`, config loader, and health-check module. [groupBy:: arq] [priority:: 3]
+- [X] ARC-001 Bootstrap monorepo with pnpm workspaces - Initialize the `wendy-planner` monorepo with `apps/api`, `apps/web`, and `packages/contracts` workspaces, shared `tsconfig.base.json`, ESLint, and Prettier configs. Per ADR-12. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
+- [X] ARC-002 Enforce ESLint boundary rules - Configure ESLint to prevent cross-app imports (`apps/api` ⇄ `apps/web`) and ensure `packages/*` never imports from `apps/*`. CI fails on violation. Per ADR-12. [groupBy:: arq] [priority:: 2] [completion:: 2026-08-12]
+- [X] ARC-003 Bootstrap NestJS API skeleton with module layout - Generate `apps/api` with the bounded-context folder structure (identity, weddings, guests, invitation, photos, audit) and the cross-cutting `shared/` folder (guards/interceptors/errors/events) per ADR-09 and the backend blueprint §3. Include `app.module.ts`, `main.ts`, typed config (ADR-16), and a health-check module. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
 - [ ] ARC-004 Bootstrap Vite + React Web skeleton - Generate `apps/web` with route groups `(dashboard)` and `(public)` (TanStack Router), i18n directory, and a placeholder layout. Per ADR-02 v2. No Node.js runtime, static build only. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-005 Bootstrap `@wendy/contracts` package - Create `packages/contracts` with `tsconfig.json` (`experimentalDecorators`, `emitDecoratorMetadata`), branded NanoId types module, and a `fe-adapter` exporting `classValidatorResolver` for React Hook Form. Per ADR-13 and ADR-14. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-006 Configure shared typed-config classes - Set up ADR-16 typed config classes (env-based, validated at boot) for API and Web. Each config module fails fast on invalid environment. [groupBy:: arq] [priority:: 2]

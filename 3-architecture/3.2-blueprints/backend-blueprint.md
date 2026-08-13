@@ -3,9 +3,12 @@ title: "Backend Tier Blueprint"
 date: 2026-08-11
 type: architecture
 scope: internal
-version: 1.1.3
-updated: 2026-08-11
+version: 1.2.0
+updated: 2026-08-12
 tier: backend
+revision-history:
+  - v1.2.0 (2026-08-12): added explicit subfolders for future shared services (prisma, s3, secrets) and documented the "config + service" pattern. Fixes the small inconsistency in v1.1.3 where the comment said "PrismaService, S3Client" live in shared/ but only four subfolders (guards/interceptors/errors/events) were listed.
+  - v1.1.3 (2026-08-11): prior version
 ---
 
 # Backend Tier Blueprint
@@ -61,15 +64,64 @@ src/
 │   ├── identity/                # JWT issuance, users, passwords
 │   ├── weddings/                # Wedding aggregate + per-template payload
 │   └── ...                      # guests, invitation, photos, audit — same pattern
-├── shared/                      # cross-context singletons (PrismaService, S3Client)
+├── shared/                      # cross-context singletons (runtime services + cross-cutting concerns)
 │   ├── guards/                  # JwtAuthGuard, PublicTokenGuard, RolesGuard
 │   ├── interceptors/            # audit, traceId, response envelope
 │   ├── errors/                  # DomainError taxonomy + envelope mapper
-│   └── events/                  # in-process EventEmitter wiring
+│   ├── events/                  # in-process EventEmitter wiring
+│   ├── prisma/                  # PrismaService (ARC-008)              ← @Injectable runtime client
+│   ├── s3/                      # S3Service       (ARC-029)             ← @Injectable runtime client
+│   └── secrets/                 # SecretsManagerService (ARC-013)      ← @Injectable runtime client
 ├── config/                      # typed config classes (ADR-16), one per domain
+│   ├── env.config.ts            # generic env vars (NODE_ENV, PORT, LOG_LEVEL)
+│   ├── database.config.ts       # DATABASE_URL, DB_POOL_SIZE            (ARC-008)
+│   ├── jwt.config.ts            # RS256 keys, issuer, ttl              (ARC-013)
+│   ├── s3.config.ts             # bucket, region, access keys          (ARC-029)
+│   └── secrets.config.ts        # Secrets Manager config              (ARC-013)
 ├── health/                      # Terminus controller + custom Prisma/S3 indicators (ADR-17)
-└── main.ts                      # bootstrap: ValidationPipe + pino + Swagger
+└── main.ts                      # bootstrap: ValidationPipe + pino + Swagger + Sentry
 ```
+
+### The "config + service" pattern
+
+Every external connection (Prisma, S3, Secrets Manager, future Redis, etc.) follows the same two-file pattern:
+
+| File | Responsibility | Depends on |
+|---|---|---|
+| `src/config/X.config.ts` | Typed config class with `class-validator` decorators. Validates env vars on boot (ADR-16). Fails fast if a required value is missing. | `process.env` |
+| `src/shared/X/x.service.ts` | `@Injectable()` runtime service that uses the config to construct the real client (Prisma, AWS SDK, etc.). Exposed to bounded contexts via NestJS DI. | `X.config.ts` |
+
+Example for S3 (planned for ARC-029):
+
+```ts
+// src/config/s3.config.ts
+@Injectable()
+export class S3Config {
+  @IsString() S3_BUCKET!: string;
+  @IsString() AWS_REGION!: string;
+  @IsString() S3_ACCESS_KEY_ID!: string;
+  @IsString() S3_SECRET_ACCESS_KEY!: string;
+  static fromEnv(env = process.env): S3Config { /* ... */ }
+}
+
+// src/shared/s3/s3.service.ts
+@Injectable()
+export class S3Service {
+  private readonly client: S3Client;
+  constructor(config: S3Config) {
+    this.client = new S3Client({
+      region: config.AWS_REGION,
+      credentials: {
+        accessKeyId: config.S3_ACCESS_KEY_ID,
+        secretAccessKey: config.S3_SECRET_ACCESS_KEY,
+      },
+    });
+  }
+  presignPut(key: string, contentType: string): string { /* ... */ }
+}
+```
+
+**Why this pattern:** bounded contexts depend on `S3Service` (the runtime adapter), not on `S3Config` (the values). The two files share the same prefix (`s3.`) so the relationship is obvious in the file tree.
 
 ---
 

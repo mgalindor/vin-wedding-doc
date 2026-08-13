@@ -3,8 +3,11 @@ title: "Release Plan — Wendy Planner"
 date: 2026-08-11
 type: management
 scope: internal
-version: 1.0.0
-updated: 2026-08-11
+version: 1.1.0
+updated: 2026-08-12
+revision-history:
+  - v1.1.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed in Sprint 1. Added Sprint 1 progress section.
+  - v1.0.0 (2026-08-11): initial release plan
 ---
 
 # Release Plan — Wendy Planner
@@ -22,17 +25,29 @@ updated: 2026-08-11
 
 **Demo at end of sprint**: Admin opens the platform → creates a WP account → hands credentials out-of-band → WP logs in → sees a "no weddings yet" screen.
 
+### Sprint 1 progress (2026-08-12)
+
+| Item | Status | Completion | Notes |
+|---|---|---|---|
+| ARC-001 Bootstrap monorepo with pnpm workspaces | ✅ Done | 2026-08-12 | `code/` submodule populated with workspace root + 3 workspaces. |
+| ARC-003 Bootstrap NestJS API skeleton with module layout | ✅ Done | 2026-08-12 | 7 modules (6 bounded contexts + health) with 5 subfolders each. |
+| ARC-002 Enforce ESLint boundary rules | ✅ Done | 2026-08-12 | 3 forbidden directions enforced; 7 unit tests pass. |
+
+**Story artifacts:** `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/` (functional-spec, tech-spec, task-list, verification, story.yaml).
+
+**Sprint 1 remaining**: ARC-004 (Vite + React Web), ARC-005 (`@wendy/contracts` package), ARC-008 (Prisma), ARC-013 (JWT), ARC-015 (passport-jwt + RBAC), ARC-036 (Terminus), OPS-023 (docker-compose), OPS-019 (CI workflow), plus the 5 user stories.
+
 ### Architecture & DevOps
 
-- [ ] ARC-001 Bootstrap monorepo with pnpm workspaces [groupBy:: arq] [priority:: 3]
-- [ ] ARC-003 Bootstrap NestJS API skeleton with module layout [groupBy:: arq] [priority:: 3]
+- [X] ARC-001 Bootstrap monorepo with pnpm workspaces [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
+- [X] ARC-003 Bootstrap NestJS API skeleton with module layout [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
 - [ ] ARC-004 Bootstrap Vite + React Web skeleton [groupBy:: arq] [priority:: 3]
 - [ ] ARC-005 Bootstrap `@wendy/contracts` package [groupBy:: arq] [priority:: 3]
 - [ ] ARC-008 Initialize Prisma schema and first migration [groupBy:: arq] [priority:: 3]
 - [ ] ARC-013 Implement JWT auth (RS256) + JWKS [groupBy:: arq] [priority:: 3]
 - [ ] ARC-015 Implement passport-jwt strategy with RBAC guards [groupBy:: arq] [priority:: 3]
 - [ ] ARC-036 Implement health checks (Terminus) [groupBy:: arq] [priority:: 3]
-- [ ] ARC-002 Enforce ESLint boundary rules [groupBy:: arq] [priority:: 2]
+- [X] ARC-002 Enforce ESLint boundary rules [groupBy:: arq] [priority:: 2] [completion:: 2026-08-12]
 - [ ] OPS-023 Author `docker-compose.yml` for local dev [groupBy:: devops] [priority:: 3]
 - [ ] OPS-019 Author CI workflow (`ci.yml`) [groupBy:: devops] [priority:: 3]
 
@@ -227,19 +242,19 @@ The last week of Sprint 6 (2026-10-26 → 2026-11-01) is reserved as buffer for:
 
 | Sprint | Must | Should | Could | Total | Sprint Goal Theme |
 |---|---|---|---|---|---|
-| Sprint 1 (Aug 10–23) | 14 | 1 | 0 | 15 | Foundations & Authentication |
+| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (3 of 11 architecture items done) |
 | Sprint 2 (Aug 24–Sep 6) | 14 | 4 | 0 | 18 | Weddings & Guests |
 | Sprint 3 (Sep 7–20) | 9 | 3 | 0 | 12 | Invitation Publish & Bilingual UI |
 | Sprint 4 (Sep 21–Oct 4) | 16 | 4 | 0 | 20 | RSVP, Guest Photos & Photo Storage |
 | Sprint 5 (Oct 5–18) | 6 | 14 | 0 | 20 | Hardening, Staging & AWS Foundation |
 | Sprint 6 (Oct 19–Nov 1) | 0 | 0 | 9 | 9 | Pilot Rehearsal, Could-Haves & Buffer |
-| **Total** | **59** | **26** | **9** | **94** | |
+| **Total** | **56** | **26** | **9** | **91** | (3 ARC items completed on 2026-08-12) |
 
-> Note: 113 backlog items − 94 sprint items = 19 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint.
+> Note: 113 backlog items − 91 sprint items = 22 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint.
 
 ### Risk callouts
 
-- **Sprint 1 is dense.** 15 items including 11 architecture/infra tasks. The team's first 2 weeks are largely setup; the first user-visible milestone arrives late in Sprint 1 or early Sprint 2. Front-load the conversation with the PO about progress expectations.
+- **Sprint 1 is dense.** 12 items (3 completed on 2026-08-12) including 8 architecture/infra tasks. The team's first 2 weeks are largely setup; the first user-visible milestone arrives late in Sprint 1 or early Sprint 2. Front-load the conversation with the PO about progress expectations.
 - **Sprint 4 is the largest.** 20 items including 10 architecture tasks (mostly the AWS production deploy chain) and 10 user stories. This is the sprint where pilot-wedding functionality comes together. If it slips, Sprint 5/6 absorb the impact.
 - **Sprint 6 is light on purpose.** It is buffer and Could-haves. If the team is on track after Sprint 4, Sprint 5 can absorb hardening work and Sprint 6 becomes pure rehearsal + polish. If Sprint 5 slips, Sprint 6 absorbs the slip.
 
