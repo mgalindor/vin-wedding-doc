@@ -49,15 +49,6 @@ steps:
     status: not-started
   - id: approve-tech-spec
     status: not-started
-  - id: create-task-list
-    status: not-started
-    tiers:
-      - tier: backend
-        status: not-started
-      - tier: web
-        status: not-started
-  - id: approve-task-list
-    status: not-started
   - id: implement-tasks
     tiers:
       - tier: backend
@@ -80,7 +71,7 @@ Status values per step type:
 
 **Very important** : Do not pass to the next step until the current step is finished (done, passed, or approved).
 
-**Human approval gate — BLOCKING RULE** : Every step that produces a document (create-functional-spec, create-tech-spec, create-task-list) MUST stop and wait for explicit human approval before the workflow continues. The agent MUST NOT auto-advance. After presenting the output, stop and remain on hold until the user explicitly says the document is approved. The corresponding HOLD step (approve-functional-spec, approve-tech-spec, approve-task-list) enforces this gate.
+**Human approval gate — BLOCKING RULE** : Every step that produces a document (create-functional-spec, create-tech-spec) MUST stop and wait for explicit human approval before the workflow continues. The agent MUST NOT auto-advance. After presenting the output, stop and remain on hold until the user explicitly says the document is approved. The corresponding HOLD step (approve-functional-spec, approve-tech-spec) enforces this gate.
 
 # Resuming the Process
 

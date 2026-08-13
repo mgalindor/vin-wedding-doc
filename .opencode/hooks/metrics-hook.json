@@ -9,7 +9,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "node .gene2/scripts/analyze-session-logs.js --stdin",
+        "command": "node .opencode/scripts/metrics/analyze-session-logs.js --stdin",
         "cwd": ".",
         "timeout": 30
       }

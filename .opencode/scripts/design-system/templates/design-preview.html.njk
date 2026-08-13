@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ tokens.name }} — Design System Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ cssFile }}" />
+</head>
+<body>
+<div class="preview-app">
+
+  <!-- ========== Sidebar ========== -->
+  <nav class="sidebar" aria-label="Design system navigation">
+    <div class="sidebar-logo">
+      <span class="sidebar-logo-mark">{{ tokens.name }}</span>
+      <span class="sidebar-logo-sub">Design System</span>
+    </div>
+
+    <p class="sidebar-section-label">Foundations</p>
+    <ul class="sidebar-nav">
+      <li><a href="#colors" class="active">Colors</a></li>
+      <li><a href="#typography">Typography</a></li>
+      <li><a href="#spacing">Spacing &amp; Rounding</a></li>
+      <li><a href="#shape-grammar">Pills &amp; Rectangles</a></li>
+      <li><a href="#elevation">Elevation &amp; Depth</a></li>
+    </ul>
+
+    <p class="sidebar-section-label">Components</p>
+    <ul class="sidebar-nav">
+      <li><a href="#buttons">Buttons</a></li>
+      <li><a href="#inputs">Input Fields</a></li>
+      <li><a href="#badges">Status Badges</a></li>
+      <li><a href="#table">Data Table</a></li>
+      <li><a href="#cards">Dashboard Cards</a></li>
+      <li><a href="#toggle">Toggle Switch</a></li>
+      <li><a href="#status-pip">Status Pips</a></li>
+      <li><a href="#tabs">Tab Bar</a></li>
+      <li><a href="#form-sections">Form Sections</a></li>
+      <li><a href="#nav-patterns">Breadcrumb &amp; Pagination</a></li>
+    </ul>
+
+    <p class="sidebar-section-label">Guidelines</p>
+    <ul class="sidebar-nav">
+      <li><a href="#responsive">Responsive</a></li>
+      <li><a href="#dosdont">Do's &amp; Don'ts</a></li>
+    </ul>
+  </nav>
+
+  <!-- ========== Main ========== -->
+  <main class="main-content">
+
+    <!-- Page header -->
+    <header class="page-header">
+      <h1 class="page-title">Design System — {{ tokens.name }}</h1>
+      <p class="page-subtitle">{{ tokens.description }}</p>
+      <div class="page-meta">
+        <span class="meta-chip">v{{ tokens.version }}</span>
+        <span class="meta-chip">{{ tokens.date }}</span>
+        <span class="meta-chip">{{ tokens.scope }}</span>
+      </div>
+    </header>
+
+    <!-- ===== COLORS ===== -->
+    <section class="section" id="colors">
+      <h2 class="section-title">Colors</h2>
+      <p class="section-desc">
+        Full color palette organized by role — primary accent, secondary neutral, tertiary editorial, surface family, outlines, and status indicators.
+      </p>
+
+      {% for group in colorGroups %}
+      <p class="color-group-title">{{ group.title }}</p>
+      <div class="color-grid">
+        {% for swatch in group.swatches %}
+        <div class="color-swatch">
+          <div class="swatch-preview" style="background:{{ swatch.value }};"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">{{ swatch.name }}</span>
+            <span class="swatch-hex">{{ swatch.value }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TYPOGRAPHY ===== -->
+    <section class="section" id="typography">
+      <h2 class="section-title">Typography</h2>
+      <p class="section-desc">
+        <strong>Playfair Display</strong> for storytelling (display, headlines) · <strong>Inter</strong> for information density (body, UI, data). Full Latin Extended coverage for ES/EN bilingual support.
+      </p>
+
+      <div class="type-specimen">
+        {% for entry in typographyEntries %}
+        <div class="type-row">
+          <div class="type-meta">
+            <span class="type-token">{{ entry.name }}</span>
+            <span class="type-spec">{{ entry.specHtml }}</span>
+          </div>
+          <div class="type-sample {{ entry.cssClass }}">{{ entry.sample }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== SPACING & ROUNDING ===== -->
+    <section class="section" id="spacing">
+      <h2 class="section-title">Spacing &amp; Rounding</h2>
+      <p class="section-desc">
+        8px base unit drives all layout rhythm. Shape language is <em>Softly Rounded</em> — professional restraint that remains warm.
+      </p>
+
+      <p class="subsection-title">Border Radius Scale</p>
+      <div class="token-grid">
+        {% for entry in roundedEntries %}
+        <div class="token-card">
+          <div class="rounded-demo" style="border-radius:{{ entry.value }};"></div>
+          <span class="token-label">rounded-{{ entry.name }}</span>
+          <span class="token-value">{{ entry.px }}{% if entry.usage %} — {{ entry.usage }}{% endif %}</span>
+        </div>
+        {% endfor %}
+      </div>
+
+      <p class="subsection-title">Spacing Scale ({{ tokens.spacing.unit }} base unit)</p>
+      <div class="spacing-grid">
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:8px;"></div>
+          <div class="spacing-info"><span class="token-label">1× unit</span><span class="token-value">8px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:16px;"></div>
+          <div class="spacing-info"><span class="token-label">2× — mobile margin</span><span class="token-value">{{ tokens.spacing['margin-mobile'] }}</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:24px;"></div>
+          <div class="spacing-info"><span class="token-label">3× — gutter</span><span class="token-value">{{ tokens.spacing.gutter }}</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:40px;"></div>
+          <div class="spacing-info"><span class="token-label">5× — desktop margin</span><span class="token-value">{{ tokens.spacing['margin-desktop'] }}</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:56px;"></div>
+          <div class="spacing-info"><span class="token-label">7× — table row height</span><span class="token-value">56px</span></div>
+        </div>
+        <div class="spacing-row">
+          <div class="spacing-bar" style="width:80px;"></div>
+          <div class="spacing-info"><span class="token-label">10× — section gap</span><span class="token-value">80px</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== PILLS & RECTANGLES ===== -->
+    <section class="section" id="shape-grammar">
+      <h2 class="section-title">Pills &amp; Rectangles</h2>
+      <p class="section-desc">
+        Shape is meaning. <strong>Pills</strong> (<code>rounded-full</code>) signal identity and state — what something <em>is</em>.
+        <strong>Softly-rounded rectangles</strong> (<code>rounded-base → rounded-xl</code>) signal content and action — what something <em>does</em> or <em>contains</em>.
+      </p>
+
+      <div class="shape-grammar-intro">
+        <div class="shape-grammar-col">
+          <div class="shape-grammar-header">
+            <div class="shape-grammar-icon pill"></div>
+            <span class="shape-grammar-title">Pills — rounded-full (9999px)</span>
+          </div>
+          <div class="shape-grammar-body vertical">
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Status</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="pill-demo status-confirmed">Confirmed</span>
+                <span class="pill-demo status-pending">Pending</span>
+                <span class="pill-demo status-declined">Declined</span>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Categories</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="pill-demo category-family">Family</span>
+                <span class="pill-demo category-friend">Friend</span>
+                <span class="pill-demo category-colleague">Colleague</span>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Tags</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="pill-demo dietary">Tag A</span>
+                <span class="pill-demo dietary">Tag B</span>
+                <span class="pill-demo dietary">Tag C</span>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Avatar Chip</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <div class="avatar-chip"><div class="avatar-bubble">AJ</div><span class="avatar-name">Alice Johnson</span></div>
+                <div class="avatar-chip"><div class="avatar-bubble" style="background:var(--tertiary-fixed-dim); color:var(--on-tertiary-fixed-variant);">BS</div><span class="avatar-name">Bob Smith</span></div>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Progress Pill Track</p>
+              <div style="display:flex; flex-direction:column; gap:6px;">
+                <div class="progress-pill"><div class="progress-pill-fill" style="width:69%;"></div></div>
+                <div class="progress-pill"><div class="progress-pill-fill" style="width:40%;"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="shape-grammar-col">
+          <div class="shape-grammar-header">
+            <div class="shape-grammar-icon rect"></div>
+            <span class="shape-grammar-title">Rectangles — rounded-sm → rounded-xl</span>
+          </div>
+          <div class="shape-grammar-body vertical">
+            <div class="rect-row">
+              {% for entry in roundedEntries %}{% if entry.name != 'full' %}
+              <div class="rect-info">
+                <div class="rect-demo" style="width:{{ loop.index * 24 + 20 }}px; height:{{ loop.index * 14 + 20 }}px; border-radius:{{ entry.value }}; font-size:9px;">{{ entry.name }}</div>
+                <span class="rect-label">{{ entry.px }}<br/>{{ entry.usage }}</span>
+              </div>
+              {% endif %}{% endfor %}
+            </div>
+            <div style="margin-top:8px;">
+              <p class="subsection-title" style="margin-top:0;">Buttons (rounded-base)</p>
+              <div style="display:flex; gap:10px;">
+                <button class="btn-primary">Save</button>
+                <button class="btn-secondary">Cancel</button>
+              </div>
+            </div>
+            <div>
+              <p class="subsection-title" style="margin-top:0;">Input (rounded-base)</p>
+              <div class="input-wrap" style="width:100%;"><input class="input-field" type="text" placeholder="Guest name…" /></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grammar-context">
+        <span class="grammar-context-label">Shape grammar in context — Data Row</span>
+        <div class="mini-guest-row">
+          <div class="avatar-chip"><div class="avatar-bubble">AJ</div><span class="avatar-name">Alice Johnson</span></div>
+          <div class="mini-pills">
+            <span class="pill-demo status-confirmed" style="font-size:11px; padding:3px 10px;">Confirmed</span>
+            <span class="pill-demo category-family" style="font-size:11px; padding:3px 10px;">Group A</span>
+            <span class="pill-demo dietary" style="font-size:11px; padding:3px 10px;">Tag A</span>
+          </div>
+          <span class="t-data-tabular" style="margin-left:auto; color:var(--secondary);">ID-001</span>
+        </div>
+        <div class="mini-guest-row">
+          <div class="avatar-chip"><div class="avatar-bubble" style="background:var(--tertiary-fixed-dim); color:var(--on-tertiary-fixed-variant);">BS</div><span class="avatar-name">Bob Smith</span></div>
+          <div class="mini-pills">
+            <span class="pill-demo status-pending" style="font-size:11px; padding:3px 10px;">Pending</span>
+            <span class="pill-demo category-friend" style="font-size:11px; padding:3px 10px;">Group B</span>
+            <span class="pill-demo dietary" style="font-size:11px; padding:3px 10px;">Tag B</span>
+          </div>
+          <span class="t-data-tabular" style="margin-left:auto; color:var(--secondary);">ID-002</span>
+        </div>
+        <div class="mini-guest-row">
+          <div class="avatar-chip"><div class="avatar-bubble" style="background:var(--error-container); color:var(--on-error-container);">CD</div><span class="avatar-name">Carol Davis</span></div>
+          <div class="mini-pills">
+            <span class="pill-demo status-declined" style="font-size:11px; padding:3px 10px;">Declined</span>
+            <span class="pill-demo category-colleague" style="font-size:11px; padding:3px 10px;">Group C</span>
+          </div>
+          <span class="t-data-tabular" style="margin-left:auto; color:var(--secondary);">—</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== ELEVATION ===== -->
+    <section class="section" id="elevation">
+      <h2 class="section-title">Elevation &amp; Depth</h2>
+      <p class="section-desc">Depth via tonal surface shifts — no heavy shadows. A single ambient shadow token is reserved for floating surfaces only.</p>
+
+      <div class="elevation-grid">
+        <div class="elevation-card" style="background:{{ tokens.colors.surface }};">
+          <span class="token-label">Layer 0</span>
+          <span class="elevation-label">surface</span>
+          <span class="elevation-desc">{{ tokens.colors.surface }} · Page background</span>
+        </div>
+        <div class="elevation-card" style="background:{{ tokens.colors['surface-container-lowest'] }}; box-shadow:0px 2px 12px rgba(18,30,31,0.06);">
+          <span class="token-label">Layer 1</span>
+          <span class="elevation-label">surface-container-lowest</span>
+          <span class="elevation-desc">{{ tokens.colors['surface-container-lowest'] }} · Content cards<br/>shadow: 0 2 12 / 6%</span>
+        </div>
+        <div class="elevation-card" style="background:{{ tokens.colors['surface-container-low'] }};">
+          <span class="token-label">Layer 2</span>
+          <span class="elevation-label">surface-container-low</span>
+          <span class="elevation-desc">{{ tokens.colors['surface-container-low'] }} · Sidebar, alternating panels</span>
+        </div>
+        <div class="elevation-card" style="background:{{ tokens.colors['surface-container-lowest'] }}; box-shadow:0px 4px 20px rgba(18,30,31,0.10); border-color:{{ tokens.colors['primary-container'] }};">
+          <span class="token-label">Hover lift</span>
+          <span class="elevation-label">card hover state</span>
+          <span class="elevation-desc">shadow: 0 4 20 / 10%<br/>border → primary-container 150ms</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== COMPONENTS ===== -->
+    <section class="section" id="buttons">
+      <h2 class="section-title">Components</h2>
+      <p class="section-desc">All components derived from the <code>components:</code> block in the design spec.</p>
+
+      <div class="comp-card-grid">
+        {% for card in componentCards %}
+        <div class="comp-card">
+          <span class="comp-card-label"><span>{{ card.name }}</span>{% if card.subtitle %} · {{ card.subtitle }}{% endif %}</span>
+          <div class="comp-card-preview">{{ card.previewHtml }}</div>
+          {% if card.desc %}<p class="comp-card-desc">{{ card.desc }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== INPUTS ===== -->
+    <section class="section" id="inputs">
+      <h2 class="section-title">Input Fields</h2>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Text Input — States</span></div>
+        <div class="component-body">
+          <div class="input-wrap">
+            <label class="input-label" for="inp-default">Full Name</label>
+            <input id="inp-default" class="input-field" type="text" placeholder="e.g. Jane Smith" />
+            <span class="input-helper">Enter the full name as it appears in the system.</span>
+          </div>
+          <div class="input-wrap">
+            <label class="input-label" for="inp-focus">Email Address</label>
+            <input id="inp-focus" class="input-field" type="email" placeholder="guest@example.com" style="border-color:var(--primary); box-shadow:0 0 0 3px rgba(115,92,0,0.12);" />
+            <span class="input-helper">Focus state — gold ring active.</span>
+          </div>
+          <div class="input-wrap">
+            <label class="input-label" for="inp-error">Phone Number</label>
+            <input id="inp-error" class="input-field error" type="text" value="abc-not-a-phone" />
+            <span class="input-helper error">Invalid phone number format.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== BADGES ===== -->
+    <section class="section" id="badges">
+      <h2 class="section-title">Status Badges</h2>
+      <p class="section-desc">Pill-shaped with three status variants. Always paired with the record identifier.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Status Variants</span></div>
+        <div class="component-body">
+          <span class="badge badge-confirmed">Confirmed</span>
+          <span class="badge badge-pending">Pending</span>
+          <span class="badge badge-declined">Declined</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TABLE ===== -->
+    <section class="section" id="table">
+      <h2 class="section-title">Data Table</h2>
+      <p class="section-desc">56px row height · <code>data-tabular</code> typography · action icons appear on row hover only.</p>
+
+      <div class="table-wrap">
+        <table class="table-demo">
+          <thead>
+            <tr>
+              <th>Name</th><th>Group</th><th>Tag</th><th>Status</th><th>Date</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="selected">
+              <td>Alice Johnson</td><td>A1</td><td>Tag A</td>
+              <td><span class="badge badge-confirmed">Confirmed</span></td><td>2026-07-14</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>Bob Smith</td><td>A2</td><td>—</td>
+              <td><span class="badge badge-confirmed">Confirmed</span></td><td>2026-07-20</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>Carol Davis</td><td>B1</td><td>Tag B</td>
+              <td><span class="badge badge-pending">Pending</span></td><td>—</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>David Lee</td><td>B2</td><td>—</td>
+              <td><span class="badge badge-declined">Declined</span></td><td>2026-07-29</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+            <tr>
+              <td>Eve Martinez</td><td>A2</td><td>Tag C</td>
+              <td><span class="badge badge-pending">Pending</span></td><td>—</td>
+              <td><div class="row-actions"><button class="row-action-btn" title="Edit">✎</button><button class="row-action-btn" title="Delete">✕</button></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== DASHBOARD CARDS ===== -->
+    <section class="section" id="cards">
+      <h2 class="section-title">Dashboard Cards</h2>
+      <p class="section-desc">Single clear title + one primary data point. Hover to reveal gold border lift.</p>
+
+      <div class="card-grid">
+        <div class="dashboard-card">
+          <span class="dashboard-card-label">Total Records</span>
+          <div class="dashboard-card-value">142</div>
+          <span class="t-body-sm" style="color:var(--secondary);">Across 12 groups</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="dashboard-card-label">Active</span>
+          <div class="dashboard-card-value" style="color:var(--status-confirmed-text);">98</div>
+          <span class="t-body-sm" style="color:var(--secondary);">69% completion rate</span>
+        </div>
+        <div class="dashboard-card">
+          <span class="dashboard-card-label">Days Until Event</span>
+          <div class="dashboard-card-value">35</div>
+          <span class="t-body-sm" style="color:var(--secondary);">September 15, 2026</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TOGGLE SWITCH ===== -->
+    <section class="section" id="toggle">
+      <h2 class="section-title">Toggle Switch</h2>
+      <p class="section-desc">Binary on/off control for optional features. Never triggers an immediate side-effect; always paired with a Save action.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">States — click to toggle</span></div>
+        <div class="component-body">
+          <div style="display:flex; flex-direction:column; gap:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')">
+                <div class="toggle-track"><div class="toggle-knob"></div></div>
+              </div>
+              <span class="t-body-sm" style="color:var(--secondary);">Off — feature disabled</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')">
+                <div class="toggle-track on"><div class="toggle-knob"></div></div>
+              </div>
+              <span class="t-body-sm">On — feature active</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">In Context — Feature Row</span></div>
+        <div class="component-body" style="padding:0; flex-direction:column; align-items:stretch;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; border-bottom:1px solid var(--doc-border); background:#ffffff;">
+            <div>
+              <div style="font-size:14px; font-weight:600; color:var(--doc-text);">Email Notifications</div>
+              <div style="font-size:12px; color:var(--doc-text-muted); margin-top:2px;">Send automated email notifications to users</div>
+            </div>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px; background:#ffffff;">
+            <div>
+              <div style="font-size:14px; font-weight:600; color:var(--doc-text);">File Storage</div>
+              <div style="font-size:12px; color:var(--doc-text-muted); margin-top:2px;">Enable cloud file storage for this record</div>
+            </div>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track"><div class="toggle-knob"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== STATUS PIPS ===== -->
+    <section class="section" id="status-pip">
+      <h2 class="section-title">Status Pips</h2>
+      <p class="section-desc">Compact inline indicators. Four states cover the full lifecycle: <em>complete</em>, <em>in-progress</em>, <em>off</em>, and <em>auto</em>.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">All States</span></div>
+        <div class="component-body">
+          <span class="status-pip pip-complete">✓ Complete</span>
+          <span class="status-pip pip-progress">In Progress</span>
+          <span class="status-pip pip-empty">Off</span>
+          <span class="status-pip pip-auto">✓ Auto</span>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">In Context — Feature Module Card</span></div>
+        <div class="component-body" style="padding:0; flex-direction:column; align-items:stretch;">
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--doc-border); background:#ffffff;">
+            <span style="font-size:20px;">📄</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--doc-text);">Profile Details</div><div style="font-size:11px; color:var(--doc-text-muted); margin-top:1px;">Text content + media gallery</div></div>
+            <span class="status-pip pip-progress">In Progress</span>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--doc-border); background:#ffffff;">
+            <span style="font-size:20px;">🔐</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--doc-text);">Access &amp; Permissions</div><div style="font-size:11px; color:var(--doc-text-muted); margin-top:1px;">User confirmation · per-user links</div></div>
+            <span class="status-pip pip-complete">✓ Complete</span>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--doc-border); background:#ffffff;">
+            <span style="font-size:20px;">⏱️</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--doc-text);">Scheduled Task</div><div style="font-size:11px; color:var(--doc-text-muted); margin-top:1px;">Automated — derived from event date</div></div>
+            <span class="status-pip pip-auto">✓ Auto</span>
+            <div class="toggle-wrap" onclick="this.querySelector('.toggle-track').classList.toggle('on')"><div class="toggle-track on"><div class="toggle-knob"></div></div></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; background:#ffffff; opacity:0.55;">
+            <span style="font-size:20px;">📎</span>
+            <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:600; color:var(--doc-text);">Optional Info</div><div style="font-size:11px; color:var(--doc-text-muted); margin-top:1px;">Additional metadata</div></div>
+            <span class="status-pip pip-empty">Off</span>
+            <div class="toggle-wrap"><div class="toggle-track"><div class="toggle-knob"></div></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== TAB BAR ===== -->
+    <section class="section" id="tabs">
+      <h2 class="section-title">Tab Bar</h2>
+      <p class="section-desc">Page-level navigation for complex entities. Numeric badges show item counts; the <em>pending</em> badge uses the amber tone for items requiring attention.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Detail View Tabs — click to switch</span></div>
+        <div class="component-body" style="padding:0; flex-direction:column; align-items:stretch;">
+          <div class="tab-bar" id="ds-tabbar" style="padding:0 24px;">
+            <button class="tab-btn active" onclick="dsTabSwitch(this)">Overview</button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Details</button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Users <span class="tab-badge">112</span></button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Files <span class="tab-badge pending">8</span></button>
+            <button class="tab-btn" onclick="dsTabSwitch(this)">Settings</button>
+          </div>
+          <div style="padding:20px 24px; background:#ffffff; font-size:13px; color:var(--doc-text-muted);">
+            Active tab panel content renders here.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== FORM SECTIONS ===== -->
+    <section class="section" id="form-sections">
+      <h2 class="section-title">Form Sections</h2>
+      <p class="section-desc">
+        <code>rounded-xl</code> card grouping related fields. A status pip sits flush right — green "Complete" when saved; blue "Save" when the section has unsaved edits.
+      </p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Interactive — edit any field to see the Save pip</span></div>
+        <div class="component-body" style="flex-direction:column; align-items:stretch; gap:16px;">
+          <div class="form-section" data-form-section>
+            <div class="form-section-header">
+              <span class="form-section-label">Basic Information</span>
+              <span class="status-pip pip-complete form-section-pip">&#10003; Complete</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+              <div>
+                <label class="input-label" for="fs-bride">First Name *</label>
+                <input id="fs-bride" class="input-field" type="text" placeholder="e.g. Jane" oninput="fsSectionDirty(this)" />
+              </div>
+              <div>
+                <label class="input-label" for="fs-groom">Last Name *</label>
+                <input id="fs-groom" class="input-field" type="text" placeholder="e.g. Smith" oninput="fsSectionDirty(this)" />
+              </div>
+            </div>
+          </div>
+          <div class="form-section form-section-tinted" data-form-section>
+            <div class="form-section-header">
+              <span class="form-section-label">Date &amp; Location</span>
+              <span class="status-pip pip-complete form-section-pip">&#10003; Complete</span>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+              <div>
+                <label class="input-label" for="fs-date">Start Date *</label>
+                <input id="fs-date" class="input-field" type="date" oninput="fsSectionDirty(this)" />
+              </div>
+              <div>
+                <label class="input-label" for="fs-venue">Location *</label>
+                <input id="fs-venue" class="input-field" type="text" placeholder="e.g. Main Office" oninput="fsSectionDirty(this)" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== BREADCRUMB & PAGINATION ===== -->
+    <section class="section" id="nav-patterns">
+      <h2 class="section-title">Breadcrumb &amp; Pagination</h2>
+      <p class="section-desc">Navigation affordances shared across all authenticated views.</p>
+
+      <div class="component-section">
+        <div class="component-header"><span class="component-name">Breadcrumb</span></div>
+        <div class="component-body">
+          <nav class="breadcrumb">
+            <a href="#">My Projects</a>
+            <span class="breadcrumb-sep">/</span>
+            <a href="#">Project Alpha</a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">Users</span>
+          </nav>
+        </div>
+      </div>
+
+      <div class="component-section" style="margin-top:16px;">
+        <div class="component-header"><span class="component-name">Table Pagination</span></div>
+        <div class="component-body" style="padding:0;">
+          <div class="pagination" style="width:100%;">
+            <span class="page-info">Showing 20 of 142 records</span>
+            <div class="page-btns">
+              <button class="page-btn">‹</button>
+              <button class="page-btn active">1</button>
+              <button class="page-btn">2</button>
+              <button class="page-btn">3</button>
+              <button class="page-btn">…</button>
+              <button class="page-btn">18</button>
+              <button class="page-btn">›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== RESPONSIVE ===== -->
+    <section class="section" id="responsive">
+      <h2 class="section-title">Responsive Behavior</h2>
+      <p class="section-desc">Breakpoints, touch targets, and collapsing strategy extracted from the design spec.</p>
+
+      {% if responsive.rows.length %}
+      <table class="bp-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Width</th>
+            <th>Key Changes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in responsive.rows %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td>{{ row.width }}</td>
+            <td>{{ row.changes }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      {% if responsive.rulerBands.length %}
+      <div class="bp-ruler" aria-hidden="true">
+        {% for band in responsive.rulerBands %}
+        <div class="bp-ruler-band" style="flex:{{ band.endPx }};">
+          <span class="bp-ruler-band-label">{{ band.label }}</span>
+          <span class="bp-ruler-band-px">{{ band.displayPx }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if responsive.notesHtml %}
+      <div class="bp-notes">{{ responsive.notesHtml }}</div>
+      {% endif %}
+      {% else %}
+      <p class="section-desc">No breakpoint table found in the design spec.</p>
+      {% endif %}
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ===== DO'S & DON'TS ===== -->
+    <section class="section" id="dosdont">
+      <h2 class="section-title">Do's &amp; Don'ts</h2>
+      <p class="section-desc">Core guardrails for maintaining the design system's intent and quality.</p>
+
+      <div class="dos-grid">
+        <div class="dos-col do">
+          <div class="dos-header do">✓ Do</div>
+          <ul class="dos-list">
+            {% for item in dosDonts.dos %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="dos-col dont">
+          <div class="dos-header dont">✗ Don't</div>
+          <ul class="dos-list">
+            {% for item in dosDonts.donts %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Sidebar active-link on scroll
+  const sections = document.querySelectorAll('.section[id]');
+  const links = document.querySelectorAll('.sidebar-nav a');
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar-nav a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  links.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  function dsTabSwitch(btn) {
+    document.querySelectorAll('#ds-tabbar .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function fsSectionDirty(input) {
+    const section = input.closest('[data-form-section]');
+    const pip = section.querySelector('.form-section-pip');
+    if (pip.classList.contains('pip-save')) return;
+    pip.className = 'status-pip pip-save form-section-pip';
+    pip.textContent = '\u2191 Save';
+    pip.onclick = () => fsSectionSave(section);
+  }
+
+  function fsSectionSave(section) {
+    const pip = section.querySelector('.form-section-pip');
+    pip.className = 'status-pip pip-complete form-section-pip';
+    pip.textContent = '\u2713 Complete';
+    pip.onclick = null;
+  }
+</script>
+</body>
+</html>
