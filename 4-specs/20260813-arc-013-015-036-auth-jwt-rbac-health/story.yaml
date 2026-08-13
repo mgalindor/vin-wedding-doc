@@ -1,0 +1,23 @@
+---
+story: "ARC-013+ARC-015+ARC-036"
+title: "JWT auth (RS256+JWKS), passport-jwt RBAC, and Terminus health checks"
+started: 2026-08-13
+updated: 2026-08-13
+mode: yolo
+steps:
+  - id: create-functional-spec
+    status: done
+  - id: approve-functional-spec
+    status: approved
+  - id: create-tech-spec
+    status: done
+  - id: approve-tech-spec
+    status: approved
+  - id: implement-tasks
+    tiers:
+      - tier: backend
+        status: not-started
+  - id: functional-verification
+    status: not-started
+  - id: mark-as-done-story
+---

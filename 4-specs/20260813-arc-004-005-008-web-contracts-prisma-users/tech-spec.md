@@ -18,8 +18,6 @@ layers:
 
 **Status: ✅ Approved (yolo mode — auto-approved to unblock Sprint 1 closure)**
 
-> **Deviation note**: The standard `dev-implement-story` workflow does not include separate `create-task-list` and `approve-task-list` steps — those are folded into `implement-tasks`. Per explicit product-team instructions for this delivery run, a dedicated task-list approval gate is added between `approve-tech-spec` and `implement-tasks`. The workflow shape (functional → tech → task list → implement → verify) matches the Gene2 spec-driven development practice.
-
 ---
 
 ## Scope
