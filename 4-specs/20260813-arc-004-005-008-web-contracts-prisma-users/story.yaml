@@ -1,0 +1,25 @@
+---
+story: "ARC-004+ARC-005+ARC-008"
+title: "Bootstrap Web skeleton, @wendy/contracts package, and Prisma users migration"
+started: 2026-08-13
+updated: 2026-08-13
+mode: yolo
+steps:
+  - id: create-functional-spec
+    status: done
+  - id: approve-functional-spec
+    status: approved
+  - id: create-tech-spec
+    status: done
+  - id: approve-tech-spec
+    status: approved
+  - id: implement-tasks
+    tiers:
+      - tier: backend
+        status: done
+      - tier: web
+        status: done
+  - id: functional-verification
+    status: not-started
+  - id: mark-as-done-story
+---

@@ -3,9 +3,11 @@ title: "Release Plan — Wendy Planner"
 date: 2026-08-11
 type: management
 scope: internal
-version: 1.1.0
-updated: 2026-08-12
+version: 1.3.0
+updated: 2026-08-13
 revision-history:
+  - v1.3.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed in Sprint 1. Sprint 1 now has 6 of 11 architecture items done.
+  - v1.2.0 (2026-08-13): applied evolutionary design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); distributed Prisma migrations to each bounded-context task; added iterative design principle callout.
   - v1.1.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed in Sprint 1. Added Sprint 1 progress section.
   - v1.0.0 (2026-08-11): initial release plan
 ---
@@ -16,6 +18,8 @@ revision-history:
 > **Window**: 6 sprints × 2 weeks = 12 weeks (2026-08-10 → 2026-11-01 build complete; 2026-11-10 hard MVP target).
 > **Success metric**: 2 real weddings captured end-to-end (admin onboarding → wedding create → published invitation → RSVPs → photo download).
 > **Strategy**: Vertical slices — every sprint ships a working, testable increment. Risk and infrastructure first, features in dependency order, Could-haves at the end.
+
+> **Evolutionary design principle**: Each sprint scopes only what is needed to deliver its goal. Database schema, DTOs, and shared contracts grow one migration at a time — each bounded context owns its Prisma migration. Never pre-build models or DTOs for features arriving in a future sprint.
 
 ---
 
@@ -33,17 +37,26 @@ revision-history:
 | ARC-003 Bootstrap NestJS API skeleton with module layout | ✅ Done | 2026-08-12 | 7 modules (6 bounded contexts + health) with 5 subfolders each. |
 | ARC-002 Enforce ESLint boundary rules | ✅ Done | 2026-08-12 | 3 forbidden directions enforced; 7 unit tests pass. |
 
-**Story artifacts:** `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/` (functional-spec, tech-spec, task-list, verification, story.yaml).
+### Sprint 1 progress (2026-08-13)
 
-**Sprint 1 remaining**: ARC-004 (Vite + React Web), ARC-005 (`@wendy/contracts` package), ARC-008 (Prisma), ARC-013 (JWT), ARC-015 (passport-jwt + RBAC), ARC-036 (Terminus), OPS-023 (docker-compose), OPS-019 (CI workflow), plus the 5 user stories.
+| Item | Status | Completion | Notes |
+|---|---|---|---|
+| ARC-004 Bootstrap Vite + React Web skeleton | ✅ Done | 2026-08-13 | Two lazy route groups, i18n `en`/`es` wired with cookie detection, shadcn `Button`, static build emits `dist/` (chunk split verified). |
+| ARC-005 Bootstrap `@wendy/contracts` package | ✅ Done | 2026-08-13 | 11 branded NanoId types + `nanoid` re-export + decorator-capable tsconfig + decorator-pipeline sanity test (3 tests pass). `fe-adapter` deferred to Sprint 3 per spec. |
+| ARC-008 Initialize Prisma `users` migration | ✅ Done | 2026-08-13 | `schema.prisma` with single `users` model + `UserRole` enum; initial migration `identity_users_initial` generated (forward-only per ADR-11); `PrismaService` (`@Global()`) + `DatabaseConfig` wired into `AppModule`. |
+
+**Story artifacts (2026-08-12):** `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/` (functional-spec, tech-spec, task-list, verification, story.yaml).
+**Story artifacts (2026-08-13):** `4-specs/20260813-arc-004-005-008-web-contracts-prisma-users/` (functional-spec, tech-spec, story.yaml).
+
+**Sprint 1 remaining**: ARC-013 (JWT), ARC-015 (passport-jwt + RBAC), ARC-036 (Terminus), OPS-023 (docker-compose), OPS-019 (CI workflow), plus the 5 user stories.
 
 ### Architecture & DevOps
 
 - [X] ARC-001 Bootstrap monorepo with pnpm workspaces [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
 - [X] ARC-003 Bootstrap NestJS API skeleton with module layout [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
-- [ ] ARC-004 Bootstrap Vite + React Web skeleton [groupBy:: arq] [priority:: 3]
-- [ ] ARC-005 Bootstrap `@wendy/contracts` package [groupBy:: arq] [priority:: 3]
-- [ ] ARC-008 Initialize Prisma schema and first migration [groupBy:: arq] [priority:: 3]
+- [X] ARC-004 Bootstrap Vite + React Web skeleton [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
+- [X] ARC-005 Bootstrap `@wendy/contracts` package (base NanoId types only — `fe-adapter` deferred to Sprint 3) [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
+- [X] ARC-008 Initialize Prisma `users` migration (identity only — no future-sprint models) [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-013 Implement JWT auth (RS256) + JWKS [groupBy:: arq] [priority:: 3]
 - [ ] ARC-015 Implement passport-jwt strategy with RBAC guards [groupBy:: arq] [priority:: 3]
 - [ ] ARC-036 Implement health checks (Terminus) [groupBy:: arq] [priority:: 3]
@@ -68,6 +81,8 @@ revision-history:
 **Demo at end of sprint**: WP creates a wedding → fills story/location/program → adds guests → copies the first invitation link → opens it in an incognito tab and sees the invitation populated.
 
 ### Architecture & DevOps
+
+> Each bounded-context task (ARC-019, ARC-022) owns its Prisma migration. Schema is created only when the feature is built — no pre-designed models.
 
 - [ ] ARC-009 Implement Prisma Migrate deploy pipeline [groupBy:: arq] [priority:: 3]
 - [ ] ARC-010 Seed initial Admin (`admin@wendy`) [groupBy:: arq] [priority:: 3]
@@ -242,19 +257,19 @@ The last week of Sprint 6 (2026-10-26 → 2026-11-01) is reserved as buffer for:
 
 | Sprint | Must | Should | Could | Total | Sprint Goal Theme |
 |---|---|---|---|---|---|
-| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (3 of 11 architecture items done) |
+| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (6 of 11 architecture items done) |
 | Sprint 2 (Aug 24–Sep 6) | 14 | 4 | 0 | 18 | Weddings & Guests |
 | Sprint 3 (Sep 7–20) | 9 | 3 | 0 | 12 | Invitation Publish & Bilingual UI |
 | Sprint 4 (Sep 21–Oct 4) | 16 | 4 | 0 | 20 | RSVP, Guest Photos & Photo Storage |
 | Sprint 5 (Oct 5–18) | 6 | 14 | 0 | 20 | Hardening, Staging & AWS Foundation |
 | Sprint 6 (Oct 19–Nov 1) | 0 | 0 | 9 | 9 | Pilot Rehearsal, Could-Haves & Buffer |
-| **Total** | **56** | **26** | **9** | **91** | (3 ARC items completed on 2026-08-12) |
+| **Total** | **56** | **26** | **9** | **91** | (6 ARC items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 on 2026-08-13) |
 
 > Note: 113 backlog items − 91 sprint items = 22 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint.
 
 ### Risk callouts
 
-- **Sprint 1 is dense.** 12 items (3 completed on 2026-08-12) including 8 architecture/infra tasks. The team's first 2 weeks are largely setup; the first user-visible milestone arrives late in Sprint 1 or early Sprint 2. Front-load the conversation with the PO about progress expectations.
+- **Sprint 1 is dense.** 12 items (6 completed by 2026-08-13) including 5 architecture/infra tasks still open. The team's first 2 weeks are largely setup; the first user-visible milestone arrives late in Sprint 1 or early Sprint 2. Front-load the conversation with the PO about progress expectations.
 - **Sprint 4 is the largest.** 20 items including 10 architecture tasks (mostly the AWS production deploy chain) and 10 user stories. This is the sprint where pilot-wedding functionality comes together. If it slips, Sprint 5/6 absorb the impact.
 - **Sprint 6 is light on purpose.** It is buffer and Could-haves. If the team is on track after Sprint 4, Sprint 5 can absorb hardening work and Sprint 6 becomes pure rehearsal + polish. If Sprint 5 slips, Sprint 6 absorbs the slip.
 

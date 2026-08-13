@@ -3,9 +3,11 @@ title: "Product Backlog"
 date: 2026-08-10
 type: management
 scope: internal
-version: 1.4.0
-updated: 2026-08-12
+version: 1.6.0
+updated: 2026-08-13
 revision-history:
+  - v1.6.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed (Sprint 1 foundations trio).
+  - v1.5.0 (2026-08-13): applied iterative design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); each bounded-context task (ARC-019, ARC-022, ARC-025, ARC-030, ARC-037) now owns its Prisma migration; clarified ARC-035 scope.
   - v1.4.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed. Refined ARC-003 description to reflect the corrected blueprint folder structure (shared/ instead of common/, no infra/).
   - v1.3.0 (2026-08-11): prior version
 ---
@@ -84,17 +86,19 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 > Technical tasks derived from the architecture document and ADRs. Not user stories — these enable the development team to start coding.
 
+> **Iterative design rule**: Each architecture task scopes only what is needed for its sprint. Database models, DTOs, and contracts are created sprint-by-sprint alongside the feature that requires them. Do not pre-design entities or DTOs for features arriving in a future sprint.
+
 - [X] ARC-001 Bootstrap monorepo with pnpm workspaces - Initialize the `wendy-planner` monorepo with `apps/api`, `apps/web`, and `packages/contracts` workspaces, shared `tsconfig.base.json`, ESLint, and Prettier configs. Per ADR-12. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
 - [X] ARC-002 Enforce ESLint boundary rules - Configure ESLint to prevent cross-app imports (`apps/api` ⇄ `apps/web`) and ensure `packages/*` never imports from `apps/*`. CI fails on violation. Per ADR-12. [groupBy:: arq] [priority:: 2] [completion:: 2026-08-12]
 - [X] ARC-003 Bootstrap NestJS API skeleton with module layout - Generate `apps/api` with the bounded-context folder structure (identity, weddings, guests, invitation, photos, audit) and the cross-cutting `shared/` folder (guards/interceptors/errors/events) per ADR-09 and the backend blueprint §3. Include `app.module.ts`, `main.ts`, typed config (ADR-16), and a health-check module. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-12]
-- [ ] ARC-004 Bootstrap Vite + React Web skeleton - Generate `apps/web` with route groups `(dashboard)` and `(public)` (TanStack Router), i18n directory, and a placeholder layout. Per ADR-02 v2. No Node.js runtime, static build only. [groupBy:: arq] [priority:: 3]
-- [ ] ARC-005 Bootstrap `@wendy/contracts` package - Create `packages/contracts` with `tsconfig.json` (`experimentalDecorators`, `emitDecoratorMetadata`), branded NanoId types module, and a `fe-adapter` exporting `classValidatorResolver` for React Hook Form. Per ADR-13 and ADR-14. [groupBy:: arq] [priority:: 3]
+- [X] ARC-004 Bootstrap Vite + React Web skeleton - Generate `apps/web` with route groups `(dashboard)` and `(public)` (TanStack Router), i18n directory, and a placeholder layout. Per ADR-02 v2. No Node.js runtime, static build only. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
+- [X] ARC-005 Bootstrap `@wendy/contracts` package - Create `packages/contracts` with `tsconfig.json` (`experimentalDecorators`, `emitDecoratorMetadata`) and branded NanoId types module. The `fe-adapter` (`classValidatorResolver` for React Hook Form) is deferred to Sprint 3 when the first public forms are built. Per ADR-13 and ADR-14. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-006 Configure shared typed-config classes - Set up ADR-16 typed config classes (env-based, validated at boot) for API and Web. Each config module fails fast on invalid environment. [groupBy:: arq] [priority:: 2]
 - [ ] ARC-007 Wire OpenAPI 3 generation - Install `@nestjs/swagger` in `apps/api` and document every controller endpoint using DTO classes from `@wendy/contracts`. Single source of truth for the API contract. [groupBy:: arq] [priority:: 2]
 
 ## Architecture — Data Layer
 
-- [ ] ARC-008 Initialize Prisma schema and first migration - Define `schema.prisma` in `apps/api/prisma/` with models for users, weddings, guest groups, guests, RSVPs, photos, guest photos, and audit events. Every model carries `tenant_id`. Run `prisma migrate dev` for the initial migration. Per ADR-07 and ADR-11. [groupBy:: arq] [priority:: 3]
+- [X] ARC-008 Initialize Prisma `users` migration - Define `schema.prisma` in `apps/api/prisma/` with only the `users` model — the minimum required for JWT auth and WP onboarding. Every model carries `tenant_id`. Run `prisma migrate dev` for this initial migration. Schema grows incrementally: ARC-019 adds `weddings`/`wedding_data`, ARC-022 adds `guest_groups`/`guests`, ARC-025 adds `rsvps` and invitation extensions, ARC-030 adds `photos`/`guest_photos`, ARC-037 adds `audit_events`. Per ADR-07 and ADR-11. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-009 Implement Prisma Migrate deploy pipeline - Add a one-shot ECS task that runs `prisma migrate deploy` before the API container starts; document in the backend blueprint. Per ADR-11. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-010 Seed initial Admin (`admin@wendy`) - Write the deploy-time seed script that creates the first Administrator with a generated random password, logs it to the deployer's terminal, and stores the bcrypt hash. The same password is permanent (no forced rotation). Per architecture §8.1 and ADR-05. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-011 Model WP ownership and Admin-as-WP dual role - Extend the `users` table with `onboarded_by_admin_id` (nullable FK) and a `roles` array column (or `is_admin` flag) to express that an Administrator can also be a Wedding Planner and that an Admin only sees WPs they onboarded. Update ADR-05 / ADR-07 or add a new ADR. Per audit M-6. [groupBy:: arq] [priority:: 2]
@@ -111,19 +115,19 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 ## Architecture — Wedding Management
 
-- [ ] ARC-019 Implement Wedding bounded context - NestJS module with controller (CRUD + publish + archive), service, Prisma repository, and DTOs from `@wendy/contracts`. `tenant_id` enforced in every query. Statuses: `draft`, `published`, `archived`. [groupBy:: arq] [priority:: 3]
+- [ ] ARC-019 Implement Wedding bounded context - NestJS module with controller (CRUD + publish + archive), service, Prisma repository, and DTOs from `@wendy/contracts`. `tenant_id` enforced in every query. Statuses: `draft`, `published`, `archived`. **Includes Prisma migration** for `weddings` and `wedding_data` models. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-020 Implement per-template payload (JSONB) - Store wedding-specific invitation data in `wedding_data.payload` (JSONB) keyed by module (`landing`, `story`, `location`, etc.). Each module's shape is a typed DTO in `@wendy/contracts`. Per architecture §6.2. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-021 Ensure S3 prefix provisioning on wedding creation - On wedding create, ensure the S3 prefix `s3://wp-photos-prod/{tenantId}/{weddingId}/` exists. Per architecture §6.2. [groupBy:: arq] [priority:: 2]
 
 ## Architecture — Guest Management
 
-- [ ] ARC-022 Implement Guest bounded context - NestJS module: guest groups (CRUD), guests (CRUD), per-guest invitation-token minting (signed JWT `aud: 'invitation'`, `exp: event_date + 30d`). [groupBy:: arq] [priority:: 3]
+- [ ] ARC-022 Implement Guest bounded context - NestJS module: guest groups (CRUD), guests (CRUD), per-guest invitation-token minting (signed JWT `aud: 'invitation'`, `exp: event_date + 30d`). **Includes Prisma migration** for `guest_groups` and `guests` models. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-023 Implement attendance-status state machine - Guest status transitions: `Pending` → `Confirmed` (link click) | `Declined` (WP manual). WP can override at any time. Idempotent re-submission returns 200 with a flag, not 409. Per audit L-5. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-024 Implement CSV import/export for guest lists - `POST /api/v1/weddings/{id}/guests/bulk` with conflict-resolution strategy (skip duplicates with a report). `GET /api/v1/weddings/{id}/guests/export` returns CSV including the per-guest invitation URL column. [groupBy:: arq] [priority:: 1]
 
 ## Architecture — Invitation
 
-- [ ] ARC-025 Implement Invitation bounded context - Public routes: `GET /api/v1/public/invitations/{token}` returns invitation payload + guest context; `POST /api/v1/public/invitations/{token}/rsvp` records the RSVP (Confirmed only from the link). [groupBy:: arq] [priority:: 3]
+- [ ] ARC-025 Implement Invitation bounded context - Public routes: `GET /api/v1/public/invitations/{token}` returns invitation payload + guest context; `POST /api/v1/public/invitations/{token}/rsvp` records the RSVP (Confirmed only from the link). **Includes Prisma migration** for `rsvps` and any invitation schema extensions. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-026 Implement 6 invitation templates - Ship 6 fixed template renderers consumed by the `(public)` route group on the Web App. Each template is parameterized by `wedding_data.payload` and only renders `Approved` guest photos. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-027 Implement Guest Photo moderation flow - `GuestPhoto` states: `Pending` (created on upload, NOT visible publicly) → `Approved` (renders on invitation) | `Rejected` (S3 object deleted, DB row kept for audit). Per audit M-4 and architecture §6.6. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-028 Implement WP moderation queue + approve/reject endpoints - `GET /api/v1/weddings/{id}/guest-photos?status=Pending` returns pending photos with short-lived signed GET URLs. `POST /api/v1/guest-photos/{id}/approve` and `POST /api/v1/guest-photos/{id}/reject`. Audit events `guest_photo.approved` / `guest_photo.rejected`. [groupBy:: arq] [priority:: 3]
@@ -131,7 +135,7 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 ## Architecture — Photo Storage
 
-- [ ] ARC-030 Implement Photo Storage bounded context - `POST /api/v1/weddings/{id}/photos/presign` (official, WP) and `POST /api/v1/public/photo-album/{token}/presign` (couple). Clients upload directly to S3 with presigned PUTs. Per architecture §6.5. [groupBy:: arq] [priority:: 3]
+- [ ] ARC-030 Implement Photo Storage bounded context - `POST /api/v1/weddings/{id}/photos/presign` (official, WP) and `POST /api/v1/public/photo-album/{token}/presign` (couple). Clients upload directly to S3 with presigned PUTs. **Includes Prisma migration** for `photos` and `guest_photos` models. Per architecture §6.5. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-031 Implement WP bulk archive download - `POST /api/v1/weddings/{id}/photos/download-archive` triggers an async zip job (Lambda or ECS one-shot) that produces a single archive; the WP gets a signed download URL. Per audit M-5 (kickoff says the WP downloads and delivers the USB). [groupBy:: arq] [priority:: 3]
 - [ ] ARC-032 Decide and implement photo quality-tier enforcement - Pick one mechanism and document it: (a) client-side compression before PUT, (b) post-upload Lambda triggered by S3 events that transcodes, or (c) explicit "tier is a hint, not enforced" with PO sign-off. Per audit M-3 and FEAT-004 BR-02. [groupBy:: arq] [priority:: 2]
 - [ ] ARC-033 State the official-upload size cap explicitly - Decide and document the per-file size limit for official photos (separate from the 5 MB guest cap in TC-10). Re-derive the per-wedding cost bound. Per audit L-8. [groupBy:: arq] [priority:: 3]
@@ -139,9 +143,9 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 ## Architecture — Cross-Cutting
 
-- [ ] ARC-035 Implement Validation Pipe with shared DTOs - Configure NestJS global `ValidationPipe` against DTOs from `@wendy/contracts`. The Web forms use the same DTOs via the `classValidatorResolver` adapter. Per ADR-14. [groupBy:: arq] [priority:: 3]
+- [ ] ARC-035 Implement Validation Pipe with shared DTOs - Configure NestJS global `ValidationPipe`. DTOs in `@wendy/contracts` grow incrementally — only the DTOs needed for Sprint 2's bounded contexts (Wedding, Guest) are added in this task. The `fe-adapter` (`classValidatorResolver`) is wired in Sprint 3. Per ADR-14. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-036 Implement health checks (Terminus) - Expose `/health/live` (process is up) and `/health/ready` (DB reachable, S3 reachable, signing keys loaded) via `@nestjs/terminus`. ALB target group uses `/health/ready`. Per ADR-17. [groupBy:: arq] [priority:: 3]
-- [ ] ARC-037 Implement Audit module - Subscribe to domain events on the in-process bus; write `audit_events` rows in the same DB transaction as the action for: `user.created`, `user.disabled`, `password.reset`, `wedding.published`, `wedding.archived`, `rsvp.submitted`, `guest_photo.approved`, `guest_photo.rejected`, `photo.downloaded`, `photos.deleted`. [groupBy:: arq] [priority:: 2]
+- [ ] ARC-037 Implement Audit module - Subscribe to domain events on the in-process bus; write `audit_events` rows in the same DB transaction as the action for: `user.created`, `user.disabled`, `password.reset`, `wedding.published`, `wedding.archived`, `rsvp.submitted`, `guest_photo.approved`, `guest_photo.rejected`, `photo.downloaded`, `photos.deleted`. **Includes Prisma migration** for `audit_events` model. [groupBy:: arq] [priority:: 2]
 - [ ] ARC-038 Implement i18n (i18next + Accept-Language detection) - Configure `i18next` with `en` (default) and `es` catalogs in `apps/web/src/i18n/locales/`. Auto-detect via `i18next-browser-languagedetector` from `Accept-Language`. Persist user override in a cookie. Per ADR-08. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-039 Wire Sentry across Web, API, and Lambda - Configure `@sentry/browser` (Web), `@sentry/node` (API, Lambda) with the API's `traceId` as a tag. Ensure no PII captured in breadcrumbs. [groupBy:: arq] [priority:: 2]
 - [ ] ARC-040 Add data-protection & retention section - Document the applicable regulation stance (LFPDPPP / GDPR — confirm with Vineyards), non-photo data retention (retained indefinitely), guest PII deletion procedure (manual on request for MVP), and the PII inventory (RDS + S3 + Sentry). Per audit M-7. [groupBy:: arq] [priority:: 2]
