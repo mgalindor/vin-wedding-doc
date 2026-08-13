@@ -38,7 +38,7 @@ story: "{story-id}"
 title: "{story short title}"
 started: YYYY-MM-DD
 updated: YYYY-MM-DD
-mode: interactive
+mode: interactives
 state: "last implemented step"
 steps:
   - id: create-functional-spec

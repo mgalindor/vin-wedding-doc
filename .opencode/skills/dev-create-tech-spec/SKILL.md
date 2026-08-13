@@ -25,7 +25,7 @@ The spec is always scoped to a single story. It does not redesign the system —
 | Status | Meaning |
 |---|---|
 | `draft` | Produced by the architect agent from the functional spec and architecture context. Contains structural decisions and open questions. Ready for peer review. |
-| `approved` | Validated after the technical peer review. All open questions resolved. Used as the authoritative design reference during task list creation and implementation. |
+| `approved` | Validated after the technical peer review. All open questions resolved. |
 
 ## Boundaries
 

@@ -1,0 +1,23 @@
+architecture:
+  path:
+    - ./3-architecture/3.1-architecture/
+    - ./3-architecture/3.3-decision-record/
+  blueprints:
+    - tier: backend
+      path: ./3-architecture/3.2-blueprints/backend-blueprint.md
+    - tier: web-frontend
+      path: ./3-architecture/3.2-blueprints/web-frontend-blueprint.md
+
+src-code:
+  - name: wendy-planner-api
+    type: backend
+    git:
+    local: ./code/
+  - name: wendy-planner-web
+    type: web-frontend
+    git:
+    local: ./code/
+  - name: wendy-contracts
+    type: shared-contracts
+    git:
+    local: ./code/

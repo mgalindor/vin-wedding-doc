@@ -29,8 +29,8 @@ Prompt files pre-configure the right model, agent, and context for each task. Ju
 | `mk.discover-architecture-brownfield` | 3 | Discovers and documents the architecture of an existing system through code archaeology: component inventory, blueprints, and architecture snapshot. |
 | `mk.create-architecture-greenfield` | 3 | Designs the architecture of a brand new project from scratch: system context, building blocks, and key technical decisions. Only for projects with no existing code. |
 | `mk.create-blueprint` | 4 | Creates the technical guide for a single tier (backend, frontend, mobile): folder structure, stack, patterns, and coding conventions. |
-| `mk.implement-story` | 5 | Implements spec driven development. Orchestrates the full story delivery cycle: functional spec → technical design → task list |
-| `mk.implement-tasklist` | 6 | Executes the coding tasks of an approved story following the technical spec and tier blueprint. Uses a fast model optimized for implementation.Execute the  implementation → verification. |
+| `mk.implement-story` | 5 | Implements spec driven development. Orchestrates the full story delivery cycle: functional spec → technical design |
+
 
 Auxiliar prompts
 
@@ -135,11 +135,11 @@ Goal: Define a clear, actionable plan to deliver the project within the given co
 ### Coding
 Goal: Implement the planned features according to the defined architecture and coding standards, ensuring quality through testing and review. This process is following the practice spect driven development, where the functional specification is a living document that evolves through the development process, not a static document created upfront. The functional specification is the source of truth for the implementation, and it should be updated as new information is discovered or as changes are made to the implementation.
 
-1. Iterative cycle per story: `Functional Spec → Implementation Plan → Task List → Code → Verification` using the prompt `mk.implement-story.prompt.md`
-2. Generate Code calling the prompt `mk.implement-tasklist` this enable the developer agent. Its important to share the tasklist and the blueprint to let the agent focus on specific technology and area. Optionally you can as to focus on a specific section of the tasklist this is useful when you want more control or when the task is very complex
+1. Iterative cycle per story: `Functional Spec → Implementation Plan → Code → Verification` using the prompt `mk.implement-story.prompt.md`
+2. Generate Code calling the prompt `mk.implement-core` this enable the developer agent. 
 
 ### QA
-Iterative cycle per story: `Functional Spec → Implementation Plan → Task List → Acceptance Tests → Verification`
+Iterative cycle per story: `Functional Spec → Implementation Plan → Acceptance Tests → Verification`
 
 ---
 

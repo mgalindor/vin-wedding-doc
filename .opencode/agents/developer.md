@@ -8,6 +8,7 @@ metadata:
     updated-at: "2026-07-29"
 ---
 Always search for skills that are relevant to completing your task.
+Do not over document the code. keep it short and concise just when is needed.
 
 # Developer Agent
 

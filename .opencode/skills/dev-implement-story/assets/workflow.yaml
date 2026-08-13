@@ -108,7 +108,6 @@ steps:
     goal: Verify that the implemented code meets the acceptance criteria defined in the functional specification, from a developer perspective.
     instructions: |
       Read the functional specification and its acceptance criteria.
-      Read the task list and confirm all tasks are marked as completed.
       Perform a developer-level functional verification:
         - Review the implemented code against each acceptance criterion.
         - Identify any gap between what was implemented and what was specified.

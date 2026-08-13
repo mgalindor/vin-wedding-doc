@@ -3,7 +3,7 @@
   ===========================================
   PURPOSE: Defines the high-level technical design for a single user story.
            Covers all affected layers: backend, frontend (web/mobile), or both.
-           Used as the design reference for task list creation and implementation.
+           Used as the design reference for implementation.
 
   HOW TO USE:
   - Replace all {placeholder} values with real content.
