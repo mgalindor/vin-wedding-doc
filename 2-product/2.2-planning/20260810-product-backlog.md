@@ -3,9 +3,10 @@ title: "Product Backlog"
 date: 2026-08-10
 type: management
 scope: internal
-version: 1.7.0
+version: 1.8.0
 updated: 2026-08-13
 revision-history:
+  - v1.8.0 (2026-08-13): marked ARC-013, ARC-015, ARC-036 as completed (JWT RS256+JWKS, passport-jwt RBAC, Terminus health checks). Code commit `8253e4f` in `code/` submodule. Spec v2.0.0 (pragmatic re-scope) committed in `014eef1`.
   - v1.7.0 (2026-08-13): marked OPS-023 as completed (Postgres 17 docker-compose + dev scripts + two-layer .env/.env.local). ARC-013/015/036 remain `[ ]` — their specs are approved but the implementation was reverted to keep the OPS-023 scope small; the auth/terminus trio will be picked up again when ARC-013/015/036 restart.
   - v1.6.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed (Sprint 1 foundations trio).
   - v1.5.0 (2026-08-13): applied iterative design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); each bounded-context task (ARC-019, ARC-022, ARC-025, ARC-030, ARC-037) now owns its Prisma migration; clarified ARC-035 scope.
@@ -107,9 +108,9 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 ## Architecture — Identity & Access
 
-- [ ] ARC-013 Implement JWT auth (RS256) + JWKS - Implement RS256 JWT issuance/verification with private key in Secrets Manager, public key served at `/.well-known/jwks.json`. 15-min access tokens, 7-day refresh tokens in `HttpOnly; Secure; SameSite=Lax` cookies. Per ADR-05 and audit H-1. [groupBy:: arq] [priority:: 3]
+- [X] ARC-013 Implement JWT auth (RS256) + JWKS - `JwtService` (jsonwebtoken directly, RS256 pinned, 15-min access + 7-day refresh cookie contract for ARC-014) and `JwksController` exposing `/.well-known/jwks.json` with the public key. Typed `JwtConfig` validates env at boot. Per ADR-05 and audit H-1. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-014 Implement OIDC-style auth endpoints - Expose `/oauth/token`, `/oauth/refresh`, `/oauth/revoke`, `/oauth/userinfo`, `/oauth/logout`, `PUT /oauth/user/password`, and `/.well-known/wendy-configuration`. Per ADR-05 §Standards-aligned URLs. [groupBy:: arq] [priority:: 2]
-- [ ] ARC-015 Implement passport-jwt strategy with RBAC guards - Wire `@nestjs/passport` + `passport-jwt` (ADR-15) with role-based guards (`Administrator`, `WeddingPlanner`) and tenant scoping at the repository level. [groupBy:: arq] [priority:: 3]
+- [X] ARC-015 Implement passport-jwt strategy with RBAC guards - `JwtStrategy` (RS256 algorithm restriction, algorithm-confusion defense), `JwtAuthGuard` honoring `@Public()`, `RolesGuard` reading `@Roles(...)` metadata, `@CurrentUser` decorator. Both guards registered globally in `main.ts` with `Reflector`. Per ADR-15. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-016 Implement public-token strategy (invitations, photo-album) - Build a separate `PublicTokenStrategy` for `/api/v1/public/*` routes that validates a signed token's `aud` claim (`invitation`, `photo-album`, `guest-photos`) and `exp`. Per audit L-1: reuse the invitation token for guest photos (drop the separate `/g/` token) with `exp: event_date + 30d`. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-017 Implement WP onboarding endpoint - `POST /api/v1/wedding-planners` accepts Admin-entered password; bcrypt cost 12; response contains no password. Audit event `user.created` written in the same DB transaction. Per audit H-3 and architecture §6.1. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-018 Implement disable + password reset endpoints - `POST /api/v1/wedding-planners/{id}/disable` and `POST /api/v1/wedding-planners/{id}/reset-password`. Invalidate active sessions on reset. Audit events `user.disabled` and `password.reset` in the same DB transaction. [groupBy:: arq] [priority:: 3]
@@ -145,7 +146,7 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 ## Architecture — Cross-Cutting
 
 - [ ] ARC-035 Implement Validation Pipe with shared DTOs - Configure NestJS global `ValidationPipe`. DTOs in `@wendy/contracts` grow incrementally — only the DTOs needed for Sprint 2's bounded contexts (Wedding, Guest) are added in this task. The `fe-adapter` (`classValidatorResolver`) is wired in Sprint 3. Per ADR-14. [groupBy:: arq] [priority:: 3]
-- [ ] ARC-036 Implement health checks (Terminus) - Expose `/health/live` (process is up) and `/health/ready` (DB reachable, S3 reachable, signing keys loaded) via `@nestjs/terminus`. ALB target group uses `/health/ready`. Per ADR-17. [groupBy:: arq] [priority:: 3]
+- [X] ARC-036 Implement health checks (Terminus) - `HealthController` with `/health/live` (memory) + `/health/ready` (Prisma + memory + disk). Custom `PrismaHealthIndicator` runs `SELECT 1` with a 1-second timeout. Both endpoints marked `@Public()`. ALB target group uses `/health/ready`. Per ADR-17. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-037 Implement Audit module - Subscribe to domain events on the in-process bus; write `audit_events` rows in the same DB transaction as the action for: `user.created`, `user.disabled`, `password.reset`, `wedding.published`, `wedding.archived`, `rsvp.submitted`, `guest_photo.approved`, `guest_photo.rejected`, `photo.downloaded`, `photos.deleted`. **Includes Prisma migration** for `audit_events` model. [groupBy:: arq] [priority:: 2]
 - [ ] ARC-038 Implement i18n (i18next + Accept-Language detection) - Configure `i18next` with `en` (default) and `es` catalogs in `apps/web/src/i18n/locales/`. Auto-detect via `i18next-browser-languagedetector` from `Accept-Language`. Persist user override in a cookie. Per ADR-08. [groupBy:: arq] [priority:: 3]
 - [ ] ARC-039 Wire Sentry across Web, API, and Lambda - Configure `@sentry/browser` (Web), `@sentry/node` (API, Lambda) with the API's `traceId` as a tag. Ensure no PII captured in breadcrumbs. [groupBy:: arq] [priority:: 2]
