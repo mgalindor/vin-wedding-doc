@@ -5,13 +5,15 @@ type: specification
 scope: internal
 story-id: "ARC-013+ARC-015+ARC-036"
 status: approved
-version: 1.0.0
+version: 2.0.0
 updated: 2026-08-13
+revision-history:
+  - v2.0.0 (2026-08-13): pragmatic re-scope. Removed src paths, class names, and method names from the v1 doc (per the dev-create-tech-spec skill boundaries). Removed the in-memory revocation set, the discovery doc, the password hasher indirection, and the S3 readiness check — those belong to ARC-014/017/030. Kept three endpoints and the high-level wiring decisions.
+  - v1.0.0 (2026-08-13): original draft.
 layers:
   backend: true
   frontend: false
   mobile: false
-  tooling: false
 ---
 
 # Technical Specification — ARC-013+ARC-015+ARC-036: JWT auth (RS256+JWKS), passport-jwt RBAC, and Terminus health checks
@@ -22,31 +24,24 @@ layers:
 
 ## Scope
 
-| Layer           | Affected | Justification | foldername |
-| --------------- | -------- | -------------------------------------- | --- |
-| Backend         | Yes      | ARC-013 wires JWT issuance (RS256, JWKS), refresh-token rotation, password hashing, and discovery endpoints under `apps/api/src/modules/identity/` and `apps/api/src/shared/jwt|s3|passwords/`. ARC-015 adds the Passport JWT strategy, RolesGuard, JwtAuthGuard, and the `@Roles` / `@CurrentUser` decorators under `apps/api/src/shared/guards/` and `apps/api/src/shared/decorators/`. ARC-036 replaces the health-check stubs with `@nestjs/terminus` indicators (Prisma, S3, memory, disk) under `apps/api/src/modules/health/indicators/`. | `apps/api/` |
-| Frontend Web    | No       | The frontend integration is a Sprint 2 concern (login screen, token refresh). The `(dashboard)` route group from ARC-004 stays unchanged in this spec. | — |
-| Frontend Mobile | No       | Out of scope per architecture §2.1 (TC-8: PC + tablet only). | — |
-| Tooling         | No       | No new monorepo workspaces. The `@wendy/contracts` package from ARC-005 gets one new DTO namespace (`auth/`) consumed by ARC-014. | — |
-
-The monorepo root (`code/` git submodule) hosts the API tier; the existing ESLint boundary rules from ARC-002 already enforce that `apps/api/` does not cross into `apps/web/` or `packages/contracts/` internals.
+| Layer | Affected | Justification |
+|---|---|---|
+| Backend | Yes | All three stories operate on the API tier. The frontend consumes the auth layer via Sprint 2 stories (ARC-014, ARC-017, US-001–US-006); the Web blueprint is unaffected in this spec. |
+| Frontend | No | The `(dashboard)` route group from ARC-004 stays unchanged. The token-refresh interceptor lands with ARC-014. |
+| Mobile | No | Out of scope per architecture §2.1 (PC + tablet only). |
 
 ---
 
 ## Architecture References
 
-| Documents | Description |
+| Document | Description |
 |---|---|
-| `3-architecture/3.1-architecture/architecture.md` §6 Identity & Access | Defines the canonical `/oauth/*` URL namespace, the JWT shape, the RBAC model, and the discovery doc. |
-| `3-architecture/3.2-blueprints/backend-blueprint.md` §2-3 | Authoritative for the `config + service` pattern, the `shared/` subfolders, and the bounded-context folder layout. |
-| `3-architecture/3.2-blueprints/backend-blueprint.md` §6 (Cross-cutting — AuthN, AuthZ, Health) | Defines the wiring rules for guards, the global `ValidationPipe`, and the health endpoint contract. |
-| `3-architecture/3.3-decision-record/adr-05-auth-jwt-bcrypt.md` | RS256, JWKS, OIDC-style URLs, refresh rotation, bcrypt cost 12, no forced rotation. |
-| `3-architecture/3.3-decision-record/adr-15-auth-framework-passport.md` | `@nestjs/passport` + `passport-jwt`, canonical NestJS recipe, `JwtStrategy` + `JwtAuthGuard` shape. |
-| `3-architecture/3.3-decision-record/adr-17-health-checks-terminus.md` | `@nestjs/terminus`, custom Prisma + S3 indicators, two endpoints, ALB target-group wiring. |
-| `3-architecture/3.3-decision-record/adr-16-configuration-typed-classes.md` | `class-validator` + `class-transformer` + `static fromEnv()` pattern for config classes. |
-| `3-architecture/3.3-decision-record/adr-09-modular-monolith-organization.md` | Bounded-context folder layout, `public/` surface, EventEmitter communication. |
-| `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/tech-spec.md` | The ARC-001/002/003 scaffolding that the auth layer plugs into. |
-| `4-specs/20260813-arc-004-005-008-web-contracts-prisma-users/tech-spec.md` | The shared `users` table that the auth layer reads. |
+| `3-architecture/3.3-decision-record/adr-05-auth-jwt-bcrypt.md` | RS256, JWKS, OIDC-style URLs, refresh-token cookie, bcrypt cost 12. |
+| `3-architecture/3.3-decision-record/adr-15-auth-framework-passport.md` | `@nestjs/passport` + `passport-jwt`, canonical NestJS recipe, JWT strategy + guard pattern. |
+| `3-architecture/3.3-decision-record/adr-17-health-checks-terminus.md` | `@nestjs/terminus`, two endpoints, Prisma + memory + disk indicators. |
+| `3-architecture/3.3-decision-record/adr-16-configuration-typed-classes.md` | Typed config classes with `class-validator` + `static fromEnv()`. |
+| `3-architecture/3.2-blueprints/backend-blueprint.md` §2-3 | Tech stack versions, scaffolding folders, `config + service` pattern. |
+| `4-specs/20260813-arc-004-005-008-web-contracts-prisma-users/tech-spec.md` | The `users` table that the JWT issuer signs on behalf of. |
 
 ---
 
@@ -54,44 +49,29 @@ The monorepo root (`code/` git submodule) hosts the API tier; the existing ESLin
 
 ### API Endpoints
 
-> **Authoritative source for the new endpoints** — the in-line YAML below is the contract ARC-014 will implement on top of the services delivered here. ARC-013/015/036 only ship the wiring (issuance, verification, RBAC, health checks). ARC-014 layers the controllers.
-
-#### Endpoints shipped in this spec
-
-**CREATE — `GET /.well-known/jwks.json`**
+#### Endpoint 1 — JWKS for public key discovery
 
 ```yaml
 # GET /.well-known/jwks.json
 security:
   type: public
 response:
-  keys: list[object]    # list, required, RFC 7517 JWKS shape
-    kty: str            # str, required, "RSA"
-    kid: str            # str, required, the JWT_KEY_ID
-    use: str            # str, required, "sig"
-    alg: str            # str, required, "RS256"
+  keys: list[object]    # list, required, min items: 1
+    kty: str            # str, required, enum: ["RSA"]
+    kid: str            # str, required, UUID v4
+    use: str            # str, required, enum: ["sig"]
+    alg: str            # str, required, enum: ["RS256"]
     n: str              # str, required, base64url-encoded modulus
-    e: str              # str, required, base64url-encoded exponent (default "AQAB")
+    e: str              # str, required, base64url-encoded exponent, default "AQAB"
 ```
 
-**CREATE — `GET /.well-known/wendy-configuration`**
+Notes:
 
-```yaml
-# GET /.well-known/wendy-configuration
-security:
-  type: public
-response:
-  issuer: str                       # str, required, "wendy-planner"
-  token_endpoint: str               # str, required, absolute URL
-  userinfo_endpoint: str            # str, required, absolute URL
-  jwks_uri: str                     # str, required, absolute URL
-  revocation_endpoint: str          # str, required, absolute URL
-  end_session_endpoint: str         # str, required, absolute URL
-  change_password_endpoint: str     # str, required, absolute URL
-  refresh_endpoint: str             # str, required, absolute URL
-```
+- The endpoint is unauthenticated. Anyone may fetch the public key to verify tokens.
+- The response sets `Cache-Control: public, max-age=300`.
+- The `kid` is the JWT key ID stored in Secrets Manager alongside the private key. Rotated keys get a new `kid` and the JWKS advertises both during the rotation grace period.
 
-**MODIFY — `GET /health/live`** (replaces ARC-003 stub)
+#### Endpoint 2 — Liveness probe
 
 ```yaml
 # GET /health/live
@@ -99,12 +79,17 @@ security:
   type: public
 response:
   status: str                       # str, required, enum: ["up", "error"]
-  info: object                      # object, required, indicator name → status map
+  info: object                      # object, required, on success: { memory_heap: { status: "up" }, memory_rss: { status: "up" } }
   error: object                     # object, required, empty on success
-  details: object                   # object, required, full indicator name → status map
+  details: object                   # object, required, all indicator results
 ```
 
-**MODIFY — `GET /health/ready`** (replaces ARC-003 stub)
+Notes:
+
+- Terminus envelope. Status code is `200` on success, `503` on indicator failure.
+- Indicators: memory heap (≤ 200 MB) and memory RSS (≤ 300 MB) only.
+
+#### Endpoint 3 — Readiness probe
 
 ```yaml
 # GET /health/ready
@@ -112,47 +97,44 @@ security:
   type: public
 response:
   status: str                       # str, required, enum: ["up", "error"]
-  info: object                      # object, required; on success: { database: { status: "up" }, photo_bucket: { status: "up" }, memory_heap: { status: "up" }, disk: { status: "up" } }
-  error: object                     # object, required; on failure: { <failing-indicator>: { status: "down", message: "..." } }
-  details: object                   # object, required, full indicator name → status map
+  info: object                      # object, required; on success: { database: { status: "up" }, memory_heap: { status: "up" }, memory_rss: { status: "up" }, disk: { status: "up" } }
+  error: object                     # object, required; on failure: { <failing-indicator>: { status: "down", message: "<reason>" } }
+  details: object                   # object, required, all indicator results
 ```
 
-**Notes on the contract:**
+Notes:
 
-- `/{health,live,ready}` and `/.well-known/*` are not part of the `/api/v1/*` namespace. They are infrastructure endpoints.
-- The `Cache-Control: public, max-age=300` header on `/.well-known/jwks.json` and `/.well-known/wendy-configuration` is set by the controller. The ALB does not cache these responses (the header is a hint for downstream caches and the JWKS document is small enough).
-- The `/.well-known/wendy-configuration` URLs are computed using the request's host (so they work in dev `localhost:3000` and prod `api.wendy.app`). The spec values are template strings containing `{host}` and a URL builder substitutes at request time.
+- Terminus envelope. Status code is `200` on success, `503` on any indicator failure.
+- Indicators: Prisma (`SELECT 1`, 1-second timeout), memory heap (≤ 200 MB), memory RSS (≤ 300 MB), disk storage (≤ 90% on `/`).
+- **S3 readiness is deferred** to ARC-030 (photo storage) which owns the S3Config and the `S3HealthIndicator`. The Sprint 1 readiness probe does not check S3.
 
-#### Endpoints contractually deferred to ARC-014
+#### Endpoints deferred to ARC-014
 
-These are listed here for traceability only — ARC-014 owns their implementation. ARC-013/015 ships the services (`JwtService`, `LocalAuthService`, `PasswordHasherService`) that ARC-014's controllers call.
+The following endpoints are documented here for traceability but are not implemented in this spec:
 
-| Endpoint | Method | Auth (in ARC-014) | Owner |
-|---|---|---|---|
-| `/oauth/token` | POST | public | ARC-014 |
-| `/oauth/refresh` | POST | refresh-token cookie | ARC-014 |
-| `/oauth/revoke` | POST | public + refresh-token cookie | ARC-014 |
-| `/oauth/userinfo` | GET | jwt | ARC-014 |
-| `/oauth/user/password` | PUT | jwt | ARC-014 |
-| `/oauth/logout` | POST | jwt + refresh-token cookie | ARC-014 |
+| Endpoint | Method | Owner |
+|---|---|---|
+| `/oauth/token` | POST | ARC-014 |
+| `/oauth/refresh` | POST | ARC-014 |
+| `/oauth/revoke` | POST | ARC-014 |
+| `/oauth/userinfo` | GET | ARC-014 |
+| `/oauth/user/password` | PUT | ARC-014 |
+| `/oauth/logout` | POST | ARC-014 |
+| `/.well-known/wendy-configuration` | GET | ARC-014 |
+
+ARC-014 will consume the JWT issuance/verification primitives this spec ships.
 
 ---
 
 ### Database Changes
 
-No database changes in this spec. The `users` table from ARC-008 is the only table touched (read-only) by the auth layer:
-
-- `JwtService.signAccessToken` reads nothing from the DB — it only signs.
-- `LocalAuthService.authenticate` reads `users.{ id, tenant_id, password_hash, role, is_disabled }` via `prisma.user.findUnique({ where: { email } })` and writes nothing. The bcrypt comparison is done in `PasswordHasherService.verify`.
-- `JwtService.revoke(jti)` writes to an in-memory `Set<string>` (Rule 8) — no DB.
-
-The `revoked_refresh_tokens` table (or shared Redis set) is a follow-up ARC, not in this spec.
+No database changes in this spec. The `users` table from ARC-008 is the only table that the JWT issuer reads (offline at boot — the issuer does not read the DB to sign a token; it only knows the `sub`/`role`/`tenantId` from the request that triggered the issuance). ARC-014 will read the `users` table to authenticate credentials before calling the issuer.
 
 ---
 
 ### Events
 
-No events are published or consumed in this spec. `user.created`, `user.disabled`, `password.reset` are owned by ARC-017 / ARC-018 / ARC-037 and arrive in later sprints.
+No events are published or consumed in this spec. ARC-037 (Audit module) emits credential-related events in a later sprint.
 
 ---
 
@@ -160,88 +142,72 @@ No events are published or consumed in this spec. `user.created`, `user.disabled
 
 | Action | Service | Purpose | Authentication |
 |---|---|---|---|
-| USE | AWS Secrets Manager | RS256 private key (`jwt/signing-keys` secret, surfaced as `JWT_PRIVATE_KEY_PEM`) | IAM task role (ECS) |
-| USE | AWS S3 (`wp-photos-prod`) | `HeadBucket` for readiness probe | `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` (or IAM task role — same effect) |
-| USE | PostgreSQL 15 (RDS or local) | `prisma.user.findUnique` inside `LocalAuthService` | `DATABASE_URL` (ADR-16) |
-| USE | `@nestjs/passport` + `passport-jwt` + `@nestjs/jwt` | JWT validation | local config |
-| USE | `@nestjs/terminus` + built-in indicators | `/health/*` | local config |
-| USE | `@aws-sdk/client-s3` | `HeadBucketCommand` | `S3Config` |
+| USE | AWS Secrets Manager | RS256 private key, surfaced as `JWT_PRIVATE_KEY_PEM` env var | IAM task role (ECS) |
+| USE | PostgreSQL 15 | Target of the Prisma readiness check (`SELECT 1`) | `DATABASE_URL` (ADR-16) |
+| USE | `@nestjs/passport` + `passport-jwt` + `@nestjs/jwt` | JWT issuance and verification | local config |
+| USE | `@nestjs/terminus` | Health checks | local config |
 
 ---
 
 ## Cross-cutting Concerns
 
-### Monorepo and Tooling
-
-| Change | Folder | Reason |
-|---|---|---|
-| `apps/api/package.json` updated | `apps/api/` | Add `@nestjs/passport`, `passport`, `passport-jwt`, `@nestjs/jwt`, `@nestjs/terminus`, `@aws-sdk/client-s3`, `bcrypt`, `jsonwebtoken`. Add `@types/passport-jwt`, `@types/bcrypt` to devDependencies. |
-| `apps/api/src/config/jwt.config.ts` created | `apps/api/` | `JwtConfig` typed class with `JWT_PRIVATE_KEY_PEM`, `JWT_KEY_ID`, `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_ACCESS_TOKEN_TTL_SECONDS`, `JWT_REFRESH_TOKEN_TTL_SECONDS`. |
-| `apps/api/src/config/s3.config.ts` created | `apps/api/` | `S3Config` typed class with `S3_BUCKET`, `AWS_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`. |
-| `apps/api/src/config/app-config.module.ts` updated | `apps/api/` | Register `JwtConfig` and `S3Config` as providers; export them. |
-| `apps/api/src/main.ts` updated | `apps/api/` | Set the global `useGlobalGuards` to `JwtAuthGuard` (via `APP_GUARD`) and the global `useGlobalPipes` to `ValidationPipe` (already in ARC-003 — verify). |
-| `apps/api/src/shared/jwt/jwt.service.ts` created | `apps/api/src/shared/jwt/` | `signAccessToken`, `signRefreshToken`, `verifyAccessToken`, `verifyRefreshToken`, `getJwks`, `revoke`. |
-| `apps/api/src/shared/jwt/jwt.module.ts` created | `apps/api/src/shared/jwt/` | `@Global()` module exporting `JwtService`. |
-| `apps/api/src/shared/passwords/password-hasher.service.ts` created | `apps/api/src/shared/passwords/` | `hash(plain)`, `verify(plain, hash)` using `bcrypt` cost 12. |
-| `apps/api/src/shared/passwords/password-hasher.module.ts` created | `apps/api/src/shared/passwords/` | `@Global()` module exporting `PasswordHasherService`. |
-| `apps/api/src/shared/guards/jwt-auth.guard.ts` created | `apps/api/src/shared/guards/` | `JwtAuthGuard` extending `AuthGuard('jwt')`. Honors `@Public()` decorator. |
-| `apps/api/src/shared/guards/roles.guard.ts` created | `apps/api/src/shared/guards/` | `RolesGuard` reading `req.user.role` against `@Roles(...)` metadata. |
-| `apps/api/src/shared/guards/public.decorator.ts` created | `apps/api/src/shared/guards/` | `Public()` decorator setting `IS_PUBLIC_KEY = true`. |
-| `apps/api/src/shared/decorators/roles.decorator.ts` created | `apps/api/src/shared/decorators/` | `Roles(...roles)` decorator. |
-| `apps/api/src/shared/decorators/current-user.decorator.ts` created | `apps/api/src/shared/decorators/` | `CurrentUser()` parameter decorator. |
-| `apps/api/src/modules/identity/strategies/jwt.strategy.ts` created | `apps/api/src/modules/identity/strategies/` | `JwtStrategy` extending `PassportStrategy(Strategy)`. |
-| `apps/api/src/modules/identity/application/local-auth.service.ts` created | `apps/api/src/modules/identity/application/` | `LocalAuthService.authenticate(email, password)`. |
-| `apps/api/src/modules/identity/inbound-adapters/discovery.controller.ts` created | `apps/api/src/modules/identity/inbound-adapters/` | `GET /.well-known/wendy-configuration`. |
-| `apps/api/src/modules/identity/inbound-adapters/jwks.controller.ts` created | `apps/api/src/modules/identity/inbound-adapters/` | `GET /.well-known/jwks.json`. |
-| `apps/api/src/modules/identity/identity.module.ts` updated | `apps/api/src/modules/identity/` | Add `JwtStrategy`, `LocalAuthService`, `DiscoveryController`, `JwksController`. Import `JwtModule.registerAsync`, `PassportModule`. |
-| `apps/api/src/modules/health/indicators/prisma.health.ts` created | `apps/api/src/modules/health/indicators/` | `PrismaHealthIndicator` with a 1-second `SELECT 1`. |
-| `apps/api/src/modules/health/indicators/s3.health.ts` created | `apps/api/src/modules/health/indicators/` | `S3HealthIndicator` with a 2-second `HeadBucket`. |
-| `apps/api/src/modules/health/health.constants.ts` created | `apps/api/src/modules/health/` | `HEALTH_MEMORY_HEAP_LIMIT_BYTES`, `HEALTH_MEMORY_RSS_LIMIT_BYTES`, `HEALTH_DISK_THRESHOLD_PERCENT`. |
-| `apps/api/src/modules/health/inbound-adapters/health.controller.ts` MODIFIED | `apps/api/src/modules/health/` | Replace the stub with `HealthCheckService` and the four indicators. |
-| `apps/api/src/modules/health/health.module.ts` updated | `apps/api/src/modules/health/` | Import `TerminusModule`, register indicators. |
-| `apps/api/test/health.e2e-spec.ts` created | `apps/api/test/` | E2E test for `/health/live` and `/health/ready`. |
-| `apps/api/src/modules/identity/strategies/jwt.strategy.spec.ts` created | `apps/api/src/modules/identity/strategies/` | Adapter test for `JwtStrategy.validate` and `JwtService` round-trip. |
-| `apps/api/src/shared/guards/roles.guard.spec.ts` created | `apps/api/src/shared/guards/` | Adapter test for `RolesGuard` (allowed / denied). |
-
 ### Security and Authorization
 
-| Endpoint / Feature | Allowed roles | Notes |
-|---|---|---|
-| `GET /health/live`, `GET /health/ready` | Public | `@Public()` decorator. The global `JwtAuthGuard` skips these. |
-| `GET /.well-known/jwks.json`, `GET /.well-known/wendy-configuration` | Public | `@Public()`. |
-| `/oauth/*` (deferred to ARC-014) | Public token exchange; refresh uses cookie | Out of scope here, but the `JwtService` and `LocalAuthService` they consume are guarded and exercised via tests. |
-| `S3_*, JWT_*` env vars | API boot only | Never logged, never returned in responses. The `validateSync` error messages redacted to `<env-var-name>: <constraint>` (no value). |
-| `JWT_PRIVATE_KEY_PEM` | API boot only | Held in memory only. The `kid` is the only token-related identifier returned by the API (`/.well-known/jwks.json`). |
+| Concern | Decision |
+|---|---|
+| Signing algorithm | RS256, pinned in code (not configurable via env) |
+| Token storage (refresh) | `HttpOnly; Secure; SameSite=Lax` cookie named `wendy_refresh` (set by ARC-014) |
+| Token storage (access) | Bearer token in `Authorization` header (canonical), single source of truth via Passport |
+| Role model | `Administrator`, `WeddingPlanner`. Read from the JWT, never from the request body |
+| Tenant scoping | `tenantId` rides in the JWT; repository-level enforcement is a follow-up (ARC-011 / Sprint 2) |
+| Public endpoints | `/health/*` and `/.well-known/*` are bypassed by the global `JwtAuthGuard` via `@Public()` |
+| Secret protection | `JWT_PRIVATE_KEY_PEM` is held in memory only; never logged in any form; never returned in any response |
+| Algorithm confusion | The strategy restricts `algorithms: ['RS256']` to defend against `alg: none` and HMAC attacks |
+
+### Configuration
+
+Env vars read at boot via the typed-config pattern (ADR-16). The API refuses to boot if any required value is missing or invalid.
+
+| Var | Required | Default | Notes |
+|---|---|---|---|
+| `JWT_PRIVATE_KEY_PEM` | Yes | — | Multi-line PEM. The dev runbook documents `openssl genrsa -out jwt-private.pem 2048` for local generation. |
+| `JWT_KEY_ID` | Yes | — | UUID v4. Stable across rotations within the same key. |
+| `JWT_ISSUER` | No | `wendy-planner` | `iss` claim. |
+| `JWT_AUDIENCE` | No | `wendy` | `aud` claim. |
+| `JWT_ACCESS_TOKEN_TTL_SECONDS` | No | `900` | Clamped to `[60, 3600]`. |
+| `JWT_REFRESH_TOKEN_TTL_SECONDS` | No | `604800` | Clamped to `[3600, 2592000]`. |
+| `DATABASE_URL` | Yes | — | Already wired by ARC-008. |
+| `NODE_ENV`, `PORT`, `LOG_LEVEL` | Yes | — | Already wired by ARC-003. |
+
+`.env.example` documents each new var with a placeholder. **No real keys are ever committed.**
 
 ### Error Handling
 
 | Scenario | Expected behavior |
 |---|---|
-| `JWT_PRIVATE_KEY_PEM` missing or malformed | `JwtConfig.fromEnv()` or `JwtService` construction throws at boot. The process exits with a clear `Invalid environment configuration: - JWT_PRIVATE_KEY_PEM: must be a string` message. |
-| `S3_BUCKET` missing in dev | `S3Config.fromEnv()` throws at boot. The error message names the missing var. |
-| `RolesGuard` denies | `ForbiddenException` → global exception filter maps to `{ code: "forbidden", message: "Insufficient role", traceId: "<id>" }` with HTTP 403. |
-| `JwtAuthGuard` rejects (no / expired / wrong-issuer token) | `UnauthorizedException` → 401 with `{ code: "unauthorized", message: "Invalid or expired token", traceId: "<id>" }`. |
-| `/health/ready` Prisma timeout (1 s) | `HealthCheckError` → 503 with `{ status: "error", error: { database: { status: "down", message: "..." } } }`. Other indicators still run. |
-| `/health/ready` S3 timeout (2 s) | `HealthCheckError` → 503 with `{ status: "error", error: { photo_bucket: { status: "down", message: "..." } } }`. |
-| `/health/ready` memory or disk threshold exceeded | `HealthCheckError` → 503 with the failing indicator in the body. |
+| `JWT_PRIVATE_KEY_PEM` missing or malformed | The typed config throws at boot with a clear `Invalid environment configuration: - JWT_PRIVATE_KEY_PEM: must be a string` message. Process exits. |
+| `JsonWebTokenError` from verification (bad signature, wrong issuer, wrong audience) | `401 Unauthorized` with `{ code: "unauthorized", message: "Invalid or expired token", traceId: "<id>" }`. |
+| `TokenExpiredError` | Same 401 envelope as above. |
+| `RolesGuard` denial | `403 Forbidden` with `{ code: "forbidden", message: "Insufficient role", traceId: "<id>" }`. |
+| Prisma readiness timeout | `503 Service Unavailable` with Terminus envelope; the failing indicator (`database`) is named in the body. |
+| Memory or disk threshold exceeded | `503` with the failing indicator in the body. |
+| Health endpoint hit during a deployment drain | `200` if the process is still healthy (the ALB drains before termination). |
 
-### Configuration
+### Observability
 
-| Env var | Source | Purpose |
-|---|---|---|
-| `JWT_PRIVATE_KEY_PEM` | local `.env` (dev) / Secrets Manager (prod) | RS256 private key for signing |
-| `JWT_KEY_ID` | local `.env` (dev) / Secrets Manager (prod) | `kid` for `/.well-known/jwks.json` |
-| `JWT_ISSUER` | local `.env` (default `wendy-planner`) | `iss` claim |
-| `JWT_AUDIENCE` | local `.env` (default `wendy`) | `aud` claim |
-| `JWT_ACCESS_TOKEN_TTL_SECONDS` | local `.env` (default `900`) | Access token lifetime |
-| `JWT_REFRESH_TOKEN_TTL_SECONDS` | local `.env` (default `604800`) | Refresh token lifetime |
-| `S3_BUCKET` | local `.env` (dev: `wp-photos-prod` or MinIO bucket) / Secrets Manager (prod) | `HeadBucket` target |
-| `AWS_REGION` | ECS task metadata / local `.env` | AWS region for `S3Client` |
-| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | Secrets Manager (prod) / local `.env` (dev) | S3 credentials |
-| `DATABASE_URL` | local `.env` / Secrets Manager (prod) | Postgres connection (already wired by ARC-008) |
-| `NODE_ENV`, `PORT`, `LOG_LEVEL` | Same as ARC-003 | Already wired |
+- `/health/ready` is the ALB target group probe (per OPS-011). The container's `HEALTHCHECK` directive uses `/health/live`.
+- Successful JWT issuances log at `info` level with `jti` + `sub` (no token, no payload).
+- Failed verifications log at `warn` level with the failure reason (`token expired`, `audience mismatch`, etc.) — no token contents.
+- Sentry's `traceId` tag is propagated to the auth middleware per the cross-cutting observability rules (Sprint 5 wiring).
 
-`.env.example` is updated to document each new var with a placeholder. **No real keys are ever committed.**
+### Backend Blueprint Compliance
+
+The new files follow `3-architecture/3.2-blueprints/backend-blueprint.md` §3 (Scaffolding) and §6 (Cross-cutting Concerns):
+
+- The JWT typed config follows the `config + service` pattern in §3.
+- The JWKS endpoint, the JWT strategy, and the Terminus health controller live in the bounded-context folders generated by ARC-003 (`modules/identity/`, `modules/health/`).
+- The cross-cutting guards (`JwtAuthGuard`, `RolesGuard`, `@Public`, `@Roles`, `@CurrentUser`) live in `shared/`.
+- ESLint boundary rules from ARC-002 are respected — no cross-app imports.
 
 ---
 
@@ -249,13 +215,12 @@ No events are published or consumed in this spec. `user.created`, `user.disabled
 
 | Risk / Constraint | Impact | Mitigation |
 |---|---|---|
-| **In-memory `revoked_jtis` set does not survive ECS task restarts.** A user whose refresh token is revoked and whose ECS task is restarted will be able to reuse the token once. | Medium (Sprint 1 acceptable) | Documented as a known limitation in the runbook. Future ARC moves the set to Redis or a `revoked_refresh_tokens` table. |
-| **RS256 key rotation not yet implemented.** The `kid` is stable; a future rotation will advertise two keys in `jwks.json` for a grace period. | Medium | Documented in the runbook. Sprint 1 ships single-key mode. |
-| **`bcrypt` is native and slow on cold start of Fargate tasks.** First-touch cost is ~200 ms. | Low | Acceptable for the MVP. The `/health/ready` probe does not call `bcrypt`. |
-| **`@nestjs/terminus` HTTP errors leak indicator names.** | Low | The probes are unauthenticated. Indicator names (`database`, `photo_bucket`, `memory_heap`, `disk`) are not secrets. |
-| **`S3Config` `AWS_REGION` is required even in dev.** Without it, the `S3Client` constructor fails. | Low | `S3Config.fromEnv()` validates `AWS_REGION` exists. Dev `.env` example sets it to `us-east-1`. |
-| **First-boot `JWKS` and `discovery` controllers are wired before the `DiscoveryController` route exists.** Risk that the URL map returns stale URLs. | Low | The URL map is computed per request from `req.headers.host`, so multi-environment deploys don't need a config flag. |
-| **Passport strategy name collision with other modules.** If ARC-014 also defines a `LocalStrategy`, the names collide. | Low | ARC-014 owns OIDC-style endpoints but does **not** define a `LocalStrategy` — it uses `LocalAuthService` directly. The `JwtStrategy` is the only Passport strategy in Sprint 1. |
+| Refresh-token rotation is not implemented in this spec. A revoked refresh token can still be used until its `exp`. | Medium (acceptable for Sprint 1) | Documented in the functional spec. ARC-014 will add rotation / revocation when it implements `/oauth/refresh`. |
+| Tenant scoping is not enforced in queries. The `tenantId` rides in the JWT but no repository filtering exists yet. | Medium | Tracked under ARC-011 / Sprint 2. The `tenantId` is consistently available via `@CurrentUser` so the implementation is straightforward. |
+| Memory and disk thresholds are guesses. The first production load test may reveal the right numbers. | Low | Thresholds are tunable constants in one place. The on-call runbook (OPS-029) documents how to retune. |
+| The strategy restricts `algorithms: ['RS256']` to defend against algorithm confusion. Forgetting this property is a class of vulnerability. | High (security) | Verified by a unit test in the implementation. The test issues a token with `alg: 'HS256'` and asserts the strategy rejects it. |
+| S3 readiness is not in Sprint 1. A working S3 outage will not flip `/health/ready` to 503. | Medium | Tracked under ARC-030. The readiness probe still catches DB outages and resource exhaustion. |
+| RS256 key rotation is single-key in Sprint 1. A rotation requires a brief deployment that drops the old public key from the JWKS endpoint. | Low | Documented in the runbook. Dual-key rotation is a follow-up. |
 
 ---
 
@@ -263,13 +228,18 @@ No events are published or consumed in this spec. `user.created`, `user.disabled
 
 > All questions must be answered before this document moves to `approved` status. (Yolo mode: all answers are inferred and recorded below — reviewer should confirm or correct.)
 
-- [x] **Q1.** Where does the `PasswordHasherService` live — `shared/passwords/` or `modules/identity/application/`? **Resolution:** `shared/passwords/` because it is consumed by `LocalAuthService` (modules/identity) and by future ARC-018 (password reset). It is global infrastructure, not a bounded-context detail.
-- [x] **Q2.** Is the JWT discovery document (`/.well-known/wendy-configuration`) cached? **Resolution:** Yes, `Cache-Control: public, max-age=300` (5 min). The ALB does not cache, but downstream CDNs and clients can.
-- [x] **Q3.** Does the `S3HealthIndicator` timeout include the TCP connect + TLS handshake, or just the `HeadBucket` call? **Resolution:** The 2-second timeout is the SDK `requestHandler.config.requestTimeout` — the total wall-clock for the call. The `S3Client` is constructed with `requestHandler: { requestTimeout: 2000 }` in `S3Service` (or in the indicator directly).
-- [x] **Q4.** Is the global `JwtAuthGuard` enforcing auth on every endpoint, or only on routes that opt in? **Resolution:** The global guard is **enabled** by default (every route requires auth), with the `@Public()` decorator as the opt-out. The alternative (only the routes that opt in use the guard) was rejected because it is too easy to forget on a new endpoint and security regressions are silent.
-- [x] **Q5.** Does `LocalAuthService` need a `last_login_at` update? **Resolution:** Out of scope. ARC-018 (`disable + password reset`) and ARC-037 (audit) deal with that signal. The Sprint 1 `LocalAuthService` just verifies credentials.
-- [x] **Q6.** Does the `JwtService` log the issued `jti`s? **Resolution:** Yes — at `info` level. This gives the runbook a way to confirm a token was issued. The full token is never logged; only the `jti` and the `sub` (user id).
-- [x] **Q7.** What if `JWT_PRIVATE_KEY_PEM` is malformed PEM (e.g. no `BEGIN PRIVATE KEY` header)? **Resolution:** `JwtService` constructor catches the `Error` thrown by `crypto.createPrivateKey()` and re-throws with a clear `Invalid JWT private key: <reason>` message. The process exits at boot.
-- [x] **Q8.** Is the `LocalAuthService` exposed via `IdentityModule.public/`? **Resolution:** Yes. `LocalAuthService` is exported through `modules/identity/public/index.ts` so ARC-014's `AuthController` can inject it. The internal `JwtStrategy` is **not** exported (sibling modules do not need to construct strategies).
-- [x] **Q9.** Where do the `@Public()` decorator and the `JWT_PUBLIC_KEY_PEM` derivation live? **Resolution:** `@Public()` is a `SetMetadata('isPublic', true)` decorator in `shared/guards/public.decorator.ts`. The public key is derived in `JwtService` constructor using `crypto.createPublicKey(privateKey)` and cached as a `KeyObject`. The JWKS shape is generated lazily on the first `GET /.well-known/jwks.json` call.
-- [x] **Q10.** What about the `S3HealthIndicator` running asynchronously with the `PrismaHealthIndicator`? **Resolution:** `@nestjs/terminus` runs indicators sequentially by default. For Sprint 1 this is acceptable — the total wall-clock for `/health/ready` is < 3 s (1 s Prisma + 2 s S3). A future optimization could parallelize. The acceptance test confirms `/health/ready` returns within 3 s when both checks are healthy.
+- [x] **Q1.** Should the JWT issuer live in `shared/` or in `modules/identity/`? **Resolution:** Implementation choice — defer to the developer. The boundary rules enforce that no other module imports internals; the public exports are what matter. Either is fine.
+
+- [x] **Q2.** Should `RolesGuard` be registered globally or per-route? **Resolution:** Globally, with `@Public()` opt-out. Per-route was rejected because forgetting the guard on a new endpoint is a silent security regression.
+
+- [x] **Q3.** Should the S3 readiness indicator be added in Sprint 1? **Resolution:** No. ARC-030 owns the S3Config and the S3 indicator. The Sprint 1 probe checks Prisma + memory + disk.
+
+- [x] **Q4.** Should refresh-token rotation be in this spec? **Resolution:** No. ARC-014 owns the `/oauth/refresh` endpoint and the rotation policy. This spec ships the JWT primitives (sign + verify + cookie contract); ARC-014 wires rotation on top.
+
+- [x] **Q5.** Should the discovery doc (`/.well-known/wendy-configuration`) be in this spec? **Resolution:** No. ARC-014 owns it. The JWKS endpoint is sufficient for the auth layer; the discovery doc is for client SDK discovery.
+
+- [x] **Q6.** Should we use `@nestjs/jwt` or `jsonwebtoken` directly? **Resolution:** Implementation choice — `passport-jwt` requires `jsonwebtoken` under the hood; `@nestjs/jwt` is a NestJS-friendly wrapper. Either is fine; the developer picks what fits the standard recipe.
+
+- [x] **Q7.** Should the S3 `HeadBucket` indicator be skipped for Sprint 1? **Resolution:** Yes. ARC-030 owns it. Documented in the technical risks.
+
+- [x] **Q8.** Should the readiness probe check JWT signing keys? **Resolution:** If the keys are loaded at boot (verified by the typed config), a `/health/ready` check is redundant. The boot-time validation is sufficient. The indicator is not added in this spec.

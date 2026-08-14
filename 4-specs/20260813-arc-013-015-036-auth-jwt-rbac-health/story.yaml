@@ -16,8 +16,8 @@ steps:
   - id: implement-tasks
     tiers:
       - tier: backend
-        status: not-started
+        status: done
   - id: functional-verification
-    status: not-started
+    status: passed
   - id: mark-as-done-story
 ---
