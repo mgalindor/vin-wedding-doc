@@ -5,15 +5,15 @@ type: management
 scope: internal
 story-id: "ARC-013+ARC-015+ARC-036"
 status: passed
-version: 1.0.0
-updated: 2026-08-13
+version: 1.1.0
+updated: 2026-08-14
 verdict: pass
 ---
 
 # Functional Verification — ARC-013+ARC-015+ARC-036
 
-> **Verdict: ✅ PASS** — All 19 acceptance rules from the v2.0.0 functional spec are satisfied by the implementation. Build is green (`typecheck` + `lint` + `build`).
-> Date: 2026-08-13. Verifier: development team (yolo mode).
+> **Verdict: ✅ PASS** — All 19 acceptance rules from the v2.0.0 functional spec are satisfied. Build is green (`typecheck` + `lint` + `build`). E2E smoke suite (15 tests) passes against a live Postgres 17 instance.
+> Date: 2026-08-14. Verifier: development team.
 
 ## Summary
 
@@ -33,6 +33,15 @@ verdict: pass
 | `pnpm typecheck` (in `apps/api`) | ✅ exit 0 |
 | `pnpm lint` (in `apps/api`) | ✅ exit 0 — 0 errors, 0 warnings |
 | `pnpm build` (in `apps/api`) | ✅ exit 0 — `nest build` produces `dist/` |
+| `pnpm test:e2e` (in `apps/api`) | ✅ 15/15 tests passed — live Postgres 17 on :5433 (2026-08-14) |
+
+### E2E smoke suite (2026-08-14)
+
+`apps/api/test/smoke.e2e-spec.ts` — 15 tests, 0 failures, 1.4 s  
+Run command: `pnpm --filter @wendy/api test:e2e`  
+Prerequisite: `docker compose up -d` + Prisma migrations applied.
+
+> **Root cause fixed (2026-08-14):** Vitest's default esbuild transformer does not emit decorator metadata (`emitDecoratorMetadata`). This caused NestJS constructor-injection to receive `undefined` for typed parameters, making `HealthCheckService` and `JwtService` undefined inside their controllers at runtime. Fixed by adding `unplugin-swc` to `apps/api/vitest.config.e2e.ts`. Unit test config (`vitest.config.ts`) is unaffected.
 
 ### ARC-013 rule-by-rule
 
@@ -104,11 +113,10 @@ None for the 19 acceptance rules.
 
 ### Notes (non-blocking, for future stories)
 
-- **N1 — E2E tests not yet authored.** The existing `apps/api/test/smoke.e2e-spec.ts` (last touched by ARC-003) still asserts the original `{ status: 'ok' }` envelope. ARC-014 (OIDC endpoints) is the natural place to expand the E2E spec to cover `/oauth/*`, the JWT round-trip, and `/health/ready` against a stubbed PrismaService. Out of scope here per the spec's evolutionary-design principle.
-- **N2 — S3 readiness probe deferred to ARC-030.** The tech-spec lists S3 as a future readiness indicator; this spec ships Prisma + memory + disk only.
-- **N3 — Refresh-token rotation policy deferred to ARC-014.** The cookie contract is documented (Rule 4); ARC-014 will implement `/oauth/refresh` and the rotation policy.
-- **N4 — `revoked_jtis` set (in-memory) deferred.** Same rationale as N3.
-- **N5 — Tenant scoping enforcement deferred to ARC-011.** The `tenantId` rides in the JWT and is exposed via `@CurrentUser`; no repository filtering exists yet because no bounded-context queries exist.
+- **N1 — S3 readiness probe deferred to ARC-030.** The tech-spec lists S3 as a future readiness indicator; this spec ships Prisma + memory + disk only.
+- **N2 — Refresh-token rotation policy deferred to ARC-014.** The cookie contract is documented (Rule 4); ARC-014 will implement `/oauth/refresh` and the rotation policy.
+- **N3 — `revoked_jtis` set (in-memory) deferred.** Same rationale as N2.
+- **N4 — Tenant scoping enforcement deferred to ARC-011.** The `tenantId` rides in the JWT and is exposed via `@CurrentUser`; no repository filtering exists yet because no bounded-context queries exist.
 
 ## Recommendation
 

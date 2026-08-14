@@ -70,7 +70,7 @@ Two-pass planning for Wendy Planner (Vineyards). The kickoff, project brief, and
    - Product Owner identity + SLA → unlocks Sprint 5 stakeholder demos.
    - "Captura exitosa" definition → unlocks Sprint 6 pilot-wedding rehearsal checklist.
    - Compliance regulation → input to ARC-040 in Sprint 5.
-3. **Story specs**: for each Sprint 1 story, run `mk.implement-story.prompt.md` to produce functional specs + technical specs + task lists.
+3. **Story specs**: for each Sprint 1 story, run `mk.implement-story.prompt.md` to produce functional specs + technical specs
 
 ## Action items / Owners
 
