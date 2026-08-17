@@ -3,10 +3,11 @@ title: "Backend Tier Blueprint"
 date: 2026-08-11
 type: architecture
 scope: internal
-version: 1.2.0
-updated: 2026-08-12
+version: 1.3.0
+updated: 2026-08-17
 tier: backend
 revision-history:
+  - v1.3.0 (2026-08-17): added §7.1 Test File Layout & Naming, §7.2 Test Scripts, §7.3 Breaking Tests From Earlier Specs — establishes the project-wide convention that the directory is the layer and the NNN in the file name is the TC ID from the spec's verification-summary.
   - v1.2.0 (2026-08-12): added explicit subfolders for future shared services (prisma, s3, secrets) and documented the "config + service" pattern. Fixes the small inconsistency in v1.1.3 where the comment said "PrismaService, S3Client" live in shared/ but only four subfolders (guards/interceptors/errors/events) were listed.
   - v1.1.3 (2026-08-11): prior version
 ---
@@ -217,6 +218,61 @@ HTTP Request → Controller (inbound-adapter) → Use Case (application)
 | Unit | Use cases (application layer), services in isolation, error mapping, config class validation. Domain invariants are exercised indirectly through use case tests. | Vitest | Adapters, DB, HTTP stack, file I/O |
 | Adapter | Controllers with mocked use cases (validations, exception mapping, guards); repositories against real PostgreSQL (queries, migrations, constraints); guards/strategies with mocked JWT. | Vitest + supertest + testcontainers + Prisma | Full app boot, full user flow, UI rendering |
 | End-to-end | Full HTTP flow against a bootstrapped Nest app + test DB. Reserved for the primary journeys in §6 of the architecture document. | Supertest against `Test.createTestingModule(AppModule).compile()` | Internal implementation details, edge cases already covered by unit / adapter tests |
+
+### 7.1 Test File Layout & Naming (project-wide)
+
+**The directory is the layer — never encode layer in the file name.**
+
+| Layer | Path | Runner |
+|-------|------|--------|
+| Unit (BE, alongside code) | `apps/api/src/**/*.spec.ts` | Vitest |
+| Unit (BE, cross-cutting) | `apps/api/test/functional/tc-NNN-*.spec.ts` | Vitest |
+| Adapter (BE) | `apps/api/test/integration/tc-NNN-*.spec.ts` | Vitest + supertest + testcontainers |
+| Unit (FE) | `apps/web/src/**/*.spec.ts(x)` | Vitest + Testing Library |
+| End-to-end (FE) | `apps/web/tests/e2e/tc-NNN-*.spec.ts` | Playwright |
+
+**File name:** `<scope>-<NNN>-<kebab-description>.spec.ts`
+
+- `scope` = `tc` for a verification test case. Future: `it-NNN` for integration contract, `e2e-NNN` if Playwright projects multiply.
+- `NNN` is **the test case ID from the spec's `verification-summary.md`**, not a consecutive counter. e.g. TC-101 → `tc-101-...spec.ts`. If a spec has no TC entry, mint one in its verification-summary first.
+- `kebab-description` names the component or flow under test (e.g. `authenticate-use-case`, `oauth-token-controller`, `token-lifetime`).
+
+**Why the directory, not the number:** earlier drafts proposed ranges like `tc-0xx = unit, tc-1xx = adapter`. This is fragile (you run out of 0xx; you can't tell `tc-100` apart from a TC number). The parent directory is the source of truth.
+
+### 7.2 Test Scripts (`apps/api/package.json`)
+
+| Command | What it runs |
+|---------|--------------|
+| `pnpm test` | unit + functional |
+| `pnpm test:unit` | functional only |
+| `pnpm test:watch` | functional in watch mode |
+| `pnpm test:integration` | adapter against real Postgres |
+| `pnpm test:integration:watch` | adapter in watch mode |
+| `pnpm test:integration:debug` | adapter with verbose reporter |
+| `pnpm test:all` | unit + integration |
+
+> **Note on `test:e2e`:** the backend `test:e2e` script was renamed to `test:integration` in commit `f8e9b3a` because it runs **adapter** tests (NestJS bootstrap + Postgres, no browser), not end-to-end. The frontend `test:e2e` (in `apps/web`) remains — that one IS end-to-end via Playwright.
+
+### 7.3 When a New Spec Breaks Tests From an Earlier Spec
+
+Business rules change. Three responses, pick by intent:
+
+1. **Update the test** — when the new rule replaces the old one. The commit message MUST list which TC IDs changed and reference the deprecating spec:
+
+   ```
+   feat(US-009): drop expires_in field, add refresh tokens
+
+   Updates the following TC-IDs from US-006:
+   - tc-002-token-lifetime.spec.ts: now asserts jti is present
+   - tc-003-jwt-claims.spec.ts: drops the exp - iat === 3600 check
+
+   Refs: US-006 v1.3.0 (deprecates 1h access-token contract).
+   ```
+
+2. **Mark `@deprecated`** — when both behaviours coexist temporarily (feature flag, gradual rollout). Use `it.skip()` or `describe.skip()` and leave the file in place as documentation.
+3. **Delete** — only when the new test fully replaces the old and the behaviour it covered is now redundant.
+
+The **`verification-summary.md` of the new spec MUST list** which TC-IDs from earlier specs are superseded. This keeps the trail of "what behaviour used to be tested" auditable.
 
 **Coverage target:** unit tests for every use case; one adapter test per controller and per repository; one E2E test per primary scenario in §6 of the architecture document.
 
