@@ -1,0 +1,31 @@
+---
+story: "US-006 + ARC-010"
+title: "Confirm my identity to access the platform + Seed default Administrator"
+started: 2026-08-14
+updated: 2026-08-17
+mode: yolo
+state: "done"
+steps:
+  - id: create-functional-spec
+    status: done
+  - id: approve-functional-spec
+    status: approved
+  - id: create-tech-spec
+    status: done
+  - id: approve-tech-spec
+    status: approved   # skipped per user instruction; reviewer pauses for spec review below
+  - id: spec-revision-v1.2.0
+    description: "Minimum-viable scope cut. See revision history in functional-spec.md (v1.2.0) and tech-spec.md (v1.1.0)."
+    status: done
+  - id: implement-tasks
+    tiers:
+      - tier: backend
+        status: done
+      - tier: web-frontend
+        status: done
+  - id: functional-verification
+    description: "Automated verification: 23 vitest backend tests + 8 Playwright E2E tests = 31/31 passing. See verification-summary.md §1 and §8 for details (incl. TypeScript 7 moduleResolution migration)."
+    status: done
+  - id: mark-as-done-story
+    status: done
+---

@@ -3,26 +3,15 @@ title: "Release Plan — Wendy Planner"
 date: 2026-08-11
 type: management
 scope: internal
-version: 1.5.0
-updated: 2026-08-13
-revision-history:
-  - v1.5.0 (2026-08-13): marked ARC-013, ARC-015, ARC-036 as completed in Sprint 1. Sprint 1 now has 10 of 12 items done (auth, RBAC, and Terminus health checks shipped together). Only OPS-019 (CI workflow) and the 5 user stories remain.
-  - v1.4.0 (2026-08-13): marked OPS-023 as completed in Sprint 1. Sprint 1 now has 7 of 11 architecture/DevOps items done (Postgres 17 docker-compose, dev scripts, two-layer .env / .env.local split).
-  - v1.3.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed in Sprint 1. Sprint 1 now has 6 of 11 architecture items done.
-  - v1.2.0 (2026-08-13): applied evolutionary design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); distributed Prisma migrations to each bounded-context task; added iterative design principle callout.
-  - v1.1.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed in Sprint 1. Added Sprint 1 progress section.
-  - v1.0.0 (2026-08-11): initial release plan
+version: 1.6.0
+updated: 2026-08-17
 ---
 
 # Release Plan — Wendy Planner
 
-> **Capacity**: 1 backend + 1 frontend developer (2 people total).
-> **Window**: 6 sprints × 2 weeks = 12 weeks (2026-08-10 → 2026-11-01 build complete; 2026-11-10 hard MVP target).
-> **Success metric**: 2 real weddings captured end-to-end (admin onboarding → wedding create → published invitation → RSVPs → photo download).
 > **Strategy**: Vertical slices — every sprint ships a working, testable increment. Risk and infrastructure first, features in dependency order, Could-haves at the end.
 
 > **Evolutionary design principle**: Each sprint scopes only what is needed to deliver its goal. Database schema, DTOs, and shared contracts grow one migration at a time — each bounded context owns its Prisma migration. Never pre-build models or DTOs for features arriving in a future sprint.
-
 ---
 
 ## Sprint 1 — Foundations & Authentication (2026-08-10 → 2026-08-23)
@@ -31,30 +20,6 @@ revision-history:
 
 **Demo at end of sprint**: Admin opens the platform → creates a WP account → hands credentials out-of-band → WP logs in → sees a "no weddings yet" screen.
 
-### Sprint 1 progress (2026-08-12)
-
-| Item | Status | Completion | Notes |
-|---|---|---|---|
-| ARC-001 Bootstrap monorepo with pnpm workspaces | ✅ Done | 2026-08-12 | `code/` submodule populated with workspace root + 3 workspaces. |
-| ARC-003 Bootstrap NestJS API skeleton with module layout | ✅ Done | 2026-08-12 | 7 modules (6 bounded contexts + health) with 5 subfolders each. |
-| ARC-002 Enforce ESLint boundary rules | ✅ Done | 2026-08-12 | 3 forbidden directions enforced; 7 unit tests pass. |
-
-### Sprint 1 progress (2026-08-13)
-
-| Item | Status | Completion | Notes |
-|---|---|---|---|
-| ARC-004 Bootstrap Vite + React Web skeleton | ✅ Done | 2026-08-13 | Two lazy route groups, i18n `en`/`es` wired with cookie detection, shadcn `Button`, static build emits `dist/` (chunk split verified). |
-| ARC-005 Bootstrap `@wendy/contracts` package | ✅ Done | 2026-08-13 | 11 branded NanoId types + `nanoid` re-export + decorator-capable tsconfig + decorator-pipeline sanity test (3 tests pass). `fe-adapter` deferred to Sprint 3 per spec. |
-| ARC-008 Initialize Prisma `users` migration | ✅ Done | 2026-08-13 | `schema.prisma` with single `users` model + `UserRole` enum; initial migration `identity_users_initial` generated (forward-only per ADR-11); `PrismaService` (`@Global()`) + `DatabaseConfig` wired into `AppModule`. |
-| OPS-023 Author `docker-compose.yml` for local dev | ✅ Done | 2026-08-13 | Postgres 17 only (no MinIO/MailHog/Redis — those land with their owning stories); `pnpm docker:up/down/logs` scripts at the workspace root; two-layer env: committed `.env` (non-sensitive defaults, externalizes config out of code) + gitignored `.env.local` for sensitive overrides; ConfigModule resolves env files from the monorepo root first. Verified objectively by an independent `@architect` subagent against 12 explicit constraints (all ✅). |
-| ARC-013 + ARC-015 + ARC-036 JWT auth + RBAC + Terminus health | ✅ Done | 2026-08-13 | JwtService signs RS256 access (15min) + refresh (7d) tokens; JwksController serves `/.well-known/jwks.json`; JwtStrategy + JwtAuthGuard + RolesGuard + @Roles + @CurrentUser + @Public; Terminus-backed `/health/live` + `/health/ready` with custom PrismaHealthIndicator (1s timeout). Build green: typecheck + lint + build all pass. E2E tests deferred to ARC-014 (will exercise the round-trip). Code commit `8253e4f` in `code/` submodule. |
-
-**Story artifacts (2026-08-12):** `4-specs/20260812-arc-001-monorepo-and-nestjs-bootstrap/` (functional-spec, tech-spec, verification, story.yaml).
-**Story artifacts (2026-08-13):** `4-specs/20260813-arc-004-005-008-web-contracts-prisma-users/` (functional-spec, tech-spec, story.yaml).
-**Story artifacts (2026-08-13):** `4-specs/20260813-arc-013-015-036-auth-jwt-rbac-health/` (functional-spec v2.0.0, tech-spec v2.0.0, verification v1.0.0, story.yaml).
-**Story artifacts (2026-08-13):** `4-specs/20260814-ops-023-docker-compose/` (verification only — no functional-spec per user instruction "no requiere spec").
-
-**Sprint 1 remaining**: OPS-019 (CI workflow), plus the 5 user stories (US-001 / US-002 / US-004 / US-005 / US-006).
 
 ### Architecture & DevOps
 
@@ -72,11 +37,11 @@ revision-history:
 
 ### User Stories
 
+- [X] US-006 Confirm my identity to access the platform [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-001 Onboard a new Wedding Planner [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-002 Set the new Wedding Planner's initial access [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-004 Revoke a Wedding Planner's access [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-005 Restore a Wedding Planner's access [groupBy:: user-and-role-management] [priority:: 3]
-- [ ] US-006 Confirm my identity to access the platform [groupBy:: user-and-role-management] [priority:: 3]
 
 ---
 
@@ -91,7 +56,7 @@ revision-history:
 > Each bounded-context task (ARC-019, ARC-022) owns its Prisma migration. Schema is created only when the feature is built — no pre-designed models.
 
 - [ ] ARC-009 Implement Prisma Migrate deploy pipeline [groupBy:: arq] [priority:: 3]
-- [ ] ARC-010 Seed initial Admin (`admin@wendy`) [groupBy:: arq] [priority:: 3]
+- [X] ARC-010 Seed initial Admin (`admin@wendy`) [groupBy:: arq] [priority:: 3]
 - [ ] ARC-019 Implement Wedding bounded context [groupBy:: arq] [priority:: 3]
 - [ ] ARC-020 Implement per-template payload (JSONB) [groupBy:: arq] [priority:: 3]
 - [ ] ARC-021 Ensure S3 prefix provisioning on wedding creation [groupBy:: arq] [priority:: 2]
@@ -263,13 +228,13 @@ The last week of Sprint 6 (2026-10-26 → 2026-11-01) is reserved as buffer for:
 
 | Sprint | Must | Should | Could | Total | Sprint Goal Theme |
 |---|---|---|---|---|---|
-| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (10 of 12 items done: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13) |
+| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (11 of 12 items done: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13; ARC-010 + US-006 on 2026-08-17) |
 | Sprint 2 (Aug 24–Sep 6) | 14 | 4 | 0 | 18 | Weddings & Guests |
 | Sprint 3 (Sep 7–20) | 9 | 3 | 0 | 12 | Invitation Publish & Bilingual UI |
 | Sprint 4 (Sep 21–Oct 4) | 16 | 4 | 0 | 20 | RSVP, Guest Photos & Photo Storage |
 | Sprint 5 (Oct 5–18) | 6 | 14 | 0 | 20 | Hardening, Staging & AWS Foundation |
 | Sprint 6 (Oct 19–Nov 1) | 0 | 0 | 9 | 9 | Pilot Rehearsal, Could-Haves & Buffer |
-| **Total** | **56** | **26** | **9** | **91** | (10 items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13) |
+| **Total** | **56** | **26** | **9** | **91** | (11 items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13; ARC-010 + US-006 on 2026-08-17) |
 
 > Note: 113 backlog items − 91 sprint items = 22 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint.
 

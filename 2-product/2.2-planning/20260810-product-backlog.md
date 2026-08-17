@@ -3,15 +3,8 @@ title: "Product Backlog"
 date: 2026-08-10
 type: management
 scope: internal
-version: 1.8.0
-updated: 2026-08-13
-revision-history:
-  - v1.8.0 (2026-08-13): marked ARC-013, ARC-015, ARC-036 as completed (JWT RS256+JWKS, passport-jwt RBAC, Terminus health checks). Code commit `8253e4f` in `code/` submodule. Spec v2.0.0 (pragmatic re-scope) committed in `014eef1`.
-  - v1.7.0 (2026-08-13): marked OPS-023 as completed (Postgres 17 docker-compose + dev scripts + two-layer .env/.env.local). ARC-013/015/036 remain `[ ]` — their specs are approved but the implementation was reverted to keep the OPS-023 scope small; the auth/terminus trio will be picked up again when ARC-013/015/036 restart.
-  - v1.6.0 (2026-08-13): marked ARC-004, ARC-005, ARC-008 as completed (Sprint 1 foundations trio).
-  - v1.5.0 (2026-08-13): applied iterative design principle; scoped ARC-008 to users-only migration; scoped ARC-005 to base NanoId types (fe-adapter deferred to Sprint 3); each bounded-context task (ARC-019, ARC-022, ARC-025, ARC-030, ARC-037) now owns its Prisma migration; clarified ARC-035 scope.
-  - v1.4.0 (2026-08-12): marked ARC-001, ARC-002, ARC-003 as completed. Refined ARC-003 description to reflect the corrected blueprint folder structure (shared/ instead of common/, no infra/).
-  - v1.3.0 (2026-08-11): prior version
+version: 1.9.0
+updated: 2026-08-17
 ---
 
 # Product Backlog
@@ -35,7 +28,7 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 - [ ] US-003 Find any Wedding Planner I onboarded - As an Administrator, I need to search and locate any Wedding Planner I have onboarded so that I can manage their account efficiently [groupBy:: user-and-role-management] [priority:: 2]
 - [ ] US-004 Revoke a Wedding Planner's access - As an Administrator, I need to disable a Wedding Planner who is no longer part of the team so that they cannot reach the platform [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-005 Restore a Wedding Planner's access - As an Administrator, I need to give a Wedding Planner a new way to sign in so that they can regain access without self-service recovery [groupBy:: user-and-role-management] [priority:: 3]
-- [ ] US-006 Confirm my identity to access the platform - As a Wedding Planner, I need to confirm who I am when I open the platform so that only I can reach my weddings [groupBy:: user-and-role-management] [priority:: 3]
+- [x] US-006 Confirm my identity to access the platform - As a Wedding Planner, I need to confirm who I am when I open the platform so that only I can reach my weddings [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-007 Keep my contact information current - As a Wedding Planner, I need to update my full name, email, and phone so that the Administrator can reach me when needed [groupBy:: user-and-role-management] [priority:: 2]
 - [ ] US-008 Oversee the Wedding Planners I onboarded - As an Administrator, I need visibility into the Wedding Planners I have onboarded so that I can supervise their activity [groupBy:: user-and-role-management] [priority:: 2]
 
@@ -102,7 +95,7 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 - [X] ARC-008 Initialize Prisma `users` migration - Define `schema.prisma` in `apps/api/prisma/` with only the `users` model — the minimum required for JWT auth and WP onboarding. Every model carries `tenant_id`. Run `prisma migrate dev` for this initial migration. Schema grows incrementally: ARC-019 adds `weddings`/`wedding_data`, ARC-022 adds `guest_groups`/`guests`, ARC-025 adds `rsvps` and invitation extensions, ARC-030 adds `photos`/`guest_photos`, ARC-037 adds `audit_events`. Per ADR-07 and ADR-11. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-13]
 - [ ] ARC-009 Implement Prisma Migrate deploy pipeline - Add a one-shot ECS task that runs `prisma migrate deploy` before the API container starts; document in the backend blueprint. Per ADR-11. [groupBy:: arq] [priority:: 3]
-- [ ] ARC-010 Seed initial Admin (`admin@wendy`) - Write the deploy-time seed script that creates the first Administrator with a generated random password, logs it to the deployer's terminal, and stores the bcrypt hash. The same password is permanent (no forced rotation). Per architecture §8.1 and ADR-05. [groupBy:: arq] [priority:: 3]
+- [x] ARC-010 Seed initial Admin (`admin@wendy`) - Write the deploy-time seed script that creates the first Administrator with a generated random password, logs it to the deployer's terminal, and stores the bcrypt hash. The same password is permanent (no forced rotation). Per architecture §8.1 and ADR-05. [groupBy:: arq] [priority:: 3] [completion:: 2026-08-17]
 - [ ] ARC-011 Model WP ownership and Admin-as-WP dual role - Extend the `users` table with `onboarded_by_admin_id` (nullable FK) and a `roles` array column (or `is_admin` flag) to express that an Administrator can also be a Wedding Planner and that an Admin only sees WPs they onboarded. Update ADR-05 / ADR-07 or add a new ADR. Per audit M-6. [groupBy:: arq] [priority:: 2]
 - [ ] ARC-012 Move contact fields to Guest Group - Re-model guest contact info (email, phone) to live at the `guest_groups` level, with the Guest rows referencing the group. Update DTOs in `@wendy/contracts`. Per audit L-4. [groupBy:: arq] [priority:: 2]
 
