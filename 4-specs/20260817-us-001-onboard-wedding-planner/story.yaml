@@ -1,0 +1,29 @@
+---
+story: "US-001"
+title: "Onboard a new Wedding Planner"
+started: 2026-08-17T00:00:00
+updated: 2026-08-17T00:00:00
+mode: yolo
+state: "functional-spec approved (v1.5.0 — Rule 28 added); tech-spec drafted (v1.2.1 — added /oauth/userinfo for role-gated UI); approve-tech-spec skipped per user instruction; implement-tasks completed; functional-verification PASSED (verification-summary.md v1.1.0 — 28/28 functional rules covered, 36 backend unit + 21 backend integration + 8 frontend unit + 1 E2E happy path all green; 0 lint errors both tiers; 0 typecheck errors all three projects)"
+steps:
+  - id: create-functional-spec
+    status: approved
+  - id: approve-functional-spec
+    status: approved
+  - id: create-tech-spec
+    status: draft
+  - id: approve-tech-spec
+    status: approved   # skipped per user instruction (auto-advance)
+  - id: implement-tasks
+    tiers:
+      - tier: backend
+        status: completed
+      - tier: web-frontend
+        status: completed
+  - id: functional-verification
+    status: passed
+    summary: "verification-summary.md v1.1.0 — PASSED. All 28 functional rules traced to implementation. Test totals: backend 36 unit + 21 integration + frontend 8 unit + 1 new E2E (tc-220-onboard-wedding-planner). Lint: 0 errors / 0 warnings in apps/api and apps/web. Typecheck: 0 errors in all three projects. Fixes landed in v1.1.0: (1) router.tsx CredentialsRoute forwards useParams + useLocation to the screen, fixing the build-breaking TS2739 and Rule 17; (2) adminOnlyBeforeLoad (JWT decode) replaced with useRoleGuard() that reads role from /oauth/userinfo, satisfying Rule 28; (3) new Playwright spec tc-220-onboard-wedding-planner covers the full happy path; (4) duplicate tenants migration squashed; (5) lint hygiene cleared (consistent-type-imports, unused vars); (6) unused sidebar i18n key removed and ES form.pageTitle translated. Three additional in-scope fixes surfaced by the E2E: api-client now uses VITE_API_BASE_URL, WeddingPlannersController imports the DTO at runtime (not import type) so ValidationPipe sees the property decorators, login form accepts digits in slugs to match the onboarding pattern, dashboard layout gates the landing card behind isIndex to avoid overlap with sub-route content."
+  - id: mark-as-done-story
+    status: done
+    summary: "Backlog entry US-001 marked [x] with completion date 2026-08-17 in 2-product/2.2-planning/20260810-product-backlog.md. The merged US-002 scope (initial-access entry on the same form) is delivered as part of this story, per the original scope note in functional-spec.md v1.5.0 — no follow-up backlog entry needed. Story is DONE."
+---
