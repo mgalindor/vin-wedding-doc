@@ -18,7 +18,7 @@ updated: 2026-08-17
 
 **Goal**: Admin can onboard a Wedding Planner and reset a password; WP can log in and reach an empty dashboard. Monorepo, CI, and local dev environment are operational.
 
-**Demo at end of sprint**: Admin opens the platform → creates a WP account → hands credentials out-of-band → WP logs in → sees a "no weddings yet" screen.
+**Demo at end of sprint**: Admin opens the platform → creates a WP account (sets the initial password in the same step) → hands credentials out-of-band → WP logs in → sees a "no weddings yet" screen.
 
 
 ### Architecture & DevOps
@@ -39,7 +39,6 @@ updated: 2026-08-17
 
 - [X] US-006 Confirm my identity to access the platform [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-001 Onboard a new Wedding Planner [groupBy:: user-and-role-management] [priority:: 3]
-- [ ] US-002 Set the new Wedding Planner's initial access [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-004 Revoke a Wedding Planner's access [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-005 Restore a Wedding Planner's access [groupBy:: user-and-role-management] [priority:: 3]
 
@@ -228,19 +227,19 @@ The last week of Sprint 6 (2026-10-26 → 2026-11-01) is reserved as buffer for:
 
 | Sprint | Must | Should | Could | Total | Sprint Goal Theme |
 |---|---|---|---|---|---|
-| Sprint 1 (Aug 10–23) | 11 | 1 | 0 | 12 | Foundations & Authentication (11 of 12 items done: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13; ARC-010 + US-006 on 2026-08-17) |
+| Sprint 1 (Aug 10–23) | 10 | 1 | 0 | 11 | Foundations & Authentication (10 of 11 items done: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13; ARC-010 + US-006 on 2026-08-17) |
 | Sprint 2 (Aug 24–Sep 6) | 14 | 4 | 0 | 18 | Weddings & Guests |
 | Sprint 3 (Sep 7–20) | 9 | 3 | 0 | 12 | Invitation Publish & Bilingual UI |
 | Sprint 4 (Sep 21–Oct 4) | 16 | 4 | 0 | 20 | RSVP, Guest Photos & Photo Storage |
 | Sprint 5 (Oct 5–18) | 6 | 14 | 0 | 20 | Hardening, Staging & AWS Foundation |
 | Sprint 6 (Oct 19–Nov 1) | 0 | 0 | 9 | 9 | Pilot Rehearsal, Could-Haves & Buffer |
-| **Total** | **56** | **26** | **9** | **91** | (11 items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13; ARC-010 + US-006 on 2026-08-17) |
+| **Total** | **55** | **26** | **9** | **90** | (10 items completed: ARC-001/002/003 on 2026-08-12; ARC-004/005/008 + OPS-023 + ARC-013/015/036 on 2026-08-13; ARC-010 + US-006 on 2026-08-17) |
 
-> Note: 113 backlog items − 91 sprint items = 22 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint.
+> Note: 112 backlog items − 90 sprint items = 22 items. The remaining items are deferred Must/Should work that the team will pull in during sprint planning if capacity allows, or moved to Sprint 6 buffer if they slip. They are listed in the backlog but not pre-assigned to a sprint. Adjusted 2026-08-17 to reflect the removal of US-002 (merged into US-001).
 
 ### Risk callouts
 
-- **Sprint 1 is dense.** 12 items (6 completed by 2026-08-13) including 5 architecture/infra tasks still open. The team's first 2 weeks are largely setup; the first user-visible milestone arrives late in Sprint 1 or early Sprint 2. Front-load the conversation with the PO about progress expectations.
+- **Sprint 1 is dense.** 11 items (10 completed by 2026-08-17) including 5 architecture/infra tasks still open. The team's first 2 weeks are largely setup; the first user-visible milestone arrives late in Sprint 1 or early Sprint 2. Front-load the conversation with the PO about progress expectations.
 - **Sprint 4 is the largest.** 20 items including 10 architecture tasks (mostly the AWS production deploy chain) and 10 user stories. This is the sprint where pilot-wedding functionality comes together. If it slips, Sprint 5/6 absorb the impact.
 - **Sprint 6 is light on purpose.** It is buffer and Could-haves. If the team is on track after Sprint 4, Sprint 5 can absorb hardening work and Sprint 6 becomes pure rehearsal + polish. If Sprint 5 slips, Sprint 6 absorbs the slip.
 

@@ -127,4 +127,4 @@ Not applicable in the strict sense — these are infrastructure stories. The "us
 - `pnpm --filter @wendy/api prisma migrate dev` against a local Postgres prints a clean summary of the migration applied and the seed data available (none in this iteration).
 - A TypeScript file in `apps/web/src/` that imports `import type { WeddingId } from '@wendy/contracts';` type-checks without errors.
 
-No user-facing UI components, no form validation, no i18n user-facing message catalogs are in scope here. Sprint 1 user stories (US-001, US-002, etc.) layer onto this foundation.
+No user-facing UI components, no form validation, no i18n user-facing message catalogs are in scope here. Sprint 1 user stories (US-001, US-006, etc.) layer onto this foundation.

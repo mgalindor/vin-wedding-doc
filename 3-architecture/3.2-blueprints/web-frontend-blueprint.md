@@ -13,6 +13,8 @@ tier: web-frontend
 > Concise technical guide for the Vite + React SPA (`apps/web/`). Read this end-to-end before opening a PR that touches frontend code.
 > Length: ~8 minutes. Operational commands and design-token references live in `apps/web/README.md`, not here.
 
+Design System Reference: [DESIGN.md](../../2-product/2.1-discovery/2.1.6-design/DESIGN.md)
+
 ## 1. Runtime & Platform
 
 | Dimension | Value |

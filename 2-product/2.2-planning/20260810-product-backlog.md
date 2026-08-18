@@ -13,6 +13,8 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 **Story format:** `{Short title} - As a [role], I need [action] so that [benefit}` followed by metadata tags.
 
+**Backlog scope rule:** the backlog lists only items the team will **deliver**. Process details that do not change the product (e.g. "hand credentials to the new WP through a separate channel") are documented in the journey map and the spec, not as standalone user stories. A user story must change a **capability** that the user can observe — otherwise it folds into a neighboring story as a rule.
+
 **MoSCoW priority values:**
 - `[priority:: 3]` — **Must have** — Without this, the MVP cannot launch.
 - `[priority:: 2]` — **Should have** — Important, but not critical for launch.
@@ -21,10 +23,11 @@ This backlog is derived from the user journey maps in `2-product/2.1-discovery/2
 
 > Priority distribution: ~57% Must, ~32% Should, ~11% Could. Ruthlessly focused on the MVP success metric: 2 end-to-end pilot weddings.
 
+> **Removed 2026-08-17** — `US-002 Set the new Wedding Planner's initial access` was merged into `US-001 Onboard a new Wedding Planner`. Rationale: in MVP the Administrator enters the initial password on the same form as the profile; there is no separate capability, screen, or product change. If a future iteration introduces a non-manual access mode (generate-and-email, magic link, mandatory first-login rotation), it will be re-added as a new story (e.g. `US-002a Generate the new WP's initial password`).
+
 ## User & Role Management
 
-- [ ] US-001 Onboard a new Wedding Planner - As an Administrator, I need to register a new Wedding Planner so that they can start working on weddings [groupBy:: user-and-role-management] [priority:: 3]
-- [ ] US-002 Set the new Wedding Planner's initial access - As an Administrator, I need to set how the new Wedding Planner will sign in for the first time so that they can begin using the platform [groupBy:: user-and-role-management] [priority:: 3]
+- [x] US-001 Onboard a new Wedding Planner - As an Administrator, I need to register a new Wedding Planner so that they can start working on weddings [groupBy:: user-and-role-management] [priority:: 3] [completion:: 2026-08-17]
 - [ ] US-003 Find any Wedding Planner I onboarded - As an Administrator, I need to search and locate any Wedding Planner I have onboarded so that I can manage their account efficiently [groupBy:: user-and-role-management] [priority:: 2]
 - [ ] US-004 Revoke a Wedding Planner's access - As an Administrator, I need to disable a Wedding Planner who is no longer part of the team so that they cannot reach the platform [groupBy:: user-and-role-management] [priority:: 3]
 - [ ] US-005 Restore a Wedding Planner's access - As an Administrator, I need to give a Wedding Planner a new way to sign in so that they can regain access without self-service recovery [groupBy:: user-and-role-management] [priority:: 3]

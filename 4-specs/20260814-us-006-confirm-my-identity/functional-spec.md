@@ -43,9 +43,8 @@ If credentials are wrong, the platform does not reveal whether the username exis
 | `ARC-008` Initialize Prisma `users` migration | Requires | The `users` table with `email`, password storage column (non-plain-text), `role`, `is_disabled`, `tenant_id` must exist (already shipped). |
 | `ARC-013` JWT auth (RS256) + JWKS | Requires | JWT issuance/verification primitives with RS256 and the `/.well-known/jwks.json` endpoint (already shipped). |
 | `ARC-015` Passport-jwt + RBAC guards | Requires | `JwtAuthGuard`, `RolesGuard`, `@CurrentUser`, `@Roles`, `@Public` decorators (already shipped). |
-| `US-001` Onboard a new Wedding Planner | Required by | The Administrator must create the WP account (with an assigned password) before the WP can sign in. ARC-017 implements the `POST /api/v1/wedding-planners` endpoint. |
+| `US-001` Onboard a new Wedding Planner | Required by | The Administrator must create the WP account (with an assigned password) before the WP can sign in. ARC-017 implements the `POST /api/v1/wedding-planners` endpoint. The Admin-enters-password step is part of the same flow; US-002 was merged into US-001 on 2026-08-17. |
 | `US-005` Restore a Wedding Planner's access | Required by | When a WP is locked out, the Administrator resets the password so the WP can sign in again. ARC-018 implements the reset endpoint. |
-| `US-002` Set the new Wedding Planner's initial access | Required by | The mechanism by which the Administrator hands the password to the WP out-of-band. |
 | `US-007` Keep my contact information current | Depends on | Once signed in, the WP may update their own contact info. |
 
 > ARC-010 (seed the default admin) ships bundled with US-006 and is owned by this spec. ARC-010 does not depend on US-006 (the seed runs at deploy time, before the API serves traffic); US-006 depends on ARC-010 (the WP login flow needs the default admin to be testable end-to-end).
